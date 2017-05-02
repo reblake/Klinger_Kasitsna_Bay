@@ -1,0 +1,36 @@
+---
+title: "Data_Vis"
+author: "Rachael E. Blake"
+date: "May 1, 2017"
+output: html_document
+---
+
+```{r, echo=FALSE}
+library(ggplot2)
+
+```
+
+
+```{r, echo=FALSE}
+# source the data cleaning script
+source("Data_Cleaning_K_Bay.r")
+
+```
+
+```{r, echo=FALSE}
+ft <- ggplot(data=PerCov_clean, aes(x=Year, y=FUCUS_TOTAL)) + 
+      geom_boxplot()
+ft
+
+
+ft1 <- ggplot(data=PerCov_clean, aes(x=Year, y=FUCUS_TOTAL, shape=Treatment, color=Block)) +
+       geom_point() #+ geom_line(aes(x=Year, y=FUCUS_TOTAL, group=Block))
+ft1
+
+```
+
+
+
+
+
+

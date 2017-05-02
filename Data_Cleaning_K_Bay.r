@@ -4,7 +4,7 @@
 #####  1 May 2017
 ############################################################
 
-library(readxl) ; library(tidyverse) ; library(reshape2) ; library(stringr)
+library(plyr) ; library(readxl) ; library(tidyverse) ; library(reshape2) ; library(stringr)
 
 
 # read in excel file 
@@ -65,7 +65,10 @@ PerCov_clean$Year <- rep(names(X_clean), sapply(X_clean, nrow))
 # make columns for block and treatment
 PerCov_clean$Block <- str_sub(PerCov_clean$standard_code, -9,-8)
 PerCov_clean$Treatment <- str_sub(PerCov_clean$standard_code, -4,-3)
- 
+
+# make columns numeric
+PerCov_clean[,c(4:28)] <- lapply(PerCov_clean[,c(4:28)], function(x) as.numeric(x)) 
+
 head(PerCov_clean)
 
 
