@@ -3,8 +3,8 @@ title: "Data_Vis"
 author: "Rachael E. Blake"
 date: "May 1, 2017"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r, include=FALSE, echo=FALSE, results='hide'}
@@ -12,8 +12,8 @@ library(ggplot2) ; library(tidyverse)
 
 ```
 
-#PDO
 ```{r, echo=FALSE, include=FALSE}
+# PDO data
 source("PDO_cleaning.r")
 
 # dataframes are pdo_mon and pdo_ann
@@ -29,7 +29,7 @@ pdo_mon_adj <- pdo_mon %>%
 ```
 
 ```{r, echo=FALSE}
-#
+# PDO plots
 pdo_plot <- ggplot(data=pdo_mon, aes(x=Year, y=PDO)) + geom_col() + 
             geom_hline(yintercept=0, size=1.5) + ylab("PDO Index")
 
@@ -38,12 +38,13 @@ pdo_plot <- ggplot(data=pdo_mon, aes(x=Year, y=PDO)) + geom_col() +
 pdo_plot2 <- ggplot(data=pdo_mon_adj, aes(x=Yr_Mn, y=PDO)) + 
              geom_col(aes(fill=Sign), show.legend=FALSE) + xlab("Year") +
              geom_hline(yintercept=0, size=1) + ylab("PDO Index") + 
-             scale_x_discrete(breaks=c("1999-01", "2000-01", "2001-01", "2002-01", "2003-01", "2004-01",
-                                       "2005-01", "2006-01", "2007-01", "2008-01", "2009-01", "2010-01",
-                                       "2011-01", "2012-01", "2013-01", "2014-01", "2015-01", "2016-01"),
-                              labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", 
-                                       "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014",
-                                       "2015", "2016"))
+             scale_x_discrete(breaks=c("1998-01","1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
+                                       "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", "2009-01", 
+                                       "2010-01", "2011-01", "2012-01", "2013-01", "2014-01", "2015-01", 
+                                       "2016-01"),
+                              labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005",
+                                       "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013",
+                                       "2014","2015", "2016"))
 
 ```
 
@@ -58,10 +59,18 @@ PerCov_long <- PerCov_clean %>%
                gather(Taxa, Percent_Cover, -standard_code, -plot, -abbr_code, -Year, -Block, -Treatment)
 
 PerCov_anom <- PerCov_long %>%
+               dplyr::select(-standard_code, -abbr_code) %>%
                group_by(Taxa) %>%
-               mutate(Taxa_Mean = mean(Taxa),
-                      Taxa_Anom = Taxa_Mean-Taxa) %>%
-               ungroup()
+               mutate(Taxa_Mean = mean(Percent_Cover),
+                      Taxa_Anom = Percent_Cover-Taxa_Mean) %>%
+               ungroup() %>% 
+               filter(Treatment == "01") %>%
+               group_by(Taxa, Year) %>%
+               mutate(Year_Mean = mean(Percent_Cover),
+                      Year_Anom = mean(Year_Mean-Taxa_Mean),
+                      Year_Anom_Scale = Year_Anom/100) %>%
+               ungroup() %>%
+               arrange(Year, Block, Treatment, Taxa)
 
 ```
 
@@ -91,7 +100,55 @@ lapply(var_names, function(x) FUN=explore_plots(y_var=x))
 ```
 
 ```{r, echo=FALSE}
+# Mussel anomaly plot
+anom_muss <- ggplot(data=PerCov_anom[PerCov_anom$Taxa == "Mytilus",]) + 
+             geom_col(aes(x=Year,y=Year_Anom_Scale))
 
+# Fucus anomaly plot
+anom_fucu <- ggplot(data=PerCov_anom[PerCov_anom$Taxa == "FUCUS_TOTAL",]) + 
+             geom_col(aes(x=Year,y=Year_Anom_Scale))
+
+```
+
+```{r, echo=FALSE, fig.height=5, fig.width=8}
+# combined PDO and mussel anomaly plot
+anom_pdo_muss <- pdo_plot2 + 
+                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "Mytilus",], aes(x=Year,y=Year_Anom_Scale),
+                          width=2) + 
+                 ylab("Anomaly") + theme_bw() + ylim(-4,4) +
+                 theme(panel.grid.major=element_blank(),
+                       panel.grid.minor=element_blank(),
+                       panel.border=element_blank(),
+                       axis.text = element_text(size=10),
+                       axis.title = element_text(size=16),
+                       axis.line = element_line(colour='black', size=0.5, linetype='solid'))
+anom_pdo_muss
+
+# combined PDO and Fucus anomaly plot
+anom_pdo_fucu <- pdo_plot2 + 
+                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "FUCUS_TOTAL",], aes(x=Year,y=Year_Anom_Scale),
+                          width=2) + 
+                 ylab("Anomaly") + theme_bw() + ylim(-4,4) +
+                 theme(panel.grid.major=element_blank(),
+                       panel.grid.minor=element_blank(),
+                       panel.border=element_blank(),
+                       axis.text = element_text(size=10),
+                       axis.title = element_text(size=16),
+                       axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
+print(anom_pdo_fucu)
+
+# combined PDO and Barnacles anomaly plot
+anom_pdo_barn <- pdo_plot2 + 
+                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "Barnacles",], aes(x=Year,y=Year_Anom_Scale),
+                          width=2) + 
+                 ylab("Anomaly") + theme_bw() + ylim(-4,4) +
+                 theme(panel.grid.major=element_blank(),
+                       panel.grid.minor=element_blank(),
+                       panel.border=element_blank(),
+                       axis.text = element_text(size=10),
+                       axis.title = element_text(size=16),
+                       axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
+print(anom_pdo_barn)
 
 
 ```
