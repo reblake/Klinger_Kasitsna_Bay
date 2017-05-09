@@ -1,7 +1,8 @@
 ############################################################
-#####  Terrie Klinger's Kasitsna Bay Data
-#####  Script by Rachael E. Blake
-#####  1 May 2017
+#####  Terrie Klinger's Kasitsna Bay Data              #####
+#####  Invertebrate Data Cleaning Script               #####
+#####  by Rachael E. Blake                             #####
+#####  1 May 2017                                      #####
 ############################################################
 
 library(plyr) ; library(readxl) ; library(tidyverse) ; library(reshape2) ; library(stringr)
