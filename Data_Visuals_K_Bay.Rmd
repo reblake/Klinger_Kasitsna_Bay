@@ -3,8 +3,8 @@ title: "Data_Vis"
 author: "Rachael E. Blake"
 date: "May 1, 2017"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r, include=FALSE, echo=FALSE, results='hide'}
@@ -60,17 +60,17 @@ PerCov_long <- PerCov_clean %>%
 
 PerCov_anom <- PerCov_long %>%
                dplyr::select(-standard_code, -abbr_code) %>%
-               group_by(Taxa) %>%
-               mutate(Taxa_Mean = mean(Percent_Cover),
-                      Taxa_Anom = Percent_Cover-Taxa_Mean) %>%
-               ungroup() %>% 
-               filter(Treatment == "01") %>%
-               group_by(Taxa, Year) %>%
-               mutate(Year_Mean = mean(Percent_Cover),
-                      Year_Anom = mean(Year_Mean-Taxa_Mean),
-                      Year_Anom_Scale = Year_Anom/100) %>%
-               ungroup() %>%
-               arrange(Year, Block, Treatment, Taxa)
+               dplyr::filter(Treatment == "01") %>%
+               dplyr::group_by(Taxa) %>%
+               dplyr::mutate(Taxa_Mean = mean(Percent_Cover),
+                             PerCov_Anom = Percent_Cover-Taxa_Mean) %>%
+               dplyr::ungroup() %>%
+               dplyr::group_by(Taxa, Year) %>%
+               dplyr::mutate(Year_Mean = mean(Percent_Cover),
+                             Year_Anom = mean(Year_Mean-Taxa_Mean),
+                             Year_Anom_Scale = Year_Anom/100) %>%
+               dplyr::ungroup() %>%
+               dplyr::arrange(Year, Block, Treatment, Taxa)
 
 ```
 
@@ -114,7 +114,7 @@ anom_fucu <- ggplot(data=PerCov_anom[PerCov_anom$Taxa == "FUCUS_TOTAL",]) +
 # combined PDO and mussel anomaly plot
 anom_pdo_muss <- pdo_plot2 + 
                  geom_col(data=PerCov_anom[PerCov_anom$Taxa == "Mytilus",], aes(x=Year,y=Year_Anom_Scale),
-                          width=2) + 
+                          width=2, show.legend=TRUE) + 
                  ylab("Anomaly") + theme_bw() + ylim(-4,4) +
                  theme(panel.grid.major=element_blank(),
                        panel.grid.minor=element_blank(),
