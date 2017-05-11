@@ -36,7 +36,7 @@ pdo_plot <- ggplot(data=pdo_mon, aes(x=Year, y=PDO)) + geom_col() +
   
 #
 pdo_plot2 <- ggplot(data=pdo_mon_adj, aes(x=Yr_Mn, y=PDO)) + 
-             geom_col(aes(fill=Sign), show.legend=FALSE) + xlab("Year") +
+             geom_col(aes(fill=Sign)) + xlab("Year") +            #, show.legend=FALSE
              geom_hline(yintercept=0, size=1) + ylab("PDO Index") + 
              scale_x_discrete(breaks=c("1998-01","1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
                                        "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", "2009-01", 
@@ -99,7 +99,7 @@ lapply(var_names, function(x) FUN=explore_plots(y_var=x))
 
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 # Mussel anomaly plot
 anom_muss <- ggplot(data=PerCov_anom[PerCov_anom$Taxa == "Mytilus",]) + 
              geom_col(aes(x=Year,y=Year_Anom_Scale))
@@ -113,12 +113,18 @@ anom_fucu <- ggplot(data=PerCov_anom[PerCov_anom$Taxa == "FUCUS_TOTAL",]) +
 ```{r, echo=FALSE, fig.height=5, fig.width=8}
 # combined PDO and mussel anomaly plot
 anom_pdo_muss <- pdo_plot2 + 
-                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "Mytilus",], aes(x=Year,y=Year_Anom_Scale),
-                          width=2, show.legend=TRUE) + 
+                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "Mytilus",], 
+                          aes(x=Year,y=Year_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
                  ylab("Anomaly") + theme_bw() + ylim(-4,4) +
+                 scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
+                                   name="",
+                                   labels=c("positive PDO", "negative PDO")) +
+                 scale_color_manual(values="#595959", name="", labels="Mytilus % cover") + 
                  theme(panel.grid.major=element_blank(),
                        panel.grid.minor=element_blank(),
                        panel.border=element_blank(),
+                       legend.position=c(.92, .15),
+                       legend.margin=margin(t=-0.8, unit="cm"),
                        axis.text = element_text(size=10),
                        axis.title = element_text(size=16),
                        axis.line = element_line(colour='black', size=0.5, linetype='solid'))
@@ -126,12 +132,18 @@ anom_pdo_muss
 
 # combined PDO and Fucus anomaly plot
 anom_pdo_fucu <- pdo_plot2 + 
-                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "FUCUS_TOTAL",], aes(x=Year,y=Year_Anom_Scale),
-                          width=2) + 
+                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "FUCUS_TOTAL",], 
+                          aes(x=Year,y=Year_Anom_Scale, color="#696366"), width=2) + 
                  ylab("Anomaly") + theme_bw() + ylim(-4,4) +
+                 scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
+                                   name="",
+                                   labels=c("positive PDO", "negative PDO")) +
+                 scale_color_manual(values="#595959", labels="Mytilus % cover") + 
                  theme(panel.grid.major=element_blank(),
                        panel.grid.minor=element_blank(),
                        panel.border=element_blank(),
+                       legend.position=c(.92, .15),
+                       legend.margin=margin(t=-0.8, unit="cm"),
                        axis.text = element_text(size=10),
                        axis.title = element_text(size=16),
                        axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
@@ -139,12 +151,18 @@ print(anom_pdo_fucu)
 
 # combined PDO and Barnacles anomaly plot
 anom_pdo_barn <- pdo_plot2 + 
-                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "Barnacles",], aes(x=Year,y=Year_Anom_Scale),
-                          width=2) + 
+                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "Barnacles",], 
+                          aes(x=Year,y=Year_Anom_Scale, color="#696366"), width=2) + 
                  ylab("Anomaly") + theme_bw() + ylim(-4,4) +
+                 scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
+                                   name="",
+                                   labels=c("positive PDO", "negative PDO")) +
+                 scale_color_manual(values="#595959", labels="Mytilus % cover") + 
                  theme(panel.grid.major=element_blank(),
                        panel.grid.minor=element_blank(),
                        panel.border=element_blank(),
+                       legend.position=c(.92, .15),
+                       legend.margin=margin(t=-0.8, unit="cm"),
                        axis.text = element_text(size=10),
                        axis.title = element_text(size=16),
                        axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
