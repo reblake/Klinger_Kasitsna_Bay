@@ -26,16 +26,16 @@ pdo_df$YEAR <- substr(pdo_df$YEAR, 1, 4) # removes asterisks from years 2002-201
 #
 pdo_mon <- pdo_df %>% 
            dplyr::rename(Year=YEAR) %>% # rename data columns         
-           filter(Year %in% c(1998:2016)) %>% # selects years 
-           gather(Month, PDO, -Year) # reshapes data to be column-wise
+           dplyr::filter(Year %in% c(1998:2016)) %>% # selects years 
+           tidyr::gather(Month, PDO, -Year) # reshapes data to be column-wise
 
 #
 pdo_ann <- pdo_df %>% 
            dplyr::rename(Year=YEAR) %>% # rename data columns         
-           filter(Year %in% c(1998:2016)) %>% # selects years 
-           gather(Month, PDO, -Year) %>% # reshapes data to be column-wise
-           group_by(Year) %>%
-           summarise(PDO_anul_mn=mean(as.numeric(as.character(PDO)), na.rm = TRUE)) %>% # get annual means
-           ungroup()
+           dplyr::filter(Year %in% c(1998:2016)) %>% # selects years 
+           tidyr::gather(Month, PDO, -Year) %>% # reshapes data to be column-wise
+           dplyr::group_by(Year) %>%
+           dplyr::summarize(PDO_anul_mn=mean(as.numeric(as.character(PDO)), na.rm = TRUE)) %>% # get annual means
+           dplyr::ungroup()
 
 
