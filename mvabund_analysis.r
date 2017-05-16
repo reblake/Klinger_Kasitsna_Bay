@@ -58,3 +58,9 @@ anova(glm_percov, p.uni="adjusted")  #Time elapsed: 0 hr 3 min 20 sec
 # NOTE: significant effects of 
 # Year on FOCUS_SPORELINGS, Ulva_Ent, Barnacle_spat, Mytilus
 # PDO on FUCUS_TOTAL, Mytilus
+
+
+
+
+
+
