@@ -7,7 +7,7 @@
 
 # load necessary libraries  
 library(mvabund) 
-library(tidyverse) 
+library(dplyr) 
 
 # source the data cleaning script to get the % cover data
 source("Data_Cleaning_K_Bay.r")     # dataframe is called PerCov_clean
@@ -18,18 +18,19 @@ source("PDO_cleaning.r")      # dataframes are pdo_mon and pdo_ann
 # add in the PDO data
 PerCov_PDO1 <- PerCov_clean %>%
                dplyr::left_join(pdo_ann, by="Year")   %>%
-               dplyr::filter(Treatment == "01") # and subset to just the control treatment
-
+               dplyr::filter(Treatment == "01") %>%  # and subset to just the control treatment
+               dplyr::mutate(PDO_Sign = ifelse(PDO_anul_mn>0, "A", "B"))
+  
 #####################################################
 # Trying out the new-to-me R package called mvabund #
 #####################################################
 
 # make seperate dataframes to accomodate how this package works
-sp_percov1 <- PerCov_PDO1 %>% select(FUCUS_TOTAL, Barnacles, Mytilus, Pterosiphonia_poly,
-                                     Odonthalia, Barnacle_spat, Endocladia, FUCUS_SPORELINGS,
-                                     Clad_sericia, Masto_pap, Gloiopeltis, Elachista)
+sp_percov1 <- PerCov_PDO1 %>% dplyr::select(FUCUS_TOTAL, Barnacles, Mytilus, Pterosiphonia_poly,
+                                            Odonthalia, Barnacle_spat, Endocladia, FUCUS_SPORELINGS,
+                                            Clad_sericia, Masto_pap, Gloiopeltis, Elachista)
 
-tr_percov1 <- PerCov_PDO1[,c(1:3,29:32)]
+tr_percov1 <- PerCov_PDO1[,c(1:3,29:33)]
 
 # make mvabund object 
 vis_PerCov <- mvabund(sp_percov1)
@@ -47,7 +48,7 @@ meanvar.plot(vis_PerCov~as.factor(tr_percov1$Treatment),legend=TRUE, col=c(1,10,
 lm_percov <- manylm(vis_PerCov~tr_percov1$PDO_anul_mn, family="gaussian")
 plot(lm_percov)
 
-glm_percov <- manyglm(vis_PerCov~tr_percov1$PDO_anul_mn*tr_percov1$Year, family="negative_binomial")
+glm_percov <- manyglm(vis_PerCov~tr_percov1$Year*tr_percov1$PDO_Sign, family="negative_binomial")
 plot(glm_percov)
 
 # look at model results:
