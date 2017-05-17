@@ -51,19 +51,19 @@ plot(percov_mds$points, col=as.factor(pdo_sign), pch=16, cex=0.9)
 
 #######################################################################
 # making example dataset for posting question to StackOverflow
-df_species <- sp_percov %>%
-              dplyr::rename(Species_1 = FUCUS_TOTAL,
-                            Species_2 = Barnacles,
-                            Species_3 = Mytilus,
-                            Species_4 = Pterosiphonia_poly,
-                            Species_5 = Odonthalia, 
-                            Species_6 = Barnacle_spat,
-                            Species_7 = Endocladia,
-                            Species_8 = FUCUS_SPORELINGS,
-                            Species_9 = Clad_sericia,
-                            Species_10 = Masto_pap,
-                            Species_11 = Gloiopeltis,
-                            Species_12 = Elachista)
-     
-my_mds <- vegan::metaMDS(df_species, distance="bray", k=2, trymax=1000, autotransform=TRUE)
-          
+# df_species <- sp_percov %>%
+#               dplyr::rename(Species_1 = FUCUS_TOTAL,
+#                             Species_2 = Barnacles,
+#                             Species_3 = Mytilus,
+#                             Species_4 = Pterosiphonia_poly,
+#                             Species_5 = Odonthalia, 
+#                             Species_6 = Barnacle_spat,
+#                             Species_7 = Endocladia,
+#                             Species_8 = FUCUS_SPORELINGS,
+#                             Species_9 = Clad_sericia,
+#                             Species_10 = Masto_pap,
+#                             Species_11 = Gloiopeltis,
+#                             Species_12 = Elachista)
+#      
+# my_mds <- vegan::metaMDS(df_species, distance="bray", k=2, trymax=1000, autotransform=TRUE)
+#           

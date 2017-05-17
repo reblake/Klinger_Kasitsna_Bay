@@ -172,7 +172,14 @@ print(anom_pdo_barn)
 ```
 
 # NMDS Plots
-```{r, echo=FALSE, fig.height=8, fig.width=8}
+```{r, echo=FALSE, include=FALSE}
+source("NMDS_analysis.r")
+
+# need to use NMDS output percov_mds$points
+
+```
+
+```{r, echo=FALSE, fig.height=6, fig.width=8}
 # prettier plotting
 # build a data frame with NMDS coordinates and metadata
 NMDS_ord <- data.frame(MDS1 = percov_mds$points[,1], MDS2 = percov_mds$points[,2],
