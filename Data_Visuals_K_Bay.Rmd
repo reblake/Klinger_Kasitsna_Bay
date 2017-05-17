@@ -171,6 +171,29 @@ print(anom_pdo_barn)
 
 ```
 
+# NMDS Plots
+```{r, echo=FALSE, fig.height=8, fig.width=8}
+# prettier plotting
+# build a data frame with NMDS coordinates and metadata
+NMDS_ord <- data.frame(MDS1 = percov_mds$points[,1], MDS2 = percov_mds$points[,2],
+                       PDO_Sign = PerCov_PDO$PDO_Sign, Year = PerCov_PDO$Year)
+
+# now the plot
+ord1 <- ggplot(NMDS_ord, aes(x=MDS1, y=MDS2, color=PDO_Sign)) +
+        geom_point() + stat_ellipse() +
+        theme_bw() + labs(title = "NMDS Plot by PDO") + 
+        scale_color_manual(values=c("A"="#f88379", "B"="#00BFC4"), name="",
+                           labels=c("positive PDO","negative PDO")) + 
+        theme(panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank())
+ord1
+
+ord2 <- ggplot(NMDS_ord, aes(x=MDS1, y=MDS2, color=Year)) +
+        geom_point() + #stat_ellipse() +
+        theme_bw() + labs(title = "NMDS Plot by Year")
+
+
+```
 
 
 
