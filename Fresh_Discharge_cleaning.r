@@ -50,7 +50,7 @@ start_day <- as.integer(unlist(date_str)[3])
 start_year <- as.integer(unlist(date_str)[1]) 
 
 # make date column   # NOTE Each array slice is a date!!
-date <- chron(time_date, origin=c(start_month, start_day, start_year))
+date <- chron(time_date, origin=c(start_month, start_day, start_year), out.format="m/d/year")
 
 # replace FillValue with NA
 mean_daily_discharge_m3s1[is.nan(mean_daily_discharge_m3s1)] <- NA
@@ -61,6 +61,14 @@ latlon$latitude_deg_north <- as.vector(latitude_deg_north)
 latlon$longitude_deg_east <- as.vector(longitude_deg_east)
 
 ### Function to create a giant dataframe from slices of the netcdf file
+#' create a giant dataframe from slices of the netcdf file
+#'
+#' @param slice 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 
 slice_2_df <- function(slice){
               # make empty dataframe
@@ -75,7 +83,7 @@ slice_2_df <- function(slice){
   
               return(lldf1)
 }
-
+###
 
 num_slices <- c(1:5722)   # this is the known nmber of slices in the original array
 
@@ -92,18 +100,33 @@ FWD_less <- FWD %>%
 q <- qplot(data=FWD_less, x=longitude_deg_east, y=latitude_deg_north)
 
 # create annual means
-FWD_ann_mn <- FWD_less %>%
-  
-  
-  
-  
-  
-              mutate(Year = strsplit(unlist(date)[3], "/"))
-  
-  
+FWD_anomaly <- FWD_less %>%
+               dplyr::mutate(Year = sapply(strsplit(as.character(date), split="/") , function(x) x[3]),
+                             Month = sapply(strsplit(as.character(date), split="/") , function(x) x[1]),
+                             Day = sapply(strsplit(as.character(date), split="/") , function(x) x[2])) %>%
+               dplyr::mutate(mean_overall = mean(mean_daily_discharge_m3s1),
+                             daily_anomaly = mean_daily_discharge_m3s1 - mean_overall)
 
-
-
+FWD_ann_mn <- FWD_anomaly %>%
+              dplyr::group_by(Year) %>%
+              dplyr::mutate(mean_yearly_discharge_m3s1 = mean(mean_daily_discharge_m3s1),
+                            mean_yearly_anomaly = mean(daily_anomaly)) %>%
+              dplyr::ungroup() %>%
+              dplyr::select(Year, mean_yearly_discharge_m3s1, mean_yearly_anomaly) %>%
+              dplyr::distinct() %>%
+              dplyr::mutate(Sign = ifelse(mean_yearly_anomaly>0, "A", "B"))
+              
+# create monthly means  
+FWD_mon_mn <- FWD_anomaly %>%
+              dplyr::group_by(Year, Month) %>%
+              dplyr::mutate(mean_monthly_discharge_m3s1 = mean(mean_daily_discharge_m3s1),
+                            mean_monthly_anomaly = mean(daily_anomaly),
+                            Year_Month = paste(Year, Month, sep=".")) %>%
+              dplyr::ungroup() %>%
+              dplyr::select(Year, Month, Year_Month, mean_monthly_discharge_m3s1, mean_monthly_anomaly) %>%
+              dplyr::distinct() %>%
+              dplyr::mutate(Sign = ifelse(mean_monthly_anomaly>0, "A", "B"))
+  
 
 
 
