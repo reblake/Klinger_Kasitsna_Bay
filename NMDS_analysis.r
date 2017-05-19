@@ -58,8 +58,8 @@ percov_mds <- vegan::metaMDS(sp_percov, distance="bray", k=2, trymax=1000, autot
 #plot(f5, col="black", cex=0.95)
 
 # calculate PERMANOVA 
-percov_perm1 <- vegan::adonis(sp_percov~PDO_anul_mn, pdo_treats, perm=1000, method="bray")
-percov_perm2 <- vegan::adonis(sp_percov~Year, pdo_treats, perm=1000, method="bray")
+percov_perm <- vegan::adonis(sp_percov~PDO_anul_mn, pdo_treats, perm=1000, method="bray")
+
 
 
 #######################################################################

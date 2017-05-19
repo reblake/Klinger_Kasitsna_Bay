@@ -291,6 +291,9 @@ ord2 <- ggplot(NMDS_ord, aes(x=MDS1, y=MDS2, color=Year)) +
 
 ```
 
+```{r, echo=FALSE}
+percov_perm
+```
 
 
 
