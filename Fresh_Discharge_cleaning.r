@@ -6,7 +6,7 @@
 #################################################################
 
 ### load necessary packages
-library(ncdf4) ; library(chron)
+library(ncdf4) ; library(chron) ; library(dplyr) ; library(forcats) ; library(ggplot2)
 
 ### read in the netcdf file and parse and clean the parts
 nc_kbay <- nc_open("GOA_RUNOFF_DISCHARGE.ncml.nc")
@@ -94,16 +94,20 @@ FWD <- bind_rows(FWD_list)
 # remove some points that probably don't drain into this site
 FWD_less <- FWD %>% 
             filter(!(longitude_deg_east < -151.55 & latitude_deg_north < 59.48),
-                   !(latitude_deg_north > 59.51 & longitude_deg_east > -151.45))
+                   !(latitude_deg_north > 59.51 & longitude_deg_east > -151.45)) %>%
+            mutate(Year = sapply(strsplit(as.character(date), split="/") , function(x) x[3]),
+                   Month = sapply(strsplit(as.character(date), split="/") , function(x) x[1]),
+                   Day = sapply(strsplit(as.character(date), split="/") , function(x) x[2]),
+                   Month_number = forcats::fct_recode(Month, "01"="Jan", "02"="Feb", "03"="Mar",
+                                                             "04"="Apr", "05"="May", "06"="Jun", 
+                                                             "07"="Jul", "08"="Aug", "09"="Sep", 
+                                                             "10"="Oct", "11"="Nov", "12"="Dec"))
 
 # check to see the data are approx correct by plotting the lats and lons
 q <- qplot(data=FWD_less, x=longitude_deg_east, y=latitude_deg_north)
 
 # create annual means
 FWD_anomaly <- FWD_less %>%
-               dplyr::mutate(Year = sapply(strsplit(as.character(date), split="/") , function(x) x[3]),
-                             Month = sapply(strsplit(as.character(date), split="/") , function(x) x[1]),
-                             Day = sapply(strsplit(as.character(date), split="/") , function(x) x[2])) %>%
                dplyr::mutate(mean_overall = mean(mean_daily_discharge_m3s1),
                              daily_anomaly = mean_daily_discharge_m3s1 - mean_overall)
 
@@ -121,7 +125,7 @@ FWD_mon_mn <- FWD_anomaly %>%
               dplyr::group_by(Year, Month) %>%
               dplyr::mutate(mean_monthly_discharge_m3s1 = mean(mean_daily_discharge_m3s1),
                             mean_monthly_anomaly = mean(daily_anomaly),
-                            Year_Month = paste(Year, Month, sep=".")) %>%
+                            Year_Month = paste(Year, Month_number, sep=".")) %>%
               dplyr::ungroup() %>%
               dplyr::select(Year, Month, Year_Month, mean_monthly_discharge_m3s1, mean_monthly_anomaly) %>%
               dplyr::distinct() %>%
