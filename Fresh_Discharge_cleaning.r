@@ -103,8 +103,21 @@ FWD_less <- FWD %>%
                                                              "07"="Jul", "08"="Aug", "09"="Sep", 
                                                              "10"="Oct", "11"="Nov", "12"="Dec"))
 
-# check to see the data are approx correct by plotting the lats and lons
+# check to see the data are approx. correct by plotting the lats and lons
 q <- qplot(data=FWD_less, x=longitude_deg_east, y=latitude_deg_north)
+
+# create dummy dataframe for empty 2015 rows (useful in plotting later)
+dummy_2015 <- data.frame(Year = c("2014","2014","2014","2014","2015","2015","2015","2015","2015",
+                                  "2015","2015","2015","2015","2015","2015","2015"),
+                         Month = c("09","10","11","12","01","02","03","04","05","06","07","08",
+                                   "09","10","11","12"))
+                        
+dummy_2015$Year_Month <- paste(dummy_2015$Year, dummy_2015$Month, sep="-")
+dummy_2015$mean_monthly_discharge_m3s1 <- 0.0000001
+dummy_2015$mean_monthly_anomaly <- 0.0000001
+dummy_2015$Sign <- "B"
+dummy_2015$Year_Month2 <- factor(dummy_2015$Year_Month)
+
 
 # create annual means
 FWD_anomaly <- FWD_less %>%
@@ -125,11 +138,12 @@ FWD_mon_mn <- FWD_anomaly %>%
               dplyr::group_by(Year, Month) %>%
               dplyr::mutate(mean_monthly_discharge_m3s1 = mean(mean_daily_discharge_m3s1),
                             mean_monthly_anomaly = mean(daily_anomaly),
-                            Year_Month = paste(Year, Month_number, sep=".")) %>%
+                            Year_Month = paste(Year, Month_number, sep="-")) %>%
               dplyr::ungroup() %>%
               dplyr::select(Year, Month, Year_Month, mean_monthly_discharge_m3s1, mean_monthly_anomaly) %>%
               dplyr::distinct() %>%
-              dplyr::mutate(Sign = ifelse(mean_monthly_anomaly>0, "A", "B"))
+              dplyr::mutate(Sign = ifelse(mean_monthly_anomaly>0, "A", "B")) %>%
+              dplyr::bind_rows(dummy_2015) # this adds dummy data for 2015 for plotting purposes
   
 
 
