@@ -1,5 +1,5 @@
 ---
-title: "Data_Vis"
+title: "Data Visualization"
 author: "Rachael E. Blake"
 date: "May 1, 2017"
 output:
@@ -65,45 +65,8 @@ fwd_plot <- ggplot(data=FWD_ann_mn, aes(x=Year, y=(mean_yearly_anomaly*10))) +
                               labels=c("positive runoff", "negative runoff")) 
  
   
-
-FWD_mon_mn$Year_Month2 <- factor(FWD_mon_mn$Year_Month, 
-                                 levels=c("1999-01", "1999-02", "1999-03", "1999-04", "1999-05", "1999-06",
-                                          "1999-07", "1999-08", "1999-09", "1999-10", "1999-11", "1999-12",
-                                          "2000-01", "2000-02", "2000-03", "2000-04", "2000-05", "2000-06",
-                                          "2000-07", "2000-08", "2000-09", "2000-10", "2000-11", "2000-12",
-                                          "2001-01", "2001-02", "2001-03", "2001-04", "2001-05", "2001-06",
-                                          "2001-07", "2001-08", "2001-09", "2001-10", "2001-11", "2001-12",
-                                          "2002-01", "2002-02", "2002-03", "2002-04", "2002-05", "2002-06", 
-                                          "2002-07", "2002-08", "2002-09", "2002-10", "2002-11", "2002-12",
-                                          "2003-01", "2003-02", "2003-03", "2003-04", "2003-05", "2003-06",
-                                          "2003-07", "2003-08", "2003-09", "2003-10", "2003-11", "2003-12",
-                                          "2004-01", "2004-02", "2004-03", "2004-04", "2004-05", "2004-06",
-                                          "2004-07", "2004-08", "2004-09", "2004-10", "2004-11", "2004-12",
-                                          "2005-01", "2005-02", "2005-03", "2005-04", "2005-05", "2005-06",
-                                          "2005-07", "2005-08", "2005-09", "2005-10", "2005-11", "2005-12",
-                                          "2006-01", "2006-02", "2006-03", "2006-04", "2006-05", "2006-06",
-                                          "2006-07", "2006-08", "2006-09", "2006-10", "2006-11", "2006-12", 
-                                          "2007-01", "2007-02", "2007-03", "2007-04", "2007-05", "2007-06", 
-                                          "2007-07", "2007-08", "2007-09", "2007-10", "2007-11", "2007-12", 
-                                          "2008-01", "2008-02", "2008-03", "2008-04", "2008-05", "2008-06",
-                                          "2008-07", "2008-08", "2008-09", "2008-10", "2008-11", "2008-12",
-                                          "2009-01", "2009-02", "2009-03", "2009-04", "2009-05", "2009-06",
-                                          "2009-07", "2009-08", "2009-09", "2009-10", "2009-11", "2009-12",
-                                          "2010-01", "2010-02", "2010-03", "2010-04", "2010-05", "2010-06", 
-                                          "2010-07", "2010-08", "2010-09", "2010-10", "2010-11", "2010-12", 
-                                          "2011-01", "2011-02", "2011-03", "2011-04", "2011-05", "2011-06", 
-                                          "2011-07", "2011-08", "2011-09", "2011-10", "2011-11", "2011-12", 
-                                          "2012-01", "2012-02", "2012-03", "2012-04", "2012-05", "2012-06", 
-                                          "2012-07", "2012-08", "2012-09", "2012-10", "2012-11", "2012-12",
-                                          "2013-01", "2013-02", "2013-03", "2013-04", "2013-05", "2013-06", 
-                                          "2013-07", "2013-08", "2013-09", "2013-10", "2013-11", "2013-12", 
-                                          "2014-01", "2014-02", "2014-03", "2014-04", "2014-05", "2014-06", 
-                                          "2014-07", "2014-08", "2014-09", "2014-10", "2014-11", "2014-12",
-                                          "2015-01", "2015-02", "2015-03", "2015-04", "2015-05", "2015-06",
-                                          "2015-07", "2015-08", "2015-09", "2015-10", "2015-11", "2015-12"))
-
 fwd_plot2 <- ggplot(data=FWD_mon_mn, aes(x=Year_Month, y=mean_monthly_anomaly)) + 
-             geom_col(aes(fill=Sign)) + xlab("Year") + ylab("anomaly") + 
+             geom_col(aes(fill=Sign)) + xlab("Year") + ylab("Anomaly") + 
              geom_hline(yintercept=0, size=1) +  
              scale_x_discrete(breaks=c("1998-01", "1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
                                        "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", 
@@ -115,7 +78,6 @@ fwd_plot2 <- ggplot(data=FWD_mon_mn, aes(x=Year_Month, y=mean_monthly_anomaly)) 
                               limits=c(levels(FWD_mon_mn$Year_Month)))
                              
 
-
 ```
 
 ```{r, echo=FALSE}
@@ -123,10 +85,32 @@ fwd_plot2 <- ggplot(data=FWD_mon_mn, aes(x=Year_Month, y=mean_monthly_anomaly)) 
 source("AirTemp_cleaning.r")
 
 # dataframes in this script are
-# spring_a_temp, summer_a_temp, fall_a_temp, winter_a_temp
+# spring_a_temp, summer_a_temp, fall_a_temp, winter_a_temp, ann_a_temp
 
 ```
 
+```{r, echo=FALSE}
+# plot of annual air temp anomalies
+
+ann_a_temp$YrMnDy <- as.factor(ann_a_temp$YrMnDy)
+
+ann_a_temp2 <- ann_a_temp %>%
+               dplyr::select(YrMn, Month_Anom, Month_Sign) %>%
+               dplyr::distinct()
+
+ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=Month_Anom)) + 
+           geom_col(aes(fill=Month_Sign)) + ylab("Anomaly") + xlab("Year") + 
+           geom_hline(yintercept=0, size=1) + 
+           scale_x_discrete(breaks=c("2003-01", "2004-01", "2005-01", "2006-01", "2007-01",
+                                     "2008-01", "2009-01", "2010-01", "2011-01", "2012-01",
+                                     "2013-01", "2014-01", "2015-01", "2016-01"),
+                            labels=c("2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", 
+                                     "2011", "2012", "2013", "2014","2015", "2016"),
+                            limits=c(levels(ann_a_temp$YrMn)))
+
+
+
+```
 
 
 #Invertebrates: Percent Cover Data
@@ -149,7 +133,8 @@ PerCov_anom <- PerCov_long %>%
                dplyr::group_by(Taxa, Year) %>%
                dplyr::mutate(Year_Mean = mean(Percent_Cover),
                              Year_Anom = mean(Year_Mean-Taxa_Mean),
-                             Year_Anom_Scale = Year_Anom/100) %>%
+                             Year_Anom_Scale = Year_Anom/100,
+                             Year_Anom_Scale2 = Year_Anom/10) %>%
                dplyr::ungroup() %>%
                dplyr::arrange(Year, Block, Treatment, Taxa)
 
@@ -254,17 +239,18 @@ anom_pdo_barn
 
 ```{r, echo=FALSE, fig.height=5, fig.width=8}
 # combined freshwater discharge and invert plots
-myt_sub <- unique(PerCov_anom[PerCov_anom$Taxa == "Mytilus",c(2,11)])
+myt_sub <- unique(PerCov_anom[PerCov_anom$Taxa == "Mytilus",c(2,10,11)])
+myt_sub <- dplyr::mutate(myt_sub, Year_Mon = paste(Year,"-06", sep=""))
 myt_sub$Year <- as.factor(myt_sub$Year)
-#range(myt_sub$Year_Anom_Scale)
+
 
 fwdplot_myt <- fwd_plot2 + 
                geom_col(data=myt_sub, 
-                        aes(x=Year, y=Year_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
+                        aes(x=Year_Mon, y=Year_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
                ylab("Anomaly") + xlab("Year") + theme_bw() + ylim(-0.45,0.45) + 
                scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
-                               name="",
-                               labels=c("positive runoff", "negative runoff")) +
+                                 name="",
+                                 labels=c("positive runoff", "negative runoff")) +
                scale_color_manual(values="#595959", name="", labels="Mytilus % cover") +
                theme(panel.grid.major=element_blank(),
                      panel.grid.minor=element_blank(),
@@ -276,17 +262,18 @@ fwdplot_myt <- fwd_plot2 +
                      axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
 fwdplot_myt
 
-#
-fuc_sub <- unique(PerCov_anom[PerCov_anom$Taxa == "FUCUS_TOTAL",c(2,11)])
+###
+fuc_sub <- unique(PerCov_anom[PerCov_anom$Taxa == "FUCUS_TOTAL",c(2,10,11)])
+fuc_sub <- dplyr::mutate(fuc_sub, Year_Mon = paste(Year,"-06", sep=""))
 fuc_sub$Year <- as.factor(fuc_sub$Year)
 
 fwdplot_fuc <- fwd_plot2 + 
                geom_col(data=fuc_sub, 
-                        aes(x=Year, y=Year_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
+                        aes(x=Year_Mon, y=Year_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
                ylab("Anomaly") + xlab("Year") + theme_bw() + ylim(-0.45,0.45) + 
                scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
-                               name="",
-                               labels=c("positive runoff", "negative runoff")) +
+                                 name="",
+                                 labels=c("positive runoff", "negative runoff")) +
                scale_color_manual(values="#595959", name="", labels="Fucus % cover") +
                theme(panel.grid.major=element_blank(),
                      panel.grid.minor=element_blank(),
@@ -298,48 +285,206 @@ fwdplot_fuc <- fwd_plot2 +
                      axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
 fwdplot_fuc
 
+###
+brn_sub <- unique(PerCov_anom[PerCov_anom$Taxa == "Barnacles",c(2,10,11)])
+brn_sub <- dplyr::mutate(brn_sub, Year_Mon = paste(Year,"-06", sep=""))
+brn_sub$Year <- as.factor(brn_sub$Year)
+
+fwdplot_brn <- fwd_plot2 + 
+               geom_col(data=brn_sub, 
+                        aes(x=Year_Mon, y=Year_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
+               ylab("Anomaly") + xlab("Year") + theme_bw() + ylim(-0.45,0.45) + 
+               scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
+                                 name="",
+                                 labels=c("positive runoff", "negative runoff")) +
+               scale_color_manual(values="#595959", name="", labels="Barnacle % cover") +
+               theme(panel.grid.major=element_blank(),
+                     panel.grid.minor=element_blank(),
+                     panel.border=element_blank(),
+                     legend.position=c(.22, .15),
+                     legend.margin=margin(t=-0.8, unit="cm"),
+                     axis.text = element_text(size=10),
+                     axis.title = element_text(size=16),
+                     axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
+fwdplot_brn
+
+```
+
+
+```{r, echo=FALSE}
+# subsetting and arranging data for temperature plots below
+myt_sub2 <- PerCov_anom %>%
+            dplyr::filter(Year > "2002",
+                          Taxa == "Mytilus") %>%
+            dplyr::mutate(Year_Mon = paste(Year,"-06", sep="")) %>%
+            dplyr::select(Year, Year_Anom, Year_Anom_Scale2, Year_Mon) %>%
+            dplyr::distinct()
+            
+myt_sub2$Year <- as.factor(myt_sub2$Year)
+#
+
+fuc_sub2 <- PerCov_anom %>%
+            dplyr::filter(Year > "2002",
+                          Taxa == "FUCUS_TOTAL") %>%
+            dplyr::mutate(Year_Mon = paste(Year,"-06", sep="")) %>%
+            dplyr::select(Year, Year_Anom, Year_Anom_Scale2, Year_Mon) %>%
+            dplyr::distinct()
+            
+fuc_sub2$Year <- as.factor(fuc_sub2$Year)
+#
+
+brn_sub2 <- PerCov_anom %>%
+            dplyr::filter(Year > "2002",
+                          Taxa == "Barnacles") %>%
+            dplyr::mutate(Year_Mon = paste(Year,"-06", sep="")) %>%
+            dplyr::select(Year, Year_Anom, Year_Anom_Scale2, Year_Mon) %>%
+            dplyr::distinct()
+            
+brn_sub2$Year <- as.factor(brn_sub2$Year)
+
+```
+
+
+```{r, echo=FALSE}
+# plots of invert percent cover for over-plotting below
+myt <- ggplot(data=myt_sub2, aes(x=Year, y=Year_Anom)) + 
+       geom_col(width=0.25, alpha=0.5) + theme_bw() + 
+       geom_hline(yintercept=0, size=0.5)
+
+fuc <- ggplot(data=fuc_sub2, aes(x=Year, y=Year_Anom)) + 
+       geom_col(width=0.25, alpha=0.5) + theme_bw() + 
+       geom_hline(yintercept=0, size=0.5)
+
+brn <- ggplot(data=brn_sub2, aes(x=Year, y=Year_Anom)) + 
+       geom_col(width=0.25, alpha=0.5) + theme_bw() + 
+       geom_hline(yintercept=0, size=0.5)
 
 ```
 
 ```{r, echo=FALSE}
 # plots of air temperature - data only available 2003-2016
 
-spr <- ggplot(data=spring_a_temp, aes(x=Year, y=Num_Day_Less_0)) +
-       geom_point(size=2) + theme_bw() + ylab("# of days air temp < 0 C") +
+spr <- myt +
+       geom_point(data=spring_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) + 
+       theme_bw() + ylab("# of days air temp < 0 C") +
        labs(title="Spring (Mar, Apr, May) number of cold days") +
        theme(plot.title=element_text(size=10),
              panel.grid.minor=element_blank(),
              axis.text.x=element_text(angle=30, hjust=1))
 
+sprf <- fuc +
+        geom_point(data=spring_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) + 
+        theme_bw() + ylab("# of days air temp < 0 C") +
+        labs(title="Spring (Mar, Apr, May) number of cold days") +
+        theme(plot.title=element_text(size=10),
+              panel.grid.minor=element_blank(),
+              axis.text.x=element_text(angle=30, hjust=1))
 
-sum <- ggplot(data=summer_a_temp, aes(x=Year, y=Num_Day_More_15)) +
-       geom_point(size=2) + theme_bw() + ylab("# of days air temp < 15 C") +
+sprb <- brn +
+        geom_point(data=spring_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) + 
+        theme_bw() + ylab("# of days air temp < 0 C") + ylim(-15, 31) +
+        labs(title="Spring (Mar, Apr, May) number of cold days") +
+        theme(plot.title=element_text(size=10),
+              panel.grid.minor=element_blank(),
+              axis.text.x=element_text(angle=30, hjust=1))
+###
+
+sum <- myt +
+       geom_point(data=summer_a_temp, aes(x=Year, y=Num_Day_More_15), size=2) + #geom_point(size=2) +
+       theme_bw() + ylab("# of days air temp > 15 C") +
        labs(title="Summer (Jun, Jul, Aug) number of hot days") +
        theme(plot.title=element_text(size=10),
              panel.grid.minor=element_blank(),
              axis.text.x=element_text(angle=30, hjust=1))
 
+sumf <- fuc +
+        geom_point(data=summer_a_temp, aes(x=Year, y=Num_Day_More_15), size=2) + #geom_point(size=2) +
+        theme_bw() + ylab("# of days air temp > 15 C") +
+        labs(title="Summer (Jun, Jul, Aug) number of hot days") +
+        theme(plot.title=element_text(size=10),
+              panel.grid.minor=element_blank(),
+              axis.text.x=element_text(angle=30, hjust=1))
 
-fal <- ggplot(data=fall_a_temp, aes(x=Year, y=Num_Day_Less_0)) +
-       geom_point(size=2) + theme_bw() + ylab("# of days air temp < 0 C") +
+sumb <- brn +
+        geom_point(data=summer_a_temp, aes(x=Year, y=Num_Day_More_15), size=2) + #geom_point(size=2) +
+        theme_bw() + ylab("# of days air temp > 15 C") + ylim(-15, 31) +
+        labs(title="Summer (Jun, Jul, Aug) number of hot days") +
+        theme(plot.title=element_text(size=10),
+              panel.grid.minor=element_blank(),
+              axis.text.x=element_text(angle=30, hjust=1))
+
+###
+
+fal <- myt +
+       geom_point(data=fall_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) +
+       theme_bw() + ylab("# of days air temp < 0 C") +
        labs(title="Fall (Sep, Oct, Nov) number of cold days") +
        theme(plot.title=element_text(size=10),
              panel.grid.minor=element_blank(),
              axis.text.x=element_text(angle=30, hjust=1))
 
+falf <- fuc +
+        geom_point(data=fall_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) +
+        theme_bw() + ylab("# of days air temp < 0 C") +
+        labs(title="Fall (Sep, Oct, Nov) number of cold days") +
+        theme(plot.title=element_text(size=10),
+              panel.grid.minor=element_blank(),
+              axis.text.x=element_text(angle=30, hjust=1))
 
-win <- ggplot(data=winter_a_temp, aes(x=Year, y=Num_Day_Less_neg10)) +
-       geom_point(size=2) + theme_bw() + ylab("# of days air temp < -10 C") +
+falb <- brn +
+        geom_point(data=fall_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) +
+        theme_bw() + ylab("# of days air temp < 0 C") + ylim(-15, 31) +
+        labs(title="Fall (Sep, Oct, Nov) number of cold days") +
+        theme(plot.title=element_text(size=10),
+              panel.grid.minor=element_blank(),
+              axis.text.x=element_text(angle=30, hjust=1))
+
+###
+
+win <- myt +
+       geom_point(data=winter_a_temp, aes(x=Year, y=Num_Day_Less_neg10), size=2) + #geom_point(size=2) +
+       theme_bw() + ylab("# of days air temp < -10 C") +
        labs(title="Winter (Dec, Jan, Feb) number of cold days") +
        theme(plot.title=element_text(size=10),
              panel.grid.minor=element_blank(),
              axis.text.x=element_text(angle=30, hjust=1))
 
+winf <- fuc +
+        geom_point(data=winter_a_temp, aes(x=Year, y=Num_Day_Less_neg10), size=2) + #geom_point(size=2) +
+        theme_bw() + ylab("# of days air temp < -10 C") +
+        labs(title="Winter (Dec, Jan, Feb) number of cold days") +
+        theme(plot.title=element_text(size=10),
+              panel.grid.minor=element_blank(),
+              axis.text.x=element_text(angle=30, hjust=1))
+
+winb <- brn +
+        geom_point(data=winter_a_temp, aes(x=Year, y=Num_Day_Less_neg10), size=2) + #geom_point(size=2) +
+        theme_bw() + ylab("# of days air temp < -10 C") + ylim(-15, 31) +
+        labs(title="Winter (Dec, Jan, Feb) number of cold days") +
+        theme(plot.title=element_text(size=10),
+              panel.grid.minor=element_blank(),
+              axis.text.x=element_text(angle=30, hjust=1))
+
 ```
 
-```{r, echo=FALSE}
+### Mytilus
+```{r, echo=FALSE, fig.height=7, fig.width=8}
 # arranging above plots
 grid.arrange(spr, fal, sum, win)
+
+```
+
+### Fucus
+```{r, echo=FALSE, fig.height=7, fig.width=8}
+# arranging above plots
+grid.arrange(sprf, falf, sumf, winf)
+
+```
+
+### Barnacles
+```{r, echo=FALSE, fig.height=7, fig.width=8}
+# arranging above plots
+grid.arrange(sprb, falb, sumb, winb)
 
 ```
 
@@ -414,11 +559,80 @@ win2 <- ggplot(data=winter_a_temp, aes(x=YrMnDy, y=Month_Anom)) +
 
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=7, fig.width=8}
 # arranging above plots
 grid.arrange(spr2, fal2, sum2, win2)
 
 ```
+
+```{r, echo=FALSE}
+
+at_myt <- ann_air + 
+          geom_col(data=myt_sub2, 
+                   aes(x=Year_Mon,y=Year_Anom_Scale2, color="#696366"), width=2) +    #show.legend=TRUE   
+          ylab("Anomaly") + theme_bw() + ylim(-14,14) + 
+          scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
+                            name="",
+                            labels=c("positive temp C", "negative temp C")) +
+          scale_color_manual(values="#595959", name="", labels="Mytilus % cover") + 
+          theme(panel.grid=element_blank(),
+                panel.border=element_blank(),
+                legend.position=c(.85, .15),
+                legend.margin=margin(t=-0.8, unit="cm"),
+                legend.background = element_rect(fill="transparent"),
+                legend.key.size=unit(0.5, "cm"),
+                axis.text = element_text(size=10),
+                axis.title = element_text(size=16),
+                axis.line = element_line(colour='black', size=0.5, linetype='solid'))
+
+at_myt
+###
+
+at_fuc <- ann_air + 
+          geom_col(data=fuc_sub2, 
+                   aes(x=Year_Mon,y=Year_Anom_Scale2, color="#696366"), width=2) +    #show.legend=TRUE   
+          ylab("Anomaly") + theme_bw() + ylim(-14,14) + 
+          scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
+                            name="",
+                            labels=c("positive temp C", "negative temp C")) +
+          scale_color_manual(values="#595959", name="", labels="Fucus % cover") + 
+          theme(panel.grid=element_blank(),
+                panel.border=element_blank(),
+                legend.position=c(.85, .15),
+                legend.margin=margin(t=-0.8, unit="cm"),
+                legend.background = element_rect(fill="transparent"),
+                legend.key.size=unit(0.5, "cm"),
+                axis.text = element_text(size=10),
+                axis.title = element_text(size=16),
+                axis.line = element_line(colour='black', size=0.5, linetype='solid'))
+
+at_fuc
+###
+
+at_brn <- ann_air + 
+          geom_col(data=brn_sub2, 
+                   aes(x=Year_Mon,y=Year_Anom_Scale2, color="#696366"), width=2) +    #show.legend=TRUE   
+          ylab("Anomaly") + theme_bw() + ylim(-14,14) + 
+          scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
+                            name="",
+                            labels=c("positive temp C", "negative temp C")) +
+          scale_color_manual(values="#595959", name="", labels="Barnacle % cover") + 
+          theme(panel.grid=element_blank(),
+                panel.border=element_blank(),
+                legend.position=c(.85, .15),
+                legend.margin=margin(t=-0.8, unit="cm"),
+                legend.background = element_rect(fill="transparent"),
+                legend.key.size=unit(0.5, "cm"),
+                axis.text = element_text(size=10),
+                axis.title = element_text(size=16),
+                axis.line = element_line(colour='black', size=0.5, linetype='solid'))
+
+at_brn
+
+
+
+```
+
 
 # NMDS Plots
 ```{r, echo=FALSE, include=FALSE}
@@ -427,15 +641,15 @@ source("NMDS_analysis.r")
 # need to use NMDS output percov_mds$points
 
 ```
-
+### PDO
 ```{r, echo=FALSE, fig.height=6, fig.width=8}
 # prettier plotting
 # build a data frame with NMDS coordinates and metadata
-NMDS_ord <- data.frame(MDS1 = percov_mds$points[,1], MDS2 = percov_mds$points[,2],
+NMDS_ord <- data.frame(NMDS1 = percov_mds$points[,1], NMDS2 = percov_mds$points[,2],
                        PDO_Sign = PerCov_PDO$PDO_Sign, Year = PerCov_PDO$Year)
 
 # now the plot
-ord1 <- ggplot(NMDS_ord, aes(x=MDS1, y=MDS2, color=PDO_Sign)) +
+ord1 <- ggplot(NMDS_ord, aes(x=NMDS1, y=NMDS2, color=PDO_Sign)) +
         geom_point() + stat_ellipse() +
         theme_bw() + #labs(title = "NMDS Plot by PDO") + 
         scale_color_manual(values=c("A"="#f88379", "B"="#00BFC4"), name="",
@@ -453,6 +667,83 @@ ord2 <- ggplot(NMDS_ord, aes(x=MDS1, y=MDS2, color=Year)) +
 
 ```{r, echo=FALSE}
 percov_perm
+```
+
+### Freshwater
+```{r, echo=FALSE, fig.height=6, fig.width=8}
+# prettier plotting
+# build a data frame with NMDS coordinates and metadata
+NMDS_ord2 <- data.frame(NMDS1 = percov_mds2$points[,1], NMDS2 = percov_mds2$points[,2],
+                        Year = fresh_treats$Year, FWD_Anom_Sign = fresh_treats$FWD_Sign)
+
+# now the plot
+ord3 <- ggplot(NMDS_ord2, aes(x=NMDS1, y=NMDS2, color=FWD_Anom_Sign)) +
+        geom_point() + stat_ellipse() +
+        theme_bw() + 
+        scale_color_manual(values=c("A"="#f88379", "B"="#00BFC4"), name="",
+                           labels=c("positive FWD Anom","negative FWD Anom")) + 
+        theme(panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank())
+ord3
+
+
+```
+
+```{r, echo=FALSE}
+percov_perm2
+```
+
+### Air Temp
+```{r, echo=FALSE, fig.height=6, fig.width=8}
+# prettier plotting
+# build a data frame with NMDS coordinates and metadata
+NMDS_ord3 <- data.frame(NMDS1 = percov_mds3$points[,1], NMDS2 = percov_mds3$points[,2],
+                        Year = atemp_treats$Year, ATmp_Anom_Sign = atemp_treats$ATmp_Sign)
+
+# now the plot
+ord4 <- ggplot(NMDS_ord3, aes(x=NMDS1, y=NMDS2, color=ATmp_Anom_Sign)) +
+        geom_point() + stat_ellipse() +
+        theme_bw() + 
+        scale_color_manual(values=c("A"="#f88379", "B"="#00BFC4"), name="",
+                           labels=c("positive Air Temp Anom","negative Air Temp Anom")) + 
+        theme(panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank())
+ord4
+
+
+```
+
+```{r, echo=FALSE}
+percov_perm3
+```
+
+### All env. variables
+```{r, echo=FALSE, fig.height=6, fig.width=8}
+# prettier plotting
+# build a data frame with NMDS coordinates and metadata
+NMDS_ord4 <- data.frame(NMDS1 = percov_mds4$points[,1], NMDS2 = percov_mds4$points[,2],
+                        Year = all_treats$Year, ATmp_Anom_Sign = all_treats$ATmp_Sign,
+                        FWD_annSign = all_treats$FWD_Sign, PDOSign = all_treats$PDO_Sign)
+
+# now the plot
+ord5 <- ggplot(NMDS_ord4, aes(x=NMDS1, y=NMDS2, color=PDOSign, shape=ATmp_Anom_Sign, size=FWD_annSign)) +
+        geom_point() + #stat_ellipse() +
+        theme_bw() + 
+        scale_color_manual(values=c("A"="#f88379", "B"="#00BFC4"), name="",
+                           labels=c("positive PDO","negative PDO")) + 
+        scale_shape_manual(values=c("A"=16, "B"=17), name="",
+                           labels=c("positive Air Temp anom", "negative Air Temp anom")) +
+        scale_size_manual(values=c("A"=2, "B"=6), name="",
+                          labels=c("positive runoff anom", "negative runoff anom")) +
+        theme(panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank())
+ord5
+
+
+```
+
+```{r, echo=FALSE}
+percov_perm4
 ```
 
 

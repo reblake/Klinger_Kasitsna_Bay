@@ -20,12 +20,14 @@ source("PDO_cleaning.r")      # dataframes are pdo_mon and pdo_ann
 source("Fresh_Discharge_cleaning.r")
 
 # Air temperature data
-source("AIrTemp_cleaning.r")
+source("AirTemp_cleaning.r")
 
 ################################
 # Trying regular NMDS analysis #
 ################################
+########
 ###PDO
+########
 # add in the PDO data
 PerCov_PDO <- PerCov_clean %>%
               dplyr::left_join(pdo_ann, by="Year") %>%
@@ -38,9 +40,11 @@ PerCov_PDO <- PerCov_clean %>%
 
 
 # subset data into seperate dataframes
-sp_percov <- PerCov_PDO %>% dplyr::select(FUCUS_TOTAL, Barnacles, Mytilus, Pterosiphonia_poly,
-                                          Odonthalia, Barnacle_spat, Endocladia, FUCUS_SPORELINGS,
-                                          Clad_sericia, Masto_pap, Gloiopeltis, Elachista)
+sp_percov <- PerCov_PDO %>% 
+             dplyr::select(FUCUS_TOTAL, Barnacles, Mytilus, Pterosiphonia_poly,
+                           Odonthalia, Barnacle_spat, Endocladia, FUCUS_SPORELINGS,
+                           Clad_sericia, Masto_pap, Gloiopeltis, Elachista)
+
 yr_percov <- PerCov_PDO$Year
 pdo_percov <- PerCov_PDO$PDO_anul_mn
 pdo_sign <- PerCov_PDO$PDO_Sign
@@ -60,8 +64,86 @@ percov_mds <- vegan::metaMDS(sp_percov, distance="bray", k=2, trymax=1000, autot
 # calculate PERMANOVA 
 percov_perm <- vegan::adonis(sp_percov~PDO_anul_mn, pdo_treats, perm=1000, method="bray")
 
+###############
 ###Freshwater
-# addin the freshwater data
+###############
+# add in the freshwater data
+PerCov_Fresh <- PerCov_PDO %>%
+                dplyr::full_join(FWD_ann_mn, by="Year") %>%
+                dplyr::rename(FWD_Sign = Sign) %>%
+                dplyr::filter(Year != "2015") 
+
+# subset to different dataframes
+sp_percov2 <- PerCov_Fresh %>% 
+              dplyr::select(FUCUS_TOTAL, Barnacles, Mytilus, Pterosiphonia_poly,
+                            Odonthalia, Barnacle_spat, Endocladia, FUCUS_SPORELINGS,
+                            Clad_sericia, Masto_pap, Gloiopeltis, Elachista)
+
+fresh_treats <- PerCov_Fresh[,c("Year", "mean_yearly_discharge_m3s1", "mean_yearly_anomaly", "FWD_Sign")]
+fresh_treats <- dplyr::filter(fresh_treats, !is.na(mean_yearly_discharge_m3s1))
+
+# do the analysis
+percov_mds2 <- vegan::metaMDS(sp_percov2, distance="bray", k=2, trymax=1000, autotransform=TRUE)
+
+# calculate PERMANOVA 
+percov_perm2 <- vegan::adonis(sp_percov2~mean_yearly_discharge_m3s1, fresh_treats, perm=1000, method="bray")
+
+##############
+### Air Temp
+##############
+# add in the air temp data
+
+PerCov_ATmp <- PerCov_PDO %>%
+               dplyr::full_join(year_a_temp, by="Year") %>%
+               dplyr::rename(ATmp_Sign = Year_Sign,
+                             ATemp_Year_Anom = Year_Anom) %>%
+               dplyr::filter(Year != "2016",
+                             Year > "2002")
+
+# subset to different dataframes
+sp_percov3 <- PerCov_ATmp %>% 
+              dplyr::select(FUCUS_TOTAL, Barnacles, Mytilus, Pterosiphonia_poly,
+                            Odonthalia, Barnacle_spat, Endocladia, FUCUS_SPORELINGS,
+                            Clad_sericia, Masto_pap, Gloiopeltis, Elachista)
+
+atemp_treats <- PerCov_ATmp[,c("Year", "ATemp_YearMn", "ATemp_Year_Anom", "ATmp_Sign")]
+
+# do the analysis
+percov_mds3 <- vegan::metaMDS(sp_percov3, distance="bray", k=2, trymax=1000, autotransform=TRUE)
+
+# calculate PERMANOVA 
+percov_perm3 <- vegan::adonis(sp_percov3~ATemp_YearMn, atemp_treats, perm=1000, method="bray")
+
+#################
+### all env. predictors
+#################
+
+PerCov_all <- PerCov_Fresh %>%
+              dplyr::full_join(year_a_temp, by="Year") %>%
+              dplyr::rename(ATmp_Sign = Year_Sign,
+                            ATemp_Year_Anom = Year_Anom, 
+                            mn_yr_discharge = mean_yearly_discharge_m3s1) %>%
+              dplyr::filter(Year != "2016",
+                            Year != "2015",
+                            Year > "2002")
+
+# subset to different dataframes
+sp_percov4 <- PerCov_all %>% 
+              dplyr::select(FUCUS_TOTAL, Barnacles, Mytilus, Pterosiphonia_poly,
+                            Odonthalia, Barnacle_spat, Endocladia, FUCUS_SPORELINGS,
+                            Clad_sericia, Masto_pap, Gloiopeltis, Elachista)
+
+all_treats <- PerCov_all[,c("Year", "PDO_anul_mn", "PDO_Sign", "mn_yr_discharge", 
+                            "mean_yearly_anomaly", "FWD_Sign", "ATemp_YearMn", "ATemp_Year_Anom",
+                            "ATmp_Sign")]
+
+# do the analysis
+percov_mds4 <- vegan::metaMDS(sp_percov4, distance="bray", k=2, trymax=1000, autotransform=TRUE)
+
+# calculate PERMANOVA 
+percov_perm4 <- vegan::adonis(sp_percov4~ATemp_YearMn+mn_yr_discharge+PDO_anul_mn,
+                              all_treats, perm=1000, method="bray")
 
 
-       
+
+
