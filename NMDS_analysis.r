@@ -118,14 +118,14 @@ percov_perm3 <- vegan::adonis(sp_percov3~ATemp_YearMn, atemp_treats, perm=1000, 
 ### all env. predictors
 #################
 
-PerCov_all <- PerCov_Fresh %>%
+PerCov_all <- PerCov_PDO %>%
+              dplyr::full_join(FWD_ann_mn, by="Year") %>%
               dplyr::full_join(year_a_temp, by="Year") %>%
               dplyr::rename(ATmp_Sign = Year_Sign,
                             ATemp_Year_Anom = Year_Anom, 
-                            mn_yr_discharge = mean_yearly_discharge_m3s1) %>%
-              dplyr::filter(Year != "2016",
-                            Year != "2015",
-                            Year > "2002")
+                            mn_yr_discharge = mean_yearly_discharge_m3s1,
+                            FWD_Sign = Sign) %>%
+              dplyr::filter(Year != "2015")
 
 # subset to different dataframes
 sp_percov4 <- PerCov_all %>% 
@@ -141,8 +141,30 @@ all_treats <- PerCov_all[,c("Year", "PDO_anul_mn", "PDO_Sign", "mn_yr_discharge"
 percov_mds4 <- vegan::metaMDS(sp_percov4, distance="bray", k=2, trymax=1000, autotransform=TRUE)
 
 # calculate PERMANOVA 
-percov_perm4 <- vegan::adonis(sp_percov4~ATemp_YearMn+mn_yr_discharge+PDO_anul_mn,
+percov_perm4 <- vegan::adonis(sp_percov4~ATemp_YearMn+mn_yr_discharge,
                               all_treats, perm=1000, method="bray")
+
+##################
+### biological NMDS 
+##################
+
+# subset data into seperate dataframes
+sp_percov5 <- PerCov_clean %>% 
+              dplyr::filter(Treatment == "01") %>%
+              dplyr::select(-standard_code, -abbr_code, -Treatment, -Block) %>%
+              dplyr::group_by(Year, plot) %>%
+              dplyr::summarize_each(funs(mean)) %>%
+              dplyr::ungroup() %>%
+              dplyr::select(FUCUS_TOTAL, Barnacles, Mytilus, Pterosiphonia_poly,
+                            Odonthalia, Barnacle_spat, Endocladia, FUCUS_SPORELINGS,
+                            Clad_sericia, Masto_pap, Gloiopeltis, Elachista)
+
+# do the analysis
+percov_mds5 <- vegan::metaMDS(sp_percov5, distance="bray", k=2, trymax=1000, autotransform=TRUE)
+
+# calculate PERMANOVA 
+percov_perm5 <- vegan::adonis(sp_percov5~ATemp_YearMn, all_treats, perm=1000, method="bray")
+
 
 
 
