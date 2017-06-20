@@ -150,20 +150,37 @@ percov_perm4 <- vegan::adonis(sp_percov4~ATemp_YearMn+mn_yr_discharge,
 
 # subset data into seperate dataframes
 sp_percov5 <- PerCov_clean %>% 
-              dplyr::filter(Treatment == "01") %>%
+              dplyr::filter(Treatment == "01",
+                            !Year == "2015") %>%
               dplyr::select(-standard_code, -abbr_code, -Treatment, -Block) %>%
               dplyr::group_by(Year, plot) %>%
               dplyr::summarize_each(funs(mean)) %>%
               dplyr::ungroup() %>%
               dplyr::select(FUCUS_TOTAL, Barnacles, Mytilus, Pterosiphonia_poly,
-                            Odonthalia, Barnacle_spat, Endocladia, FUCUS_SPORELINGS,
+                            Endocladia, 
                             Clad_sericia, Masto_pap, Gloiopeltis, Elachista)
+
+all_treats2 <- PerCov_clean %>%
+               dplyr::left_join(pdo_ann, by="Year") %>%
+               dplyr::full_join(FWD_ann_mn, by="Year") %>%
+               dplyr::full_join(year_a_temp, by="Year") %>%
+               dplyr::filter(Treatment == "01",
+                             !Year == "2015") %>%
+               dplyr::rename(FWD_Sign = Sign,
+                             ATmp_Sign = Year_Sign,
+                             ATemp_Year_Anom = Year_Anom, 
+                             mn_yr_discharge = mean_yearly_discharge_m3s1) %>%
+               dplyr::mutate(PDO_Sign = ifelse(PDO_anul_mn>0, "A", "B")) %>%
+               dplyr::select(Year, plot, PDO_anul_mn, PDO_Sign, mn_yr_discharge, mean_yearly_anomaly,
+                             FWD_Sign, ATemp_YearMn, ATemp_Year_Anom, ATmp_Sign) %>%
+               dplyr::arrange(Year)
+
 
 # do the analysis
 percov_mds5 <- vegan::metaMDS(sp_percov5, distance="bray", k=2, trymax=1000, autotransform=TRUE)
 
 # calculate PERMANOVA 
-percov_perm5 <- vegan::adonis(sp_percov5~ATemp_YearMn, all_treats, perm=1000, method="bray")
+percov_perm5 <- vegan::adonis(sp_percov5~ATemp_YearMn+mn_yr_discharge+Year, all_treats2, perm=1000, method="bray")
 
 
 

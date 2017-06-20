@@ -747,6 +747,47 @@ ord5
 percov_perm4
 ```
 
+### Biological NMDS
+```{r, echo=FALSE, fig.height=6, fig.width=8}
+# prettier plotting
+# build a data frame with NMDS coordinates and metadata
+NMDS_ord5 <- data.frame(NMDS1 = percov_mds5$points[,1], NMDS2 = percov_mds5$points[,2],
+                        Year = all_treats2$Year, Plot = all_treats2$plot,
+                        ATmp_Anom_Sign = all_treats2$ATmp_Sign,
+                        FWD_annSign = all_treats2$FWD_Sign, PDOSign = all_treats2$PDO_Sign)
+
+# make convex hulls for each plot across all years
+find_hull <- function(df) df[chull(df$NMDS1, df$NMDS2), ]
+hulls_all <- ddply(NMDS_ord5, "Plot", find_hull)
+
+# now the plot
+ord6 <- ggplot(NMDS_ord5, aes(x=NMDS1, y=NMDS2, color=Plot)) +
+        geom_point(size=4) + theme_bw() + 
+        geom_polygon(data=hulls_all, alpha=0, size=1) +
+        theme(panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank())
+ord6
+
+# make convex hulls for each year across all plots
+hulls_all2 <- ddply(NMDS_ord5, "Year", find_hull)
+
+# now the plot
+ord7 <- ggplot(NMDS_ord5, aes(x=NMDS1, y=NMDS2, color=Year)) +
+        geom_point(size=4) + theme_bw() + 
+        geom_polygon(data=hulls_all2, alpha=0, size=1) +
+        theme(panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank())
+ord7
+
+
+```
+
+```{r, echo=FALSE}
+percov_perm5
+```
+
+
+
 ### Correlations between env. variables
 ```{r, echo=FALSE, fig.height=6, fig.width=8}
 lmfit_pf <- lm(mn_yr_discharge~PDO_anul_mn, data=PerCov_all)  # lm() fit 
