@@ -763,7 +763,7 @@ hulls_all <- ddply(NMDS_ord5, "Plot", find_hull)
 # now the plot
 ord6 <- ggplot(NMDS_ord5, aes(x=NMDS1, y=NMDS2, color=Plot)) +
         geom_point(size=4) + theme_bw() + 
-        geom_polygon(data=hulls_all, alpha=0, size=1) +
+        geom_polygon(data=hulls_all, aes(fill=Plot), alpha=0.3, size=1) +
         theme(panel.grid.major=element_blank(),
               panel.grid.minor=element_blank())
 ord6
@@ -774,7 +774,7 @@ hulls_all2 <- ddply(NMDS_ord5, "Year", find_hull)
 # now the plot
 ord7 <- ggplot(NMDS_ord5, aes(x=NMDS1, y=NMDS2, color=Year)) +
         geom_point(size=4) + theme_bw() + 
-        geom_polygon(data=hulls_all2, alpha=0, size=1) +
+        geom_polygon(data=hulls_all2, aes(fill=ATmp_Anom_Sign), alpha=0, size=1) +
         theme(panel.grid.major=element_blank(),
               panel.grid.minor=element_blank())
 ord7
