@@ -180,7 +180,7 @@ all_treats2 <- PerCov_clean %>%
 percov_mds5 <- vegan::metaMDS(sp_percov5, distance="bray", k=2, trymax=1000, autotransform=TRUE)
 
 # calculate PERMANOVA 
-percov_perm5 <- vegan::adonis(sp_percov5~ATemp_YearMn+mn_yr_discharge+Year, all_treats2, perm=1000, method="bray")
+percov_perm5 <- vegan::adonis(sp_percov5~ATemp_YearMn*mn_yr_discharge, all_treats2, perm=1000, method="bray")
 
 
 

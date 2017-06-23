@@ -784,9 +784,8 @@ ord7
 
 ```{r, echo=FALSE}
 percov_perm5
+
 ```
-
-
 
 ### Correlations between env. variables
 ```{r, echo=FALSE, fig.height=6, fig.width=8}
@@ -832,9 +831,90 @@ grid.arrange(cor_plot2, cor_plot1, cor_plot3, nrow=2)
 
 ```
 
+### Correlations between other variables
+```{r, echo=FALSE, fig.height=6, fig.width=8}
+lmfit_tm <- lm(ATemp_YearMn~Mytilus, data=PerCov_all)  # lm() fit 
+
+cor_plot4 <- ggplot(data=PerCov_all, aes(x=Mytilus, y=ATemp_YearMn)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_tm)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_tm$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_tm$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_tm)$coef[2,4], 3))) +
+             theme(plot.title = element_text(size=9))
+            
+
+
+lmfit_tfu <- lm(ATemp_YearMn~FUCUS_TOTAL, data=PerCov_all)  # lm() fit 
+
+cor_plot5 <- ggplot(data=PerCov_all, aes(x=FUCUS_TOTAL, y=ATemp_YearMn)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_tfu)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_tfu$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_tfu$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_tfu)$coef[2,4], 3))) +
+             theme(plot.title = element_text(size=9))
+
+
+lmfit_tbn <- lm(ATemp_YearMn~Barnacles, data=PerCov_all)  # lm() fit 
+
+cor_plot5b <- ggplot(data=PerCov_all, aes(x=Barnacles, y=ATemp_YearMn)) + 
+              geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+              labs(title=paste("Adj R^2 =",signif(summary(lmfit_tbn)$adj.r.squared, 4),
+                                #"Intercept =",signif(lmfit_tbn$coef[[1]],5 ),
+                                #" Slope =",signif(lmfit_tbn$coef[[2]], 5),
+                               " p =",signif(summary(lmfit_tbn)$coef[2,4], 3))) +
+             theme(plot.title = element_text(size=10))
+            
+#####
+lmfit_fwm <- lm(mn_yr_discharge~Mytilus, data=PerCov_all)  # lm() fit 
+
+cor_plot6 <- ggplot(data=PerCov_all, aes(x=Mytilus, y=mn_yr_discharge)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_fwm)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_fwm$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_fwm$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_fwm)$coef[2,4], 3))) +
+             theme(plot.title = element_text(size=10)) +
+             scale_y_continuous(labels=function(x) sprintf("%.2f", x))
+            
+
+
+lmfit_fwf <- lm(mn_yr_discharge~FUCUS_TOTAL, data=PerCov_all)  # lm() fit 
+
+cor_plot7 <- ggplot(data=PerCov_all, aes(x=FUCUS_TOTAL, y=mn_yr_discharge)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_fwf)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_fwf$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_fwf$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_fwf)$coef[2,4], 3))) +
+             theme(plot.title = element_text(size=10)) +
+             scale_y_continuous(labels=function(x) sprintf("%.2f", x))
+            
+
+lmfit_fwb <- lm(mn_yr_discharge~Barnacles, data=PerCov_all)  # lm() fit 
+
+cor_plot8 <- ggplot(data=PerCov_all, aes(x=Barnacles, y=mn_yr_discharge)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_fwb)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_fwb$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_fwb$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_fwb)$coef[2,4], 3))) +
+             theme(plot.title = element_text(size=10)) +
+             scale_y_continuous(labels=function(x) sprintf("%.2f", x))
+            
+
+```
+
+```{r, echo=FALSE, fig.height=6, fig.width=10}
+# arranging above plots
+grid.arrange(cor_plot4, cor_plot5, cor_plot5b, cor_plot6, cor_plot7, cor_plot8, ncol=3)
+
+```
+
 # MVABUND Results
 ```{r, echo=FALSE}
-anova(glm_percov, p.uni="adjusted")
+#anova(glm_percov, p.uni="adjusted")
 
 ```
 
