@@ -45,6 +45,9 @@ spring_a_temp <- a_temp %>%
                  dplyr::group_by(Year, Month) %>%
                  dplyr::mutate(ATemp_MonthMn = mean(HOURLYDRYBULBTEMPC)) %>%
                  dplyr::ungroup() %>%
+                 dplyr::group_by(Year) %>%
+                 dplyr::mutate(ATemp_YearMn = mean(HOURLYDRYBULBTEMPC)) %>%
+                 dplyr::ungroup() %>%
                  dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE) %>%
                  dplyr::distinct() %>%
                  dplyr::mutate(YrMnDy = paste(Year, Month, Day, sep="-"),
@@ -64,6 +67,9 @@ summer_a_temp <- a_temp %>%
                  dplyr::ungroup() %>%
                  dplyr::group_by(Year, Month) %>%
                  dplyr::mutate(ATemp_MonthMn = mean(HOURLYDRYBULBTEMPC)) %>%
+                 dplyr::ungroup() %>%
+                 dplyr::group_by(Year) %>%
+                 dplyr::mutate(ATemp_YearMn = mean(HOURLYDRYBULBTEMPC)) %>%
                  dplyr::ungroup() %>%
                  dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE) %>%
                  dplyr::distinct() %>%
