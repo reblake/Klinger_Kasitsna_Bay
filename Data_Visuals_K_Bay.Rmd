@@ -912,6 +912,21 @@ grid.arrange(cor_plot4, cor_plot5, cor_plot5b, cor_plot6, cor_plot7, cor_plot8, 
 
 ```
 
+```{r, echo=FALSE, fig.height=6, fig.width=8}
+lmfit_fb <- lm(Barnacles~FUCUS_TOTAL, data=PerCov_all)  # lm() fit 
+
+cor_plot9 <- ggplot(data=PerCov_all, aes(x=FUCUS_TOTAL, y=Barnacles)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_fb)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_fb$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_fb$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_fb)$coef[2,4], 3)))
+            
+cor_plot9
+
+```
+
+
 # MVABUND Results
 ```{r, echo=FALSE}
 #anova(glm_percov, p.uni="adjusted")
