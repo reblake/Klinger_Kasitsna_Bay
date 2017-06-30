@@ -221,7 +221,7 @@ semPaths(sem2e, "std")
  
 sem2f_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 
                 Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL
+                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL 
                 '
 
 sem2f <- sem(sem2f_model, data=PerCov_FWT)
@@ -229,9 +229,80 @@ sem2f <- sem(sem2f_model, data=PerCov_FWT)
 summary(sem2f, rsquare=T, standardized=T, fit.measures=T)
 modificationIndices(sem2f, standardized=F)
 parameterEstimates(sem2f)
+inspect(sem2f, "sample") ; fitted(sem2f) 
+residuals(sem2f) ; residuals(sem2f, type="cor")
 
 semPaths(sem2f, "std")  
 
 #  
+ 
+sem2g_model <- 'FUCUS_TOTAL ~ Summ_Days_More_15 
+                Mytilus ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
+                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL
+                '
+
+sem2g <- sem(sem2g_model, data=PerCov_FWT)
+
+summary(sem2g, rsquare=T, standardized=T, fit.measures=T)
+modificationIndices(sem2g, standardized=F)
+parameterEstimates(sem2g)
+
+semPaths(sem2g, "std")  
+
+#  
+
+sem2h_model <- 'FUCUS_TOTAL ~ Summ_Days_More_15 + mn_yr_discharge
+                Mytilus ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
+                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL
+                '
+
+sem2h <- sem(sem2h_model, data=PerCov_FWT)
+
+summary(sem2h, rsquare=T, standardized=T, fit.measures=T)
+modificationIndices(sem2h, standardized=F)
+parameterEstimates(sem2h)
+
+semPaths(sem2h, "std")  
+
+#
+
+sem2i_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + Mytilus
+                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles 
+                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +  ATemp_YearlyMn 
+                '
+
+sem2i <- sem(sem2i_model, data=PerCov_FWT)
+
+summary(sem2i, rsquare=T, standardized=T, fit.measures=T)
+modificationIndices(sem2i, standardized=F)
+parameterEstimates(sem2i)
+inspect(sem2i, "sample") ; fitted(sem2i) 
+residuals(sem2i) ; residuals(sem2i, type="cor")
+
+semPaths(sem2i, "std")  
+
+#
+
+sem3_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + Mytilus + Elachista + Pterosiphonia_poly
+               Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles 
+               Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 + ATemp_YearlyMn + Elachista 
+               Pterosiphonia_poly ~ Mytilus 
+               '
+#Elachista ~ 
+sem3 <- sem(sem3_model, data=PerCov_FWT)
+
+summary(sem3, rsquare=T, standardized=T, fit.measures=T)
+modificationIndices(sem3, standardized=F)
+parameterEstimates(sem3)
+inspect(sem3, "sample") ; fitted(sem3) 
+residuals(sem3) ; residuals(sem3, type="cor")
+
+semPaths(sem3, "std")  
+
+
+
+
+
+
 
 
