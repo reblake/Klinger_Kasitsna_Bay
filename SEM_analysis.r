@@ -299,6 +299,32 @@ residuals(sem3) ; residuals(sem3, type="cor")
 
 semPaths(sem3, "std")  
 
+#####
+
+semb_model <- 'FUCUS_SPORELINGS ~ Barnacles 
+               Barnacle_spat ~ FUCUS_TOTAL 
+               Barnacles ~ FUCUS_TOTAL + Barnacle_spat
+              '
+semb <- sem(semb_model, data=PerCov_FWT)
+
+summary(semb, rsquare=T, standardized=T, fit.measures=T)
+modificationIndices(semb, standardized=F)
+parameterEstimates(semb)
+inspect(semb, "sample") ; fitted(semb) 
+residuals(semb) ; residuals(semb, type="cor")
+
+semPaths(semb, "std")  
+
+
+
+
+
+
+
+
+
+
+
 
 
 
