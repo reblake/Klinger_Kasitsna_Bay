@@ -7,7 +7,7 @@
 
 # load packages
 library(lavaan) ; library(dplyr) ; library(car) ; library(ggm) ; library(semPlot)  
-library(semTools)
+library(semTools) ; library(psych)
 
 
 # source the data cleaning script to get the % cover data
@@ -23,11 +23,11 @@ source("AirTemp_cleaning.r")
 # add in the environmental data
 
 spr <- spring_a_temp %>%
-       dplyr::select(Year, ATemp_YearMn, Num_Day_Less_0) %>% 
+       dplyr::select(Year, ATemp_YearMn, Num_Day_Less_0, ATemp_Spr_min) %>% 
        dplyr::distinct()
 
 sum <- summer_a_temp %>%
-       dplyr::select(Year, ATemp_YearMn, Num_Day_More_15) %>% 
+       dplyr::select(Year, ATemp_YearMn, Num_Day_More_15, ATemp_Summ_max) %>% 
        dplyr::distinct()
 
 
@@ -52,6 +52,11 @@ PerCov_FWT <- PerCov_clean %>%
                             Summ_Days_More_15 = Num_Day_More_15) %>%
               dplyr::filter(Year != "2015") %>%
               dplyr::arrange(Year)
+
+#########
+# Looking at correlations
+pairs.panels(PerCov_FWT[,c(2,3,8,13:16,20,23,26:31)], smooth=F, density=T, ellipses=F, lm=T, 
+             digits=3, scale=T)
 
 
 #########
@@ -336,14 +341,46 @@ semPaths(semb2, "std")
 
 #####
 
+# vif = variance inflaction factor 
+# tolerance = 1/vif
 
+# As a rule of thumb, a variable whose VIF values is greater than 10 may merit
+# further investigation. Tolerance, defined as 1/VIF, is used by many researchers 
+# to check on the degree of collinearity. A tolerance value lower than 0.1 is 
+# comparable to a VIF of 10. It means that the variable could be considered as 
+# a linear combination of other independent variables. 
 
+# Barnacle Spat
+BSVIF <- vif(lm(Barnacle_spat ~ FUCUS_TOTAL + Mytilus + mn_yr_discharge + 
+                 ATemp_YearlyMn + Summ_Days_More_15 + Spr_Days_Less_0, data=PerCov_FWT)) # VIF
+BSTol <- 1/BSVIF  # this is the tolerance
 
+# Mytilus
+MYVIF <- vif(lm(Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + 
+                Summ_Days_More_15 + Barnacles, data=PerCov_FWT)) # VIF
+MYTol <- 1/MYVIF  # this is the tolerance
 
+# FUCUS_TOTAL
+FTVIF <- vif(lm(FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + 
+                Mytilus + FUCUS_SPORELINGS, data=PerCov_FWT)) # VIF
+FTTol <- 1/FTVIF  # this is the tolerance
 
+# Barnacles
+BAVIF <- vif(lm(Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +
+                ATemp_YearlyMn + Barnacle_spat, data=PerCov_FWT)) # VIF
+BATol <- 1/BAVIF  # this is the tolerance
 
+# FUCUS_SPORELINGS
+FSVIF <- vif(lm(FUCUS_SPORELINGS ~ Barnacles + Mytilus + Spr_Days_Less_0 + Summ_Days_More_15 + 
+                ATemp_YearlyMn, data=PerCov_FWT)) # VIF
+FSTol <- 1/FSVIF  # this is the tolerance
 
+# air temps
+ATVIF <- vif(lm(ATemp_YearlyMn ~ Spr_Days_Less_0 + Summ_Days_More_15, data=PerCov_FWT)) # VIF
+ATTol <- 1/ATVIF  # this is the tolerance
 
+STVIF <- vif(lm(ATemp_YearlyMn ~ ATemp_Spr_min + ATemp_Summ_max, data=PerCov_FWT)) # VIF
+STTol <- 1/STVIF  # this is the tolerance
 
 
 
