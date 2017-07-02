@@ -299,7 +299,7 @@ residuals(sem3) ; residuals(sem3, type="cor")
 
 semPaths(sem3, "std")  
 
-#####
+##### Barnacles & Fucus only model
 
 semb_model <- 'FUCUS_SPORELINGS ~ Barnacles 
                Barnacle_spat ~ FUCUS_TOTAL 
@@ -314,6 +314,27 @@ inspect(semb, "sample") ; fitted(semb)
 residuals(semb) ; residuals(semb, type="cor")
 
 semPaths(semb, "std")  
+
+# Incorporating Barnacles & Fucus
+
+semb2_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + Mytilus + FUCUS_SPORELINGS
+                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
+                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +  ATemp_YearlyMn + Barnacle_spat
+                FUCUS_SPORELINGS ~ Barnacles + Mytilus + Spr_Days_Less_0 + Summ_Days_More_15 + ATemp_YearlyMn
+                Barnacle_spat ~ FUCUS_TOTAL + Mytilus + mn_yr_discharge + ATemp_YearlyMn + Summ_Days_More_15 + Spr_Days_Less_0
+                '
+
+semb2 <- sem(semb2_model, data=PerCov_FWT)
+
+summary(semb2, rsquare=T, standardized=T, fit.measures=T)
+modificationIndices(semb2, standardized=F)
+parameterEstimates(semb2)
+inspect(semb2, "sample") ; fitted(semb2) 
+residuals(semb2) ; residuals(semb2, type="cor")
+
+semPaths(semb2, "std")  
+
+#####
 
 
 
