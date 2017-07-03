@@ -58,6 +58,9 @@ PerCov_FWT <- PerCov_clean %>%
 pairs.panels(PerCov_FWT[,c(2,3,8,13:16,20,23,26:31)], smooth=F, density=T, ellipses=F, lm=T, 
              digits=3, scale=T)
 
+pairs.panels(PerCov_FWT[,c(23,26:31)], smooth=F, density=T, ellipses=F, lm=T, 
+             digits=3, scale=T)
+
 
 #########
 ## SEM ##
@@ -137,7 +140,7 @@ parameterEstimates(sem1e)
 
 semPaths(sem1e, "std")
 
-###
+#####
 
 sem2_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Spr_Days_Less_0 + Summ_Days_More_15
                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
@@ -286,23 +289,25 @@ residuals(sem2i) ; residuals(sem2i, type="cor")
 
 semPaths(sem2i, "std")  
 
-#
+# note: this model below uses different seasonal temp variables
 
-sem3_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + Mytilus + Elachista + Pterosiphonia_poly
-               Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles 
-               Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 + ATemp_YearlyMn + Elachista 
-               Pterosiphonia_poly ~ Mytilus 
-               '
-#Elachista ~ 
-sem3 <- sem(sem3_model, data=PerCov_FWT)
+try2i_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + mn_yr_discharge + ATemp_Spr_min + ATemp_Summ_max 
+                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + ATemp_Summ_max + Barnacles 
+                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + ATemp_YearlyMn + ATemp_Summ_max
+                '
 
-summary(sem3, rsquare=T, standardized=T, fit.measures=T)
-modificationIndices(sem3, standardized=F)
-parameterEstimates(sem3)
-inspect(sem3, "sample") ; fitted(sem3) 
-residuals(sem3) ; residuals(sem3, type="cor")
+try2i <- sem(try2i_model, data=PerCov_FWT)
 
-semPaths(sem3, "std")  
+AIC(try2i)
+fitMeasures(try2i, "pvalue")
+summary(try2i, rsquare=T, standardized=T, fit.measures=T)
+modificationIndices(try2i, standardized=F)
+parameterEstimates(try2i)
+inspect(try2i, "sample") ; fitted(try2i) 
+residuals(try2i) ; residuals(try2i, type="cor")
+
+semPaths(try2i, "std") 
+
 
 ##### Barnacles & Fucus only model
 
@@ -320,7 +325,7 @@ residuals(semb) ; residuals(semb, type="cor")
 
 semPaths(semb, "std")  
 
-# Incorporating Barnacles & Fucus
+# Incorporating Barnacles & Fucus into the second model
 
 semb2_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + Mytilus + FUCUS_SPORELINGS
                 Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
@@ -338,6 +343,28 @@ inspect(semb2, "sample") ; fitted(semb2)
 residuals(semb2) ; residuals(semb2, type="cor")
 
 semPaths(semb2, "std")  
+
+#
+
+tryb2_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + ATemp_Spr_min + ATemp_Summ_max + FUCUS_SPORELINGS
+                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + ATemp_Summ_max + Barnacles
+                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Barnacle_spat
+                FUCUS_SPORELINGS ~ Barnacles + Mytilus + ATemp_YearlyMn + ATemp_Summ_max 
+                Barnacle_spat ~ FUCUS_TOTAL + mn_yr_discharge + ATemp_YearlyMn + ATemp_Summ_max 
+                '
+
+tryb2 <- sem(tryb2_model, data=PerCov_FWT)
+
+AIC(tryb2)
+fitMeasures(tryb2, "pvalue")
+summary(tryb2, rsquare=T, standardized=T, fit.measures=T)
+modificationIndices(tryb2, standardized=F)
+parameterEstimates(tryb2)
+inspect(tryb2, "sample") ; fitted(tryb2) 
+residuals(tryb2) ; residuals(tryb2, type="cor")
+
+semPaths(tryb2, "std")  
+
 
 #####
 
@@ -381,6 +408,50 @@ ATTol <- 1/ATVIF  # this is the tolerance
 
 STVIF <- vif(lm(ATemp_YearlyMn ~ ATemp_Spr_min + ATemp_Summ_max, data=PerCov_FWT)) # VIF
 STTol <- 1/STVIF  # this is the tolerance
+
+
+
+#####
+
+sem3_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + Mytilus + Elachista + Pterosiphonia_poly
+               Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles 
+               Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 + ATemp_YearlyMn + Elachista 
+               Pterosiphonia_poly ~ Mytilus 
+               '
+#Elachista ~ 
+sem3 <- sem(sem3_model, data=PerCov_FWT)
+
+summary(sem3, rsquare=T, standardized=T, fit.measures=T)
+modificationIndices(sem3, standardized=F)
+parameterEstimates(sem3)
+inspect(sem3, "sample") ; fitted(sem3) 
+residuals(sem3) ; residuals(sem3, type="cor")
+
+semPaths(sem3, "std")  
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
