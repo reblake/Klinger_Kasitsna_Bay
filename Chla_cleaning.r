@@ -20,7 +20,6 @@ library(rvest) ; library(tidyr) ; library(stringr) ; library(dplyr)
 
 chla_file <- read.csv("./Chla_NERR/746178.csv", stringsAsFactors=FALSE,
                       header=TRUE, row.names=NULL, strip.white=TRUE)
-
 #print(object.size(chla_file),units="Gb")
 
 
@@ -28,8 +27,42 @@ chla_clean <- chla_file %>%
               dplyr::select(StationCode, DateTimeStamp, Temp, F_Temp,
                             ChlFluor, F_ChlFluor) %>%
               dplyr::filter(!is.na(ChlFluor), 
-                            F_ChlFluor %in% c("<0>", "<0> (CND)"))
+                            F_ChlFluor %in% c("<0>", "<0> (CND)"))   %>%
               
+
+dplyr::mutate(YearTest = sapply(strsplit(as.character(DateTimeStamp), split="/") , function(x) x[1]))
+              
+
+chla_file2 <- read.csv("./Chla_NERR/151505/151505.csv", stringsAsFactors=FALSE,
+                       header=TRUE, row.names=NULL, strip.white=TRUE)
+#print(object.size(chla_file2),units="Gb")
+
+chla2_clean <- chla2_clean %>%
+               dplyr::rename_(.dots=setNames(names(.), 
+                                             sapply(strsplit(as.character(names(.)), split="_"), 
+                                                    function(x) x[1])))
+
+
+#rename_(.dots=setNames(names(.), tolower(gsub("\\.", "_", names(.)))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
