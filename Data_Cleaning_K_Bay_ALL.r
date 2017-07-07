@@ -32,13 +32,12 @@ X_long_2000 <- X_long_all$`2000`
 # format 1999 dataframe
 names(X_long_1999) <- as.character(unlist(X_long_1999[1,])) # make column names 
 X_long_1999 <- X_long_1999[-c(1:2),]
-X_long_1999 <- X_long_1999[ , !duplicated(colnames(X_long_1999))]  # removing duplicate columns called `NA`            
+X_long_1999 <- X_long_1999[ , !duplicated(colnames(X_long_1999))]  # removing duplicate columns called `NA` 
 
 clean_1999 <- X_long_1999 %>%
               tibble::rownames_to_column() %>%  # making column of rownames
               dplyr::select(-rowname) %>%   # removing the rownames column
-              dplyr::rename(TRIPLET = `NA`,
-                            QUAD = `Species`,
+              dplyr::rename(QUAD = `Species`,
                             FUCUS_PERCOV_TOTAL = `Fucus (%)`,
                             FUCUS_NUM_ADULTS = `Fucus (#)`,
                             FUCUS_SPORELINGS_PERCOV = `Fucus germ (%)`,
@@ -85,9 +84,17 @@ clean_1999 <- X_long_1999 %>%
                             BARE_ROCK = `Bare Rock (%)`,
                             TOTAL_COVERAGE = `Total Coverage (%)`,
                             TOTAL_ALG_ANIM_PER_COV = `Total Alg+Anim Cvr (%)`
-                            ) %>%
+                            )
   
+
+names(clean_1999) <- make.names(names(clean_1999))  # will turn names into accepted formats
   
+clean_1999n <- clean_1999 %>%
+               dplyr::rename(TRIPLET = `NA.`) %>%
+               dplyr::mutate(Year = "1999") %>%
+               setNames(toupper(names(.))) # make column names all upper case
+# replace NAs with 0, because Terrie says missing values represent 0s, NOT missing data
+clean_1999n[is.na(clean_1999n)] <- 0
   
 
 # format 2000 dataframe
@@ -112,13 +119,79 @@ clean_2000 <- X_long_2000 %>%
                             BARE_ROCK = `BARE ROCK`,
                             BOULDER_COBBLE = `BOULDER-COBBLE`,
                             SAND_GRAVEL = `SAND-GRAVEL`) %>%  # rename columns that had special characters
+              setNames(toupper(names(.))) %>% # make column names all upper case
               dplyr::filter(!(TREATMENT %in% c("avg, sd","avg,sd","AVG,STD"))) %>%
               dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
-              dplyr::mutate_at(c(4:6,8:39), funs(as.numeric))  # converts select columns to numeric
+              dplyr::mutate_at(c(4:6,8:39), funs(as.numeric)) %>% # converts select columns to numeric
+              dplyr::mutate(Year = "2000",
+                            Month = "06",
+                            Day = "05") 
               
+# replace NAs with 0, because Terrie says missing values represent 0s, NOT missing data
+clean_2000[is.na(clean_2000)] <- 0
+
  
 
 # split years 2001 - 2017, which are formatted the same in the excel file
+
+fix_data2 <- function(df) {
+             # make column names
+             names(df) <- as.character(unlist(df[1,]))
+             df <- df[-1,]
+             # remove entirely blank column
+             df <- df[!is.na(names(df))]
+             
+             df1 <- df %>%
+                    # row names to column 
+                    tibble::rownames_to_column(var="TRIPLET") %>%  
+                    # remove spaces/characters from column names
+                    dplyr::rename(FUCUS_PERCOV_TOTAL = `FUCUS%TOTAL`, 
+                                  FUCUS_NUM_ADULTS = `FUCUS#ADULTS`,
+                                  FUCUS_SPORELINGS_PERCOV=`FUCUS SPORELINGS%`,
+                                  FUCUS_SPORELINGS_NUM = `FUCUS SPORELINGS#`,
+                                  RALFSIA_HILD  = `Ralfsia/Hild`,
+                                  CLAD_SERICEA = `Clad sericia`,
+                                  L.SITKANA = `L sitkana`,
+                                  L.SCUTULATA = `L scutulata`,
+                                  MASTO_PAP = `Masto pap`,
+                                  ERECT_CORALLINE = `erect coralline`,
+                                  BARNACLES_SPAT = `Barnacle spat`,
+                                  ANTHO_ARTEMESIA = `Antho artemesia`, 
+                                  BARE_ROCK = `BARE ROCK`,
+                                  BOULDER_COBBLE = `BOULDER-COBBLE`,
+                                  SAND_GRAVEL = `SAND-GRAVEL`
+                                  ) %>%
+                    setNames(toupper(names(.))) %>%  # make column names all upper case
+                    dplyr::mutate_if(is.factor, as.character) %>%  # make everything character
+                     # split off extra numerals from "TRIPLET" column
+                    dplyr::mutate(TRIPLET = ifelse(!(TRIPLET %in% c(1:12)), 
+                                                   sapply(strsplit(as.character(TRIPLET), split="__") , function(x) x[1]),
+                                                   TRIPLET)
+                                  ) %>%
+                    dplyr::filter(!(TRIPLET %in% c(1:12))) %>%
+                    dplyr::mutate_at(vars(FUCUS_PERCOV_TOTAL:FUCUS_SPORELINGS_PERCOV,ULVA:ANTHO_ARTEMESIA), 
+                                     funs(as.numeric)) # converts select columns to numeric
+                    
+             
+             # replace NAs with 0, because Terrie says missing values represent 0s, NOT missing data
+             df1[is.na(df1)] <- 0 
+ 
+             # return
+             return(df1)
+}
+
+
+# subset just 2001 - 2017 
+X_recent <- X_long_all[c("2017","2016","2015","2014","2013")]
+
+# apply fix_data function to list of data frames
+clean_17_13 <- lapply(X_recent, function(x) fix_data2(x))
+
+
+
+
+
+
 
 
 
