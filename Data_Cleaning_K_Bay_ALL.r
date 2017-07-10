@@ -36,37 +36,33 @@ X_long_1999 <- X_long_1999[ , !duplicated(colnames(X_long_1999))]  # removing du
 
 clean_1999 <- X_long_1999 %>%
               tibble::rownames_to_column() %>%  # making column of rownames
-              dplyr::select(-rowname) %>%   # removing the rownames column
+              dplyr::select(-rowname, -`Fucus wt wt (kg) scrape '99`, -`Ralfsia (%)`, -`Hildenbrandia (%)`,
+                            -`Petrocelis (%)`, -`Total Algal Coverage (%)`, -`Barnacle adult (%)`,
+                            -`Total Animal Cover (%)`, -`Bare Rock (%)`, -`Total Coverage (%)`,
+                            -`Total Alg+Anim Cvr (%)`) %>%   # removing the columns
               dplyr::rename(QUAD = `Species`,
                             FUCUS_PERCOV_TOTAL = `Fucus (%)`,
                             FUCUS_NUM_ADULTS = `Fucus (#)`,
                             FUCUS_SPORELINGS_PERCOV = `Fucus germ (%)`,
                             FUCUS_SPORELINGS_NUM = `Fucus germ (#)`,
-                            FUCUS_kg_WW_scrape_99 = `Fucus wt wt (kg) scrape '99`,
                             ACROSIPHONIA = `Acrosiphonia (%)`,
                             CHAETOMORPHA = `Chaetomorpha (%)`,
                             CRYPTOSIPHONIA = `Cryptosiphonia (%)`,
                             ENDOCLADIA = `Endocladia (%)`,
                             GLOIOPELTIS = `Gloiopeltis (%)`,
                             HALOSACCION = `Halosaccion (%)`,
-                            HILDENBRANDIA = `Hildenbrandia (%)`,
                             MASTOCARPUS = `Mastocarpus (%)`,
                             MELANOSIPHON = `Melanosiphon (%)`,
                             ODONTHALIA = `Odonthalia (%)`,
                             PALMARIA_C = `Palmaria c (%)`,
-                            PETROCELIS = `Petrocelis (%)`,
                             PILAYELLA = `Pilayella (%)`,
                             PORPHYRA = `Porphyra (%)`,
                             PTEROSIPHONIA = `Pterosiphonia (%)`,
-                            RALFSIA = `Ralfsia (%)`,
-                            TOTAL_ALGAL_PER_COV = `Total Algal Coverage (%)`,
                             L.SITKANA = `Litt sitkana (#)`,
                             L.SCUTULATA = `Litt scutulata (#)`,
-                 #           BARNACLES = `Barnacle adult (%)`,
+                            BARNACLES =  `Totl Barnacle Cvr (%)`,
                             BARNACLES_SPAT = `Barnacle spat (%)`,
                             MYTILUS = `Mytilus (%)`,
-                            TOTAL_ANIMAL_PER_COV = `Total Animal Cover (%)`,
-                  #          TOTAL_BARNACLE_PER_COV = `Totl Barnacle Cvr (%)`,
                             NUCELLA = `Nucella (#)`,
                             PAGURUS = `Pagurus (#)`,
                             SIPHONARIA = `Siphonaria (#)`,
@@ -80,10 +76,7 @@ clean_1999 <- X_long_1999 %>%
                             AMPHIPORUS = `Amphiphorus (#)`,
                             MARGARITES = `Margarites (#)`,
                             CUCUMARIA = `Cucumaria (#)`,
-                            LEPTASTERIAS = `Leptasterias (#)`,
-                            BARE_ROCK = `Bare Rock (%)`,
-                            TOTAL_COVERAGE = `Total Coverage (%)`,
-                            TOTAL_ALG_ANIM_PER_COV = `Total Alg+Anim Cvr (%)`
+                            LEPTASTERIAS = `Leptasterias (#)`
                             )
   
 
@@ -93,7 +86,7 @@ clean_1999n <- clean_1999 %>%
                dplyr::rename(TRIPLET = `NA.`) %>%
                dplyr::mutate(Year = "1999") %>%
                setNames(toupper(names(.))) # make column names all upper case
-# replace NAs with 0, because Terrie says missing values represent 0s, NOT missing data
+# replace NAs with 0, because Terrie says missing values represent 0s for some variables
 clean_1999n[is.na(clean_1999n)] <- 0
   
 
@@ -104,30 +97,27 @@ X_long_2000 <- X_long_2000[ , !duplicated(colnames(X_long_2000))]  # removing on
             
 clean_2000 <- X_long_2000 %>%
               tibble::rownames_to_column() %>%  # making column of rownames
-              dplyr::select(-`NA`,-rowname) %>%   # removing the other `NA` and rownames columns
+              dplyr::select(-`NA`, -rowname, -`RALFSIA/HILD`, -`PETROCELIS`, -`SPIRORBIDAE`,
+                            -`KATHRINA`, -`BARE ROCK`, 
+                            -`ROCK`, -`BOULDER-COBBLE`, -`SAND-GRAVEL`) %>%   # removing columns
               dplyr::rename(FUCUS_PERCOV_TOTAL = `FUCUS%TOTAL`,
                             FUCUS_NUM_ADULTS = `FUCUS#ADULTS`,
                             FUCUS_SPORELINGS_PERCOV = `FUCUS SPORELINGS%`,
                             FUCUS_SPORELINGS_NUM = `FUCUS SPORELINGS#`,
-                            RALFSIA_HILD = `RALFSIA/HILD`,
                             CLAD_SERICEA = `CLAD SERICEA`,
                             MASTO_PAP = `MASTO PAP`,
                             L.SITKANA = `L SITKANA`,
                             L.SCUTULATA = `L SCUTULATA`,
                             BARNACLES_SPAT = `BARNACLES SPAT`,
-                            MARGARITS_JUV = `MARGARITS JUV`,
-                            BARE_ROCK = `BARE ROCK`,
-                            BOULDER_COBBLE = `BOULDER-COBBLE`,
-                            SAND_GRAVEL = `SAND-GRAVEL`) %>%  # rename columns that had special characters
+                            MARGARITS_JUV = `MARGARITS JUV`
+                            ) %>%  # rename columns that had special characters
               setNames(toupper(names(.))) %>% # make column names all upper case
               dplyr::filter(!(TREATMENT %in% c("avg, sd","avg,sd","AVG,STD"))) %>%
               dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
-              dplyr::mutate_at(c(4:6,8:39), funs(as.numeric)) %>% # converts select columns to numeric
-              dplyr::mutate(Year = "2000",
-                            Month = "06",
-                            Day = "05") 
+              dplyr::mutate_at(c(4:6,8:35), funs(as.numeric)) %>% # converts select columns to numeric
+              dplyr::mutate(Year = "2000", Month = "06", Day = "05") 
               
-# replace NAs with 0, because Terrie says missing values represent 0s, NOT missing data
+# replace NAs with 0, because Terrie says missing values represent 0s for many columns
 clean_2000[is.na(clean_2000)] <- 0
 
  
@@ -144,22 +134,24 @@ fix_data2 <- function(df) {
              df1 <- df %>%
                     # row names to column 
                     tibble::rownames_to_column(var="TRIPLET") %>%  
-                    # remove spaces/characters from column names
-                    dplyr::rename(FUCUS_PERCOV_TOTAL = `FUCUS%TOTAL`, 
+                    dplyr::select(-`Ralfsia/Hild`, -`RALFSIA/HILD`,
+                                  -`Antho artemesia`, -`ANTHOPL ARTEMESIA`,
+                                  -`Petrocelis`, -`Petrocelia`, -`PETROCELIS`, 
+                                  -`Spirorbidae`, -`SPIRORBIDAE`, -`Katharina`, -`KATHRINA`,
+                                  -`BARE ROCK`, -`ROCK`, -`BOULDER-COBBLE`, -`SAND-GRAVEL`) %>%
+                    dplyr::rename(FUCUS_PERCOV_TOTAL = `FUCUS%TOTAL`, # remove spaces/characters from column names
                                   FUCUS_NUM_ADULTS = `FUCUS#ADULTS`,
                                   FUCUS_SPORELINGS_PERCOV=`FUCUS SPORELINGS%`,
                                   FUCUS_SPORELINGS_NUM = `FUCUS SPORELINGS#`,
-                                  RALFSIA_HILD  = `Ralfsia/Hild`,
                                   CLAD_SERICEA = `Clad sericia`,
                                   L.SITKANA = `L sitkana`,
                                   L.SCUTULATA = `L scutulata`,
                                   MASTO_PAP = `Masto pap`,
                                   ERECT_CORALLINE = `erect coralline`,
-                                  BARNACLES_SPAT = `Barnacle spat`,
-                                  ANTHO_ARTEMESIA = `Antho artemesia`, 
-                                  BARE_ROCK = `BARE ROCK`,
-                                  BOULDER_COBBLE = `BOULDER-COBBLE`,
-                                  SAND_GRAVEL = `SAND-GRAVEL`
+                                  BARNACLES_SPAT = `Barnacle spat` #,
+                                  #CRYPTONATICA = `Cryptonatica[Acrosiphonia]`,
+                                  #IRRIDESCENT_SNAIL_HOMALOPOMA = `irridescent snail (Homalopoma?)`,
+                                  #ENCRUSTING_CORRALINE = `encrusting coralline`
                                   ) %>%
                     setNames(toupper(names(.))) %>%  # make column names all upper case
                     dplyr::mutate_if(is.factor, as.character) %>%  # make everything character
@@ -168,24 +160,118 @@ fix_data2 <- function(df) {
                                                    sapply(strsplit(as.character(TRIPLET), split="__") , function(x) x[1]),
                                                    TRIPLET)
                                   ) %>%
-                    dplyr::filter(!(TRIPLET %in% c(1:12))) %>%
-                    dplyr::mutate_at(vars(FUCUS_PERCOV_TOTAL:FUCUS_SPORELINGS_PERCOV,ULVA:ANTHO_ARTEMESIA), 
-                                     funs(as.numeric)) # converts select columns to numeric
-                    
+                    dplyr::filter(TRIPLET %in% c(1:12))
              
-             # replace NAs with 0, because Terrie says missing values represent 0s, NOT missing data
+             # replace NAs with 0, because Terrie says missing values represent 0s for certain categories
              df1[is.na(df1)] <- 0 
- 
+             
              # return
              return(df1)
 }
 
 
-# subset just 2001 - 2017 
-X_recent <- X_long_all[c("2017","2016","2015","2014","2013")]
+
+fix_data3 <- function(df) {
+             # make column names
+             names(df) <- as.character(unlist(df[1,]))
+             df <- df[-1,]
+             # remove entirely blank column
+             df <- df[!is.na(names(df))]
+             
+             df1 <- df %>%
+                    tibble::rownames_to_column(var="TRIPLET") %>%   # row names to column 
+                    tidyr::gather(-TRIPLET, -QUAD, -TREATMENT, key=TAXA, value=PER_COV_OR_COUNT) %>%
+                    # split off extra numerals from "TRIPLET" column
+                    dplyr::mutate(TRIPLET = ifelse(!(TRIPLET %in% c(1:12)), 
+                                                   sapply(strsplit(as.character(TRIPLET), split="__") , function(x) x[1]),
+                                                   TRIPLET),
+                                  TAXA = case_when(TAXA == "FUCUS%TOTAL" ~ "FUCUS_PERCOV_TOTAL",
+                                                   TAXA == "FUCUS#ADULTS" ~ "FUCUS_NUM_ADULTS",
+                                                   TAXA == "FUCUS SPORELINGS%" ~ "FUCUS_SPORELINGS_PERCOV",
+                                                   TAXA == "FUCUS SPORELINGS#" ~ "FUCUS_SPORELINGS_NUM",
+                                                   TAXA == "L SITKANA"|TAXA == "L sitkana" ~ "L.SITKANA",
+                                                   TAXA == "L SCUTULATA"|TAXA == "L scutulata" ~ "L.SCUTULATA",
+                                                   TAXA == "Cryptonatica[Acrosiphonia]" ~ "CRYPTONATICA",
+                                                   TAXA == "irridescent snail (Homalopoma?)" ~ "IRRIDESCENT_SNAIL_HOMALOPOMA"
+                                                   ),
+                                  # TAXA = str_replace_all(TAXA,`[^A-Z]+`,`_`),  # strip off symbols and spaces
+                                  ) %>% 
+                     
+                    
+                    
+                    
+                    
+                    setNames(toupper(names(.))) %>%  # make column names all upper case
+                    
+                    
+                    
+               
+               
+               
+               
+                    dplyr::filter(-`Ralfsia/Hild`, -`RALFSIA/HILD`,
+                                  -`Antho artemesia`, -`ANTHOPL ARTEMESIA`,
+                                  -`Petrocelis`, -`Petrocelia`, -`PETROCELIS`, 
+                                  -`Spirorbidae`, -`SPIRORBIDAE`, -`Katharina`, -`KATHRINA`,
+                                  -`BARE ROCK`, -`ROCK`, -`BOULDER-COBBLE`, -`SAND-GRAVEL`) %>%
+               
+               
+               
+               
+               
+                    
+                    dplyr::rename(#CLAD_SERICEA = `Clad sericia`,  "CLAD SERICEA" ~ "CLAD_SERICEA",
+                                  #MASTO_PAP = `Masto pap`,
+                                  #ERECT_CORALLINE = `erect coralline`,
+                                  #BARNACLES_SPAT = `Barnacle spat` #,
+                                  CRYPTONATICA = `Cryptonatica[Acrosiphonia]`,
+                                  IRRIDESCENT_SNAIL_HOMALOPOMA = `irridescent snail (Homalopoma?)`,
+                                  #ENCRUSTING_CORALLINE = `encrusting coralline`
+                                  ) %>%
+                    
+               #     dplyr::mutate_if(is.factor, as.character) %>%  # make everything character
+                     
+                    dplyr::filter(TRIPLET %in% c(1:12))
+                    
+             
+             # replace NAs with 0, because Terrie says missing values represent 0s for certain categories
+             df1[is.na(df1)] <- 0 
+             
+             # return
+             return(df1)
+}
+
+
+
+
+# subset just years without too much cleaning needed
+X_recent <- X_long_all[c("2017","2016","2015","2014","2013",
+                         "2012",
+                         "2011","2010",
+                         "2009","2008",
+                         "2007","2006","2005","2004",
+                         "2003",
+                         "2002",
+                         "2001"
+                         )] 
+
+#12, 09, 08, 03, 01  # these need help in other dimension
 
 # apply fix_data function to list of data frames
-clean_17_13 <- lapply(X_recent, function(x) fix_data2(x))
+clean_17_02 <- lapply(X_recent, function(x) fix_data2(x))
+
+
+
+
+dplyr::select(ifelse((df %in% c("2002","2001")), -`RALFSIA/HILD`& -`ANTHOPL ARTEMESIA`& -`PETROCELIS`& 
+                                                 -`SPIRORBIDAE`& -`KATHRINA`&  -`BARE ROCK` & -`ROCK`&
+                                                 -`BOULDER-COBBLE`& -`SAND-GRAVEL`,
+                                                 -`Ralfsia/Hild`& -`Antho artemesia`& -`Petrocelis`& 
+                                                 -`Petrocelia`&  -`Spirorbidae`&  -`Katharina`& 
+                                                 -`BARE ROCK`& -`ROCK`& -`BOULDER-COBBLE`& -`SAND-GRAVEL`)
+                     )
+              
+   
 
 
 
@@ -193,6 +279,29 @@ clean_17_13 <- lapply(X_recent, function(x) fix_data2(x))
 
 
 
+
+
+
+
+
+
+
+
+
+# put all data frames into one giant one
+AllData_clean <- do.call("rbind", clean_17_13)
+  
+
+# make column for Year using data frame name
+AllData_clean$Year <- rep(names(clean_17_02), sapply(clean_17_02, nrow))
+
+
+
+           # converts select columns to numeric
+             df2 <- df1 %>% 
+                    dplyr::mutate_at(vars(FUCUS_PERCOV_TOTAL:FUCUS_SPORELINGS_PERCOV,ULVA:ANTHO_ARTEMESIA), 
+                                     funs(as.numeric)) 
+ 
 
 
 
