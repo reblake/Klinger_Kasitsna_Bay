@@ -78,14 +78,20 @@ clean_1999 <- X_long_1999 %>%
                             CUCUMARIA = `Cucumaria (#)`,
                             LEPTASTERIAS = `Leptasterias (#)`
                             )
-  
 
 names(clean_1999) <- make.names(names(clean_1999))  # will turn names into accepted formats
   
 clean_1999n <- clean_1999 %>%
                dplyr::rename(TRIPLET = `NA.`) %>%
-               dplyr::mutate(Year = "1999") %>%
-               setNames(toupper(names(.))) # make column names all upper case
+               dplyr::mutate(YEAR = "1999",
+                             TREATMENT = ifelse(QUAD %in% c(102,105,108,116,120,122,170,505,532,
+                                                            537,542,546), "CONTROL",
+                                         ifelse(QUAD %in% c(101,107,113,117,118,123,504,523,531,
+                                                            538,541,545), "SCRAPE00",
+                                         ifelse(QUAD %in% c(103,106,114,115,119,121,503,522,533,
+                                                            536,540,547), "SCRAPE99", "")))) %>%
+               setNames(toupper(names(.))) %>% # make column names all upper case
+               tidyr::gather(-TRIPLET, -QUAD, -TREATMENT, -YEAR, key=TAXA, value=PER_COV_OR_COUNT)
 # replace NAs with 0, because Terrie says missing values represent 0s for some variables
 clean_1999n[is.na(clean_1999n)] <- 0
   
@@ -94,12 +100,13 @@ clean_1999n[is.na(clean_1999n)] <- 0
 names(X_long_2000) <- as.character(unlist(X_long_2000[1,])) # make column names 
 X_long_2000 <- X_long_2000[-1,]
 X_long_2000 <- X_long_2000[ , !duplicated(colnames(X_long_2000))]  # removing one column called `NA`
+X_long_2000 <- X_long_2000[,-22]  # removing the other `NA`` column
             
 clean_2000 <- X_long_2000 %>%
               tibble::rownames_to_column() %>%  # making column of rownames
-              dplyr::select(-`NA`, -rowname, -`RALFSIA/HILD`, -`PETROCELIS`, -`SPIRORBIDAE`,
-                            -`KATHRINA`, -`BARE ROCK`, 
-                            -`ROCK`, -`BOULDER-COBBLE`, -`SAND-GRAVEL`) %>%   # removing columns
+              dplyr::select(-rowname, -`RALFSIA/HILD`, -PETROCELIS, -SPIRORBIDAE,
+                            -KATHRINA, -`BARE ROCK`, -ROCK, -`BOULDER-COBBLE`,
+                            -`SAND-GRAVEL`) %>%   # removing columns
               dplyr::rename(FUCUS_PERCOV_TOTAL = `FUCUS%TOTAL`,
                             FUCUS_NUM_ADULTS = `FUCUS#ADULTS`,
                             FUCUS_SPORELINGS_PERCOV = `FUCUS SPORELINGS%`,
@@ -115,11 +122,15 @@ clean_2000 <- X_long_2000 %>%
               dplyr::filter(!(TREATMENT %in% c("avg, sd","avg,sd","AVG,STD"))) %>%
               dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
               dplyr::mutate_at(c(4:6,8:35), funs(as.numeric)) %>% # converts select columns to numeric
-              dplyr::mutate(Year = "2000", Month = "06", Day = "05") 
+              dplyr::mutate(YEAR = "2000") %>% 
+              tidyr::gather(-TRIPLET, -QUAD, -TREATMENT, -YEAR, key=TAXA, value=PER_COV_OR_COUNT)
               
 # replace NAs with 0, because Terrie says missing values represent 0s for many columns
 clean_2000[is.na(clean_2000)] <- 0
 
+## Bind 1999 and 2000 together into one dataframe
+clean_99_00 <- full_join(clean_1999n, clean_2000, by=c("TRIPLET","QUAD","TREATMENT","YEAR",
+                                                       "TAXA","PER_COV_OR_COUNT"))
  
 
 # split years 2001 - 2017, which are formatted the same in the excel file
@@ -197,10 +208,19 @@ fix_data3 <- function(df) {
                                                    TAXA == "L_SITKANA" ~ "L.SITKANA",
                                                    TRUE ~ TAXA)# replace spaces with underscores
                                   ) %>% 
-                    dplyr::filter(!TAXA %in% c("RALFSIA_HILD","ANTHOPL_ARTEMESIA","PETROCELIA",
-                                               "PETROCELIS","SPIRORBIDAE","KATHARINA","KATHRINA",
+                    dplyr::filter(!TAXA %in% c("RALFSIA_HILD","ANTHOPL_ARTEMESIA","ANTHO_ARTEMESIA",
+                                               "PETROCELIA","PETROCELIS","SPIRORBIDAE","KATHARINA","KATHRINA",
                                                "BARE_ROCK","ROCK","BOULDER_COBBLE","SAND_GRAVEL",
-                                               "GENERAL_NOTES_")) %>%
+                                               "GENERAL_NOTES_","MODERATE_SET_OF_MUSSELS",
+                                               "FUCUS_VERY_DENSE_VIRTUALLY_ALL_PLANTS_NEW_SINCE_WINTER_MOST_REPRODUCTIVE_FEW_SECOND_OR_MULTI_YEAR_PLANTS",
+                                               "RE_SAMPLING_DID_NOT_ESTIMATE_OR_RECORD_NCC_PETROCELIS_RALFSIA_HILDENBRANDIA_",
+                                               "NOTES_AF_TK_JJ_","_NO_LEATHESIA_RELOAD_TIDBITS_DOWNLOAD_CB_",
+                                               "TREATMENT_","NO_TAXA_FUCUS_","SUM_NO_SPECIES_FUCUS_",
+                                               "AVG_NO_SPECIES_FUCUS_",
+                                               "NOTE_WHEN_THE_NUMBER_OF_SPORELINGS_GERMLINGS_IS_IT_IS_LIKELY_AN_UNDERESTIMATE_SEE_THE_GERMLING_ESTIMATES_IN_THE_BARNACLE_COUNT_DATA",
+                                               "NOTE_THE_NUMBER_OF_ADULTS_IS_AN_ESTIMATE_ESP_ROUGH_ESTIMATE_AS_THE_NUMBER_OF_INDIVIDUALS_INCREASES_ESP_WHEN_OVER_APPROACHES_"
+                                               ),
+                                  TRIPLET %in% c(1:12)) %>%
                     dplyr::mutate_at(vars(PER_COV_OR_COUNT), funs(as.numeric)) # converts select columns to numeric
              
              # replace NAs with 0, because Terrie says missing values represent 0s for certain categories
@@ -211,34 +231,37 @@ fix_data3 <- function(df) {
 }
 
 # subset just years without too much cleaning needed
-X_recent <- X_long_all[c("2017","2016","2015",#"2014","2013"#,
-                         #"2012",
-                         #"2011"#,"2010",
-                         #"2009"#,"2008",
-                         "2007","2006","2005","2004",
-                         #"2003",
-                         "2002"#,
-                         #"2001"
-                         )] 
-
+X_recent <- X_long_all[c("2017","2016","2015","2014","2013","2012","2011","2010","2009",
+                         "2008","2007","2006","2005","2004","2003","2002","2001")] 
 #12, 09, 08, 03, 01  # these need help in other dimension
 
 # apply fix_data function to list of data frames
-clean_17_02 <- lapply(X_recent, function(x) fix_data3(x))
-
-
-
-
-
-
+clean_17_01 <- lapply(X_recent, function(x) fix_data3(x))
 
 # put all data frames into one giant one
-# note: don't forget to bind in 1999 and 2000!
-AllData_clean <- do.call("rbind", clean_17_02)
-  
+Data_clean <- do.call("rbind", clean_17_01)
 
 # make column for Year using data frame name
-AllData_clean$Year <- rep(names(clean_17_02), sapply(clean_17_02, nrow))
+Data_clean$YEAR <- rep(names(clean_17_01), sapply(clean_17_01, nrow))
+rownames(Data_clean) <- c()  # removes row names
+
+# NOTE: don't forget to bind in 1999 and 2000!
+AllData_clean <- rbind(Data_clean, clean_99_00)
+
+# spread all giant dataframe back to each species having a column
+AllData_clean2 <- AllData_clean %>%
+                  tidyr::spread(key=TAXA, value=PER_COV_OR_COUNT)
+
+#### NEED TO FIX THE MULTIPLE LOTTID?LOTTIDAE?LOTTIA_P_BOREALIS?LOTTIDAE_JUV COLUMNS!!!!!!!!!!!!!
+
+
+
+
+
+
+
+
+
 
 
 
