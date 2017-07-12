@@ -91,6 +91,10 @@ clean_1999n <- clean_1999 %>%
                                          ifelse(QUAD %in% c(103,106,114,115,119,121,503,522,533,
                                                             536,540,547), "SCRAPE99", "")))) %>%
                setNames(toupper(names(.))) %>% # make column names all upper case
+               dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
+               dplyr::mutate_at(c(3:5,7:38), funs(as.numeric)) %>% # converts select columns to numeric
+               dplyr::mutate(LOTTIIDAE = LOTTIIDAE_JUV + LOTTIA_P_BOREALIS) %>%
+               dplyr::select(-LOTTIIDAE_JUV, -LOTTIA_P_BOREALIS) %>%
                tidyr::gather(-TRIPLET, -QUAD, -TREATMENT, -YEAR, key=TAXA, value=PER_COV_OR_COUNT)
 # replace NAs with 0, because Terrie says missing values represent 0s for some variables
 clean_1999n[is.na(clean_1999n)] <- 0
@@ -127,6 +131,8 @@ clean_2000 <- X_long_2000 %>%
               
 # replace NAs with 0, because Terrie says missing values represent 0s for many columns
 clean_2000[is.na(clean_2000)] <- 0
+
+
 
 ## Bind 1999 and 2000 together into one dataframe
 clean_99_00 <- full_join(clean_1999n, clean_2000, by=c("TRIPLET","QUAD","TREATMENT","YEAR",
@@ -202,6 +208,13 @@ fix_data3 <- function(df) {
                                                    TAXA == "FUCUS SPORELINGS%" ~ "FUCUS_SPORELINGS_PERCOV",
                                                    TAXA == "FUCUS#ADULTS" ~ "FUCUS_NUM_ADULTS",
                                                    TAXA == "FUCUS%TOTAL" ~ "FUCUS_PERCOV_TOTAL",
+                                                   TAXA == "LOTTIDS" ~ "LOTTIIDAE",
+                                                   TAXA == "CLAD_SERICIA" ~ "CLAD_SERICEA",
+                                                   TAXA == "AMPHIPOROUS" ~ "AMPHIPORUS",
+                                                   TAXA == "BARNACLES_SPAT" ~ "BARNACLE_SPAT",
+                                                   TAXA == "CORALLINE_CRUST" ~ "CRUSTOSE_CORALLINE",
+                                                   TAXA == "CALLITHAM_PIKEANUM" ~ "CALLITHAMNION",
+                                                   TAXA == "MASTOCARPUS" ~ "MASTO_PAP",
                                                    TRUE ~ TAXA),
                                   TAXA = str_replace_all(TAXA,"[^A-Z]+","_"),
                                   TAXA = case_when(TAXA == "L_SCUTULATA" ~ "L.SCUTULATA",
@@ -230,13 +243,21 @@ fix_data3 <- function(df) {
              return(df1)
 }
 
-# subset just years without too much cleaning needed
+# make list of just those more uniform dataframes
 X_recent <- X_long_all[c("2017","2016","2015","2014","2013","2012","2011","2010","2009",
                          "2008","2007","2006","2005","2004","2003","2002","2001")] 
 #12, 09, 08, 03, 01  # these need help in other dimension
 
 # apply fix_data function to list of data frames
 clean_17_01 <- lapply(X_recent, function(x) fix_data3(x))
+
+# fix the 2006 duplicate species column issue 
+clean_17_01$`2006` <- clean_17_01$`2006` %>%
+                      dplyr::filter(!TAXA %in% c("ERECT_CORALLINE","ACROSIPHONIA","CALLITHAM_PIKEANUM")) %>%
+                      dplyr::mutate(TAXA = case_when(TAXA == "ERECT_CORALLINE_" ~ "ERECT_CORALLINE",
+                                                     TAXA == "ACROSIPHONIA_" ~ "ACROSIPHONIA",
+                                                     TAXA == "CALLITHAMNION_PIKEANUM" ~ "CALLITHAM_PIKEANUM",
+                                                     TRUE ~ TAXA))
 
 # put all data frames into one giant one
 Data_clean <- do.call("rbind", clean_17_01)
@@ -252,7 +273,15 @@ AllData_clean <- rbind(Data_clean, clean_99_00)
 AllData_clean2 <- AllData_clean %>%
                   tidyr::spread(key=TAXA, value=PER_COV_OR_COUNT)
 
-#### NEED TO FIX THE MULTIPLE LOTTID?LOTTIDAE?LOTTIA_P_BOREALIS?LOTTIDAE_JUV COLUMNS!!!!!!!!!!!!!
+
+#### NEED TO FIX THE MULTIPLE 
+
+
+
+#  CRYPTONATICA_ACROSIPHONIA_    CRYPTOSIPHONIA     ACROSIPHONIA
+# MARGARITES     MARGARITES_MARG    MARGARITS_JUV
+#  "PALMARIA"   "PALMARIA_C"      "PALMARIA_CALLOPHYLLOIDES" 
+# !!!!!!!!!!!!!
 
 
 
