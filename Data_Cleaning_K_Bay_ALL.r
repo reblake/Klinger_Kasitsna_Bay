@@ -61,7 +61,7 @@ clean_1999 <- X_long_1999 %>%
                             L.SITKANA = `Litt sitkana (#)`,
                             L.SCUTULATA = `Litt scutulata (#)`,
                             BARNACLES =  `Totl Barnacle Cvr (%)`,
-                            BARNACLES_SPAT = `Barnacle spat (%)`,
+                            BARNACLE_SPAT = `Barnacle spat (%)`,
                             MYTILUS = `Mytilus (%)`,
                             NUCELLA = `Nucella (#)`,
                             PAGURUS = `Pagurus (#)`,
@@ -119,7 +119,7 @@ clean_2000 <- X_long_2000 %>%
                             MASTO_PAP = `MASTO PAP`,
                             L.SITKANA = `L SITKANA`,
                             L.SCUTULATA = `L SCUTULATA`,
-                            BARNACLES_SPAT = `BARNACLES SPAT`,
+                            BARNACLE_SPAT = `BARNACLES SPAT`,
                             MARGARITS_JUV = `MARGARITS JUV`
                             ) %>%  # rename columns that had special characters
               setNames(toupper(names(.))) %>% # make column names all upper case
@@ -215,6 +215,11 @@ fix_data3 <- function(df) {
                                                    TAXA == "CORALLINE_CRUST" ~ "CRUSTOSE_CORALLINE",
                                                    TAXA == "CALLITHAM_PIKEANUM" ~ "CALLITHAMNION",
                                                    TAXA == "MASTOCARPUS" ~ "MASTO_PAP",
+                                                   TAXA == "CRYPTONATICA_ACROSIPHONIA_" ~ "ACROSIPHONIA",
+                                                   TAXA == "MARGARITES_MARG" ~ "MARGARITES",
+                                                   TAXA == "MARGARITS_JUV" ~ "MARGARITES",
+                                                   TAXA == "PALMARIA_CALLOPHYLLOIDES" ~ "PALMARIA",
+                                                   TAXA == "PALMARIA_C" ~ "PALMARIA",
                                                    TRUE ~ TAXA),
                                   TAXA = str_replace_all(TAXA,"[^A-Z]+","_"),
                                   TAXA = case_when(TAXA == "L_SCUTULATA" ~ "L.SCUTULATA",
@@ -267,27 +272,15 @@ Data_clean$YEAR <- rep(names(clean_17_01), sapply(clean_17_01, nrow))
 rownames(Data_clean) <- c()  # removes row names
 
 # NOTE: don't forget to bind in 1999 and 2000!
-AllData_clean <- rbind(Data_clean, clean_99_00)
+AllData_clean_long <- rbind(Data_clean, clean_99_00)
 
 # spread all giant dataframe back to each species having a column
-AllData_clean2 <- AllData_clean %>%
-                  tidyr::spread(key=TAXA, value=PER_COV_OR_COUNT)
+AllData_clean <- AllData_clean_long %>%
+                 tidyr::spread(key=TAXA, value=PER_COV_OR_COUNT)
 
-
-#### NEED TO FIX THE MULTIPLE 
-
-
-
-#  CRYPTONATICA_ACROSIPHONIA_    CRYPTOSIPHONIA     ACROSIPHONIA
-# MARGARITES     MARGARITES_MARG    MARGARITS_JUV
-#  "PALMARIA"   "PALMARIA_C"      "PALMARIA_CALLOPHYLLOIDES" 
-# !!!!!!!!!!!!!
-
-
-
-
-
-
+# replace NAs with 0, because Terrie says missing values represent 0s for certain categories
+AllData_clean[is.na(AllData_clean)] <- 0 
+             
 
 
 
