@@ -51,10 +51,10 @@ clean_1999 <- X_long_1999 %>%
                             ENDOCLADIA = `Endocladia (%)`,
                             GLOIOPELTIS = `Gloiopeltis (%)`,
                             HALOSACCION = `Halosaccion (%)`,
-                            MASTOCARPUS = `Mastocarpus (%)`,
-                            MELANOSIPHON = `Melanosiphon (%)`,
+                            MASTO_PAP = `Mastocarpus (%)`,
+                            MELANOSIPHON = `Melanosiphon (%)`, 
                             ODONTHALIA = `Odonthalia (%)`,
-                            PALMARIA_C = `Palmaria c (%)`,
+                            PALMARIA = `Palmaria c (%)`,  
                             PILAYELLA = `Pilayella (%)`,
                             PORPHYRA = `Porphyra (%)`,
                             PTEROSIPHONIA = `Pterosiphonia (%)`,
@@ -120,7 +120,7 @@ clean_2000 <- X_long_2000 %>%
                             L.SITKANA = `L SITKANA`,
                             L.SCUTULATA = `L SCUTULATA`,
                             BARNACLE_SPAT = `BARNACLES SPAT`,
-                            MARGARITS_JUV = `MARGARITS JUV`
+                            MARGARITES = `MARGARITS JUV`        
                             ) %>%  # rename columns that had special characters
               setNames(toupper(names(.))) %>% # make column names all upper case
               dplyr::filter(!(TREATMENT %in% c("avg, sd","avg,sd","AVG,STD"))) %>%
@@ -197,29 +197,26 @@ fix_data3 <- function(df) {
              df1 <- df %>%
                     tibble::rownames_to_column(var="TRIPLET") %>%   # row names to column 
                     setNames(toupper(names(.))) %>%  # make column names all upper case
+                    dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
                     tidyr::gather(-TRIPLET, -QUAD, -TREATMENT, key=TAXA, value=PER_COV_OR_COUNT) %>%
                     # split off extra numerals from "TRIPLET" column
                     dplyr::mutate(TRIPLET = ifelse(!(TRIPLET %in% c(1:12)), 
                                                    sapply(strsplit(as.character(TRIPLET), split="__") , function(x) x[1]),
                                                    TRIPLET),
-                                  TAXA = case_when(TAXA == "irridescent snail (Homalopoma?)" ~ "IRRIDESCENT_SNAIL_HOMALOPOMA",
-                                                   TAXA == "Cryptonatica[Acrosiphonia]" ~ "CRYPTONATICA",
-                                                   TAXA == "FUCUS SPORELINGS#" ~ "FUCUS_SPORELINGS_NUM",
-                                                   TAXA == "FUCUS SPORELINGS%" ~ "FUCUS_SPORELINGS_PERCOV",
-                                                   TAXA == "FUCUS#ADULTS" ~ "FUCUS_NUM_ADULTS",
-                                                   TAXA == "FUCUS%TOTAL" ~ "FUCUS_PERCOV_TOTAL",
+                                  TAXA = str_replace_all(TAXA, "#ADULTS", " NUM_ADULTS"),
+                                  TAXA = str_replace_all(TAXA, "%TOTAL", " PERCOV_TOTAL"),
+                                  TAXA = str_replace_all(TAXA, "SPORELINGS#", "SPORELINGS_NUM"),
+                                  TAXA = str_replace_all(TAXA, "SPORELINGS%", "SPORELINGS_PERCOV"),
+                                  TAXA = str_replace_all(TAXA, "BARNACLES SPAT", "BARNACLE SPAT"),
+                                  TAXA = str_replace_all(TAXA, "SERICIA", "SERICEA"),
+                                  TAXA = case_when(TAXA == "IRRIDESCENT SNAIL (HOMALOPOMA?)" ~ "IRRIDESCENT SNAIL HOMALOPOMA",
                                                    TAXA == "LOTTIDS" ~ "LOTTIIDAE",
-                                                   TAXA == "CLAD_SERICIA" ~ "CLAD_SERICEA",
                                                    TAXA == "AMPHIPOROUS" ~ "AMPHIPORUS",
-                                                   TAXA == "BARNACLES_SPAT" ~ "BARNACLE_SPAT",
-                                                   TAXA == "CORALLINE_CRUST" ~ "CRUSTOSE_CORALLINE",
-                                                   TAXA == "CALLITHAM_PIKEANUM" ~ "CALLITHAMNION",
-                                                   TAXA == "MASTOCARPUS" ~ "MASTO_PAP",
-                                                   TAXA == "CRYPTONATICA_ACROSIPHONIA_" ~ "ACROSIPHONIA",
-                                                   TAXA == "MARGARITES_MARG" ~ "MARGARITES",
-                                                   TAXA == "MARGARITS_JUV" ~ "MARGARITES",
-                                                   TAXA == "PALMARIA_CALLOPHYLLOIDES" ~ "PALMARIA",
-                                                   TAXA == "PALMARIA_C" ~ "PALMARIA",
+                                                   TAXA == "CORALLINE CRUST" ~ "CRUSTOSE CORALLINE",
+                                                   TAXA == "CALLITHAM PIKEANUM" ~ "CALLITHAMNION",
+                                                   TAXA == "CRYPTONATICA[ACROSIPHONIA]" ~ "ACROSIPHONIA",
+                                                   TAXA == "MARGARITES MARG" ~ "MARGARITES",
+                                                   TAXA == "PALMARIA CALLOPHYLLOIDES" ~ "PALMARIA",
                                                    TRUE ~ TAXA),
                                   TAXA = str_replace_all(TAXA,"[^A-Z]+","_"),
                                   TAXA = case_when(TAXA == "L_SCUTULATA" ~ "L.SCUTULATA",
@@ -258,10 +255,10 @@ clean_17_01 <- lapply(X_recent, function(x) fix_data3(x))
 
 # fix the 2006 duplicate species column issue 
 clean_17_01$`2006` <- clean_17_01$`2006` %>%
-                      dplyr::filter(!TAXA %in% c("ERECT_CORALLINE","ACROSIPHONIA","CALLITHAM_PIKEANUM")) %>%
+                      dplyr::filter(!TAXA %in% c("ERECT_CORALLINE","ACROSIPHONIA","CALLITHAMNION")) %>%
                       dplyr::mutate(TAXA = case_when(TAXA == "ERECT_CORALLINE_" ~ "ERECT_CORALLINE",
                                                      TAXA == "ACROSIPHONIA_" ~ "ACROSIPHONIA",
-                                                     TAXA == "CALLITHAMNION_PIKEANUM" ~ "CALLITHAM_PIKEANUM",
+                                                     TAXA == "CALLITHAMNION_PIKEANUM" ~ "CALLITHAMNION",
                                                      TRUE ~ TAXA))
 
 # put all data frames into one giant one
@@ -282,7 +279,7 @@ AllData_clean <- AllData_clean_long %>%
 AllData_clean[is.na(AllData_clean)] <- 0 
              
 
-
+# write.csv(AllData_clean, file = "K_Bay_All_Sp_Yrs_Clean.csv", row.names=FALSE)
 
 
 
