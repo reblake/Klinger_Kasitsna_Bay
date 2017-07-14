@@ -11,7 +11,7 @@ library(semTools) ; library(psych)
 
 
 # source the data cleaning script to get the % cover data
-source("Data_Cleaning_K_Bay.r")     # dataframe is called PerCov_clean
+source("Data_Cleaning_K_Bay_ALL.r")     # dataframe is called AllData_clean
 
 # Freshwater discharge data
 source("Fresh_Discharge_cleaning.r")
@@ -31,14 +31,14 @@ sum <- summer_a_temp %>%
        dplyr::distinct()
 
 
-PerCov_FWT <- PerCov_clean %>%
-              dplyr::select(-standard_code, -abbr_code, -Myelophycus, -Halosaccion, 
-                            -Colpomenia, -Crustose_coralline, -Callithamnion, 
-                            -Porphyra, -erect_coralline, -Acrosiphonia, 
-                            -Neorhodomela, -Palmaria_callophylloides) %>%
-              dplyr::filter(Treatment == "01") %>%
-              dplyr::full_join(FWD_ann_mn, by="Year") %>%
-              dplyr::full_join(year_a_temp, by="Year") %>%
+PerCov_FWT <- AllData_clean %>%
+              dplyr::select(-MYELOPHYCUS, -HALOSACCION, -COLPOMENIA, 
+                            -CRUSTOSE_CORALLINE, -CALLITHAMNION, -ERECT_CORALLINE, 
+                            -ACROSIPHONIA, -NEORHODOMELA, -PALMARIA) %>%
+              dplyr::rename(Year = YEAR) %>%
+              dplyr::filter(TREATMENT == "CONTROL") %>%
+              dplyr::full_join(FWD_ann_mn, by="Year") %>%  # join in the freshwater data
+              dplyr::full_join(year_a_temp, by="Year") %>%  # join in the air temp data
               dplyr::rename(ATmp_Sign = Year_Sign,
                             ATemp_Year_Anom = Year_Anom, 
                             ATemp_YearlyMn = ATemp_YearMn,
@@ -55,7 +55,7 @@ PerCov_FWT <- PerCov_clean %>%
 
 #########
 # Looking at correlations
-pairs.panels(PerCov_FWT[,c(2,3,8,13:16,20,23,26:31)], smooth=F, density=T, ellipses=F, lm=T, 
+pairs.panels(PerCov_FWT[,c(8,13:16,20,23,26:31)], smooth=F, density=T, ellipses=F, lm=T, 
              digits=3, scale=T)
 
 pairs.panels(PerCov_FWT[,c(23,26:31)], smooth=F, density=T, ellipses=F, lm=T, 
@@ -66,9 +66,9 @@ pairs.panels(PerCov_FWT[,c(23,26:31)], smooth=F, density=T, ellipses=F, lm=T,
 ## SEM ##
 #########
 
-sem1_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Barnacles + Mytilus
-               Mytilus ~ ATemp_YearlyMn + mn_yr_discharge
-               Barnacles ~ mn_yr_discharge'
+sem1_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES + MYTILUS
+               MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge
+               BARNACLES ~ mn_yr_discharge'
               # ATemp_YearlyMn ~~ mn_yr_discharge'
 
 sem1 <- sem(sem1_model, data=PerCov_FWT)
@@ -79,9 +79,9 @@ semPaths(sem1, "std")
  
 #
 
-sem1a_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Barnacles 
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + FUCUS_TOTAL
-                Barnacles ~ mn_yr_discharge'
+sem1a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES 
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + FUCUS_PERCOV_TOTAL
+                BARNACLES ~ mn_yr_discharge'
 
 sem1a <- sem(sem1a_model, data=PerCov_FWT)
 
@@ -91,9 +91,9 @@ semPaths(sem1a, "std")
 
 #
 
-sem1b_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Barnacles 
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Barnacles
-                Barnacles ~ mn_yr_discharge'
+sem1b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES 
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES
+                BARNACLES ~ mn_yr_discharge'
 
 sem1b <- sem(sem1b_model, data=PerCov_FWT)
 
@@ -103,9 +103,9 @@ semPaths(sem1b, "std")
 
 #
 
-sem1c_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Barnacles 
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Barnacles
-                Barnacles ~ mn_yr_discharge + ATemp_YearlyMn'
+sem1c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES 
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES
+                BARNACLES ~ mn_yr_discharge + ATemp_YearlyMn'
 
 sem1c <- sem(sem1c_model, data=PerCov_FWT)
 
@@ -115,9 +115,9 @@ semPaths(sem1c, "std")
 
 #
 
-sem1d_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Barnacles + mn_yr_discharge
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Barnacles
-                Barnacles ~ mn_yr_discharge'
+sem1d_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES + mn_yr_discharge
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES
+                BARNACLES ~ mn_yr_discharge'
 
 sem1d <- sem(sem1d_model, data=PerCov_FWT)
 
@@ -127,9 +127,9 @@ semPaths(sem1d, "std")
 
 #
 
-sem1e_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn 
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Barnacles
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL
+sem1e_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn 
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
                 '
 
 sem1e <- sem(sem1e_model, data=PerCov_FWT)
@@ -142,9 +142,9 @@ semPaths(sem1e, "std")
 
 #####
 
-sem2_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Spr_Days_Less_0 + Summ_Days_More_15
-               Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
-               Barnacles ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + FUCUS_TOTAL
+sem2_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Spr_Days_Less_0 + Summ_Days_More_15
+               MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
+               BARNACLES ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + FUCUS_PERCOV_TOTAL
                '
 
 sem2 <- sem(sem2_model, data=PerCov_FWT)
@@ -156,9 +156,9 @@ semPaths(sem2, "std")
 
 #
 
-sem2a_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL
+sem2a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
                 '
 
 sem2a <- sem(sem2a_model, data=PerCov_FWT)
@@ -171,9 +171,9 @@ semPaths(sem2a, "std")
 
 #
 
-sem2b_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
-                Barnacles ~ mn_yr_discharge + ATemp_YearlyMn + FUCUS_TOTAL
+sem2b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
+                BARNACLES ~ mn_yr_discharge + ATemp_YearlyMn + FUCUS_PERCOV_TOTAL
                 '
 
 sem2b <- sem(sem2b_model, data=PerCov_FWT)
@@ -185,9 +185,9 @@ semPaths(sem2b, "std")
 
 #                     
 
-sem2c_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn  
-                Mytilus ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL
+sem2c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn  
+                MYTILUS ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
                 '
 
 sem2c <- sem(sem2c_model, data=PerCov_FWT)
@@ -199,9 +199,9 @@ semPaths(sem2c, "std")
 
 #                          
  
-sem2d_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn 
-                Mytilus ~ mn_yr_discharge + Summ_Days_More_15 + Barnacles
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL 
+sem2d_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn 
+                MYTILUS ~ mn_yr_discharge + Summ_Days_More_15 + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL 
                 '
 
 sem2d <- sem(sem2d_model, data=PerCov_FWT)
@@ -213,9 +213,9 @@ semPaths(sem2d, "std")
 
 #                     
  
-sem2e_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + mn_yr_discharge
-                Mytilus ~ mn_yr_discharge + Summ_Days_More_15 + Barnacles
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL
+sem2e_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + mn_yr_discharge
+                MYTILUS ~ mn_yr_discharge + Summ_Days_More_15 + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
                 '
 
 sem2e <- sem(sem2e_model, data=PerCov_FWT)
@@ -227,9 +227,9 @@ semPaths(sem2e, "std")
 
 #  
  
-sem2f_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL 
+sem2f_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL 
                 '
 
 sem2f <- sem(sem2f_model, data=PerCov_FWT)
@@ -244,9 +244,9 @@ semPaths(sem2f, "std")
 
 #  
  
-sem2g_model <- 'FUCUS_TOTAL ~ Summ_Days_More_15 
-                Mytilus ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL
+sem2g_model <- 'FUCUS_PERCOV_TOTAL ~ Summ_Days_More_15 
+                MYTILUS ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
                 '
 
 sem2g <- sem(sem2g_model, data=PerCov_FWT)
@@ -259,9 +259,9 @@ semPaths(sem2g, "std")
 
 #  
 
-sem2h_model <- 'FUCUS_TOTAL ~ Summ_Days_More_15 + mn_yr_discharge
-                Mytilus ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL
+sem2h_model <- 'FUCUS_PERCOV_TOTAL ~ Summ_Days_More_15 + mn_yr_discharge
+                MYTILUS ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
                 '
 
 sem2h <- sem(sem2h_model, data=PerCov_FWT)
@@ -274,9 +274,9 @@ semPaths(sem2h, "std")
 
 #
 
-sem2i_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + Mytilus
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles 
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +  ATemp_YearlyMn 
+sem2i_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + MYTILUS
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES 
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +  ATemp_YearlyMn 
                 '
 
 sem2i <- sem(sem2i_model, data=PerCov_FWT)
@@ -291,9 +291,9 @@ semPaths(sem2i, "std")
 
 # note: this model below uses different seasonal temp variables
 
-try2i_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + mn_yr_discharge + ATemp_Spr_min + ATemp_Summ_max 
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + ATemp_Summ_max + Barnacles 
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + ATemp_YearlyMn + ATemp_Summ_max
+try2i_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + mn_yr_discharge + ATemp_Spr_min + ATemp_Summ_max 
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + ATemp_Summ_max + BARNACLES 
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + ATemp_YearlyMn + ATemp_Summ_max
                 '
 
 try2i <- sem(try2i_model, data=PerCov_FWT)
@@ -309,11 +309,11 @@ residuals(try2i) ; residuals(try2i, type="cor")
 semPaths(try2i, "std") 
 
 
-##### Barnacles & Fucus only model
+##### BARNACLES & Fucus only model
 
-semb_model <- 'FUCUS_SPORELINGS ~ Barnacles 
-               Barnacle_spat ~ FUCUS_TOTAL 
-               Barnacles ~ FUCUS_TOTAL + Barnacle_spat
+semb_model <- 'FUCUS_SPORELINGS_PERCOV ~ BARNACLES 
+               BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL 
+               BARNACLES ~ FUCUS_PERCOV_TOTAL + BARNACLE_SPAT
               '
 semb <- sem(semb_model, data=PerCov_FWT)
 
@@ -325,13 +325,13 @@ residuals(semb) ; residuals(semb, type="cor")
 
 semPaths(semb, "std")  
 
-# Incorporating Barnacles & Fucus into the second model
+# Incorporating BARNACLES & Fucus into the second model
 
-semb2_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + Mytilus + FUCUS_SPORELINGS
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +  ATemp_YearlyMn + Barnacle_spat
-                FUCUS_SPORELINGS ~ Barnacles + Mytilus + Spr_Days_Less_0 + Summ_Days_More_15 + ATemp_YearlyMn
-                Barnacle_spat ~ FUCUS_TOTAL + Mytilus + mn_yr_discharge + ATemp_YearlyMn + Summ_Days_More_15 + Spr_Days_Less_0
+semb2_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + MYTILUS + FUCUS_SPORELINGS_PERCOV
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +  ATemp_YearlyMn + BARNACLE_SPAT
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + Spr_Days_Less_0 + Summ_Days_More_15 + ATemp_YearlyMn
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL + MYTILUS + mn_yr_discharge + ATemp_YearlyMn + Summ_Days_More_15 + Spr_Days_Less_0
                 '
 
 semb2 <- sem(semb2_model, data=PerCov_FWT)
@@ -346,11 +346,11 @@ semPaths(semb2, "std")
 
 #
 
-tryb2_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + ATemp_Spr_min + ATemp_Summ_max + FUCUS_SPORELINGS
-                Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + ATemp_Summ_max + Barnacles
-                Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Barnacle_spat
-                FUCUS_SPORELINGS ~ Barnacles + Mytilus + ATemp_YearlyMn + ATemp_Summ_max 
-                Barnacle_spat ~ FUCUS_TOTAL + mn_yr_discharge + ATemp_YearlyMn + ATemp_Summ_max 
+tryb2_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + ATemp_Spr_min + ATemp_Summ_max + FUCUS_SPORELINGS_PERCOV
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + ATemp_Summ_max + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + BARNACLE_SPAT
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + ATemp_YearlyMn + ATemp_Summ_max 
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL + mn_yr_discharge + ATemp_YearlyMn + ATemp_Summ_max 
                 '
 
 tryb2 <- sem(tryb2_model, data=PerCov_FWT)
@@ -378,27 +378,27 @@ semPaths(tryb2, "std")
 # a linear combination of other independent variables. 
 
 # Barnacle Spat
-BSVIF <- vif(lm(Barnacle_spat ~ FUCUS_TOTAL + Mytilus + mn_yr_discharge + 
+BSVIF <- vif(lm(BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL + MYTILUS + mn_yr_discharge + 
                  ATemp_YearlyMn + Summ_Days_More_15 + Spr_Days_Less_0, data=PerCov_FWT)) # VIF
 BSTol <- 1/BSVIF  # this is the tolerance
 
-# Mytilus
-MYVIF <- vif(lm(Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + 
-                Summ_Days_More_15 + Barnacles, data=PerCov_FWT)) # VIF
+# MYTILUS
+MYVIF <- vif(lm(MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + 
+                Summ_Days_More_15 + BARNACLES, data=PerCov_FWT)) # VIF
 MYTol <- 1/MYVIF  # this is the tolerance
 
-# FUCUS_TOTAL
-FTVIF <- vif(lm(FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + 
-                Mytilus + FUCUS_SPORELINGS, data=PerCov_FWT)) # VIF
+# FUCUS_PERCOV_TOTAL
+FTVIF <- vif(lm(FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + 
+                MYTILUS + FUCUS_SPORELINGS_PERCOV, data=PerCov_FWT)) # VIF
 FTTol <- 1/FTVIF  # this is the tolerance
 
-# Barnacles
-BAVIF <- vif(lm(Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +
-                ATemp_YearlyMn + Barnacle_spat, data=PerCov_FWT)) # VIF
+# BARNACLES
+BAVIF <- vif(lm(BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +
+                ATemp_YearlyMn + BARNACLE_SPAT, data=PerCov_FWT)) # VIF
 BATol <- 1/BAVIF  # this is the tolerance
 
-# FUCUS_SPORELINGS
-FSVIF <- vif(lm(FUCUS_SPORELINGS ~ Barnacles + Mytilus + Spr_Days_Less_0 + Summ_Days_More_15 + 
+# FUCUS_SPORELINGS_PERCOV
+FSVIF <- vif(lm(FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + Spr_Days_Less_0 + Summ_Days_More_15 + 
                 ATemp_YearlyMn, data=PerCov_FWT)) # VIF
 FSTol <- 1/FSVIF  # this is the tolerance
 
@@ -413,12 +413,12 @@ STTol <- 1/STVIF  # this is the tolerance
 
 #####
 
-sem3_model <- 'FUCUS_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + Mytilus + Elachista + Pterosiphonia_poly
-               Mytilus ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + Barnacles 
-               Barnacles ~ mn_yr_discharge + FUCUS_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 + ATemp_YearlyMn + Elachista 
-               Pterosiphonia_poly ~ Mytilus 
+sem3_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + MYTILUS + ELACHISTA + PTEROSIPHONIA
+               MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES 
+               BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 + ATemp_YearlyMn + ELACHISTA 
+               PTEROSIPHONIA ~ MYTILUS 
                '
-#Elachista ~ 
+#ELACHISTA ~ 
 sem3 <- sem(sem3_model, data=PerCov_FWT)
 
 summary(sem3, rsquare=T, standardized=T, fit.measures=T)
