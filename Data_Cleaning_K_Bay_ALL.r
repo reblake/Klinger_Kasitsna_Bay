@@ -236,7 +236,8 @@ fix_data3 <- function(df) {
                                                "NOTE_THE_NUMBER_OF_ADULTS_IS_AN_ESTIMATE_ESP_ROUGH_ESTIMATE_AS_THE_NUMBER_OF_INDIVIDUALS_INCREASES_ESP_WHEN_OVER_APPROACHES_"
                                                ),
                                   TRIPLET %in% c(1:12)) %>%
-                    dplyr::mutate_at(vars(PER_COV_OR_COUNT), funs(as.numeric)) # converts select columns to numeric
+                   
+               # converts select columns to numeric
              
              # replace NAs with 0, because Terrie says missing values represent 0s for certain categories
              df1[is.na(df1)] <- 0 

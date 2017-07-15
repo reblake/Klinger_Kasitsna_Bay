@@ -7,7 +7,7 @@
 
 ## load packages (order matters)
 library(httr) ; library(plyr) ; library(XML) ; library(curl)
-library(rvest) ; library(tidyr) ; library(stringr) ; library(dplyr)
+library(rvest) ; library(tidyr) ; library(stringr) ; library(dplyr) ; library(lubridate)
 
 # NOTE: This air temperature data was downloaded from https://www.ncdc.noaa.gov/cdo-web/datatools/lcd
 # on 15 June 2017.  This data can't be scraped from the web, but rather has to be requested, and
@@ -18,7 +18,7 @@ first_file <- read.csv("./Homer_Airport/LCD_1999_2008.csv", stringsAsFactors=FAL
                        header=TRUE, row.names=NULL, strip.white=TRUE,
                        colClasses=c(rep('character', 90)))
 
-second_file <- read.csv("./Homer_Airport/LCD_2009_2015.csv", stringsAsFactors=FALSE,
+second_file <- read.csv("./Homer_Airport/LCD_2009_2017_06.csv", stringsAsFactors=FALSE,
                         header=TRUE, row.names=NULL, strip.white=TRUE,
                         colClasses=c(rep('character', 90)))
 
@@ -26,11 +26,15 @@ a_temp_raw <- dplyr::bind_rows(first_file, second_file)
 
 a_temp <- a_temp_raw %>%
           dplyr::select(DATE, HOURLYDRYBULBTEMPC) %>%
-          dplyr::mutate(Year = sapply(strsplit(as.character(DATE), split="-") , function(x) x[1]),
-                        Month = sapply(strsplit(as.character(DATE), split="-") , function(x) x[2]), 
-                        Day = substr(DATE, 9, 10), 
-                        Time = substr(DATE, 12, 16)) %>%
-          dplyr::filter(!(HOURLYDRYBULBTEMPC %in% c(""," ", "3.0s","*","1.7s"))) %>%  #Note: look in LDC documentation for codes
+          dplyr::mutate(DATE = str_replace_all(DATE, "/", "-"),
+                        Time = sapply(strsplit(as.character(DATE), split=" ") , function(x) x[2]),
+                        Date = sapply(strsplit(as.character(DATE), split=" ") , function(x) x[1]),
+                        Date = parse_date_time(a_temp$Date, c('ymd','mdy')), 
+                        Year = sapply(strsplit(as.character(Date), split="-") , function(x) x[1]),
+                        Month = sapply(strsplit(as.character(Date), split="-") , function(x) x[2]), 
+                        Day = sapply(strsplit(as.character(Date), split="-") , function(x) x[3]) 
+                        ) %>%
+          dplyr::filter(!(HOURLYDRYBULBTEMPC %in% c(""," ", "3.0s","*","1.7s","15.0s"))) %>%  #Note: look in LDC documentation for codes
           dplyr::mutate_at(vars(HOURLYDRYBULBTEMPC),funs(as.numeric)) %>%
           dplyr::arrange(Year, Month, Day)
 
@@ -49,7 +53,7 @@ spring_a_temp <- a_temp %>%
                  dplyr::mutate(ATemp_YearMn = mean(HOURLYDRYBULBTEMPC),
                                ATemp_Spr_min = min(HOURLYDRYBULBTEMPC)) %>%
                  dplyr::ungroup() %>%
-                 dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE) %>%
+                 dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE, -Date) %>%
                  dplyr::distinct() %>%
                  dplyr::mutate(YrMnDy = paste(Year, Month, Day, sep="-"),
                                Day_Anom = ATemp_DayMn - Spr_mn_all,
@@ -73,7 +77,7 @@ summer_a_temp <- a_temp %>%
                  dplyr::mutate(ATemp_YearMn = mean(HOURLYDRYBULBTEMPC),
                                ATemp_Summ_max = max(HOURLYDRYBULBTEMPC)) %>%
                  dplyr::ungroup() %>%
-                 dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE) %>%
+                 dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE, -Date) %>%
                  dplyr::distinct() %>%
                  dplyr::mutate(YrMnDy = paste(Year, Month, Day, sep="-"),
                                Day_Anom = ATemp_DayMn - Sum_mn_all,
@@ -93,7 +97,7 @@ fall_a_temp <- a_temp %>%
                dplyr::group_by(Year, Month) %>%
                dplyr::mutate(ATemp_MonthMn = mean(HOURLYDRYBULBTEMPC)) %>%
                dplyr::ungroup() %>%
-               dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE) %>%
+               dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE, -Date) %>%
                dplyr::distinct() %>%
                dplyr::mutate(YrMnDy = paste(Year, Month, Day, sep="-"),
                              Day_Anom = ATemp_DayMn - Fal_mn_all,
@@ -113,7 +117,7 @@ winter_a_temp <- a_temp %>%
                  dplyr::group_by(Year, Month) %>%
                  dplyr::mutate(ATemp_MonthMn = mean(HOURLYDRYBULBTEMPC)) %>%
                  dplyr::ungroup() %>%
-                 dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE) %>%
+                 dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE, -Date) %>%
                  dplyr::distinct() %>%
                  dplyr::mutate(YrMnDy = paste(Year, Month, Day, sep="-"),
                                Day_Anom = ATemp_DayMn - Win_mn_all,
@@ -129,7 +133,7 @@ ann_a_temp <- a_temp %>%
               dplyr::group_by(Year, Month) %>%
               dplyr::mutate(ATemp_MonthMn = mean(HOURLYDRYBULBTEMPC)) %>%
               dplyr::ungroup() %>%
-              dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE) %>%
+              dplyr::select(-HOURLYDRYBULBTEMPC, -Time, -DATE, -Date) %>%
               dplyr::distinct() %>%
               dplyr::mutate(YrMnDy = paste(Year, Month, Day, sep="-"),
                             YrMn = paste(Year, Month, sep="-"),
@@ -142,7 +146,7 @@ year_a_temp <- a_temp %>%
                dplyr::group_by(Year) %>%
                dplyr::mutate(ATemp_YearMn = mean(HOURLYDRYBULBTEMPC)) %>%
                dplyr::ungroup() %>%
-               dplyr::select(-Time, -Day, -Month, -HOURLYDRYBULBTEMPC, -DATE) %>%
+               dplyr::select(-Time, -Day, -Month, -HOURLYDRYBULBTEMPC, -DATE, -Date) %>%
                dplyr::distinct() %>%
                dplyr::mutate(Year_Anom = ATemp_YearMn - Ann_mn_all,
                              Year_Sign = ifelse(Year_Anom>0, "A", "B")) %>%
