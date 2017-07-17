@@ -37,6 +37,8 @@ PerCov_FWT <- AllData_clean %>%
                             -ACROSIPHONIA, -NEORHODOMELA, -PALMARIA) %>%
               dplyr::rename(Year = YEAR) %>%
               dplyr::filter(TREATMENT == "CONTROL") %>%
+              dplyr::mutate_at(vars(TRIPLET), funs(as.numeric)) %>%
+              dplyr::arrange(Year, TRIPLET) %>%
               dplyr::full_join(FWD_ann_mn, by="Year") %>%  # join in the freshwater data
               dplyr::full_join(year_a_temp, by="Year") %>%  # join in the air temp data
               dplyr::rename(ATmp_Sign = Year_Sign,
@@ -50,15 +52,15 @@ PerCov_FWT <- AllData_clean %>%
               dplyr::full_join(sum, by="Year") %>%
               dplyr::rename(ATemp_SummerMn = ATemp_YearMn, 
                             Summ_Days_More_15 = Num_Day_More_15) %>%
-              dplyr::filter(Year != "2015") %>%
+          #    dplyr::filter(Year != "2015") %>%
               dplyr::arrange(Year)
 
 #########
 # Looking at correlations
-pairs.panels(PerCov_FWT[,c(8,13:16,20,23,26:31)], smooth=F, density=T, ellipses=F, lm=T, 
+pairs.panels(PerCov_FWT[,c(7,8,22,24,28,29,33,37,40,51,54,57:62)], smooth=F, density=T, ellipses=F, lm=T, 
              digits=3, scale=T)
 
-pairs.panels(PerCov_FWT[,c(23,26:31)], smooth=F, density=T, ellipses=F, lm=T, 
+pairs.panels(PerCov_FWT[,c(51,54,57:62)], smooth=F, density=T, ellipses=F, lm=T, 
              digits=3, scale=T)
 
 
@@ -69,11 +71,14 @@ pairs.panels(PerCov_FWT[,c(23,26:31)], smooth=F, density=T, ellipses=F, lm=T,
 sem1_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES + MYTILUS
                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge
                BARNACLES ~ mn_yr_discharge'
-              # ATemp_YearlyMn ~~ mn_yr_discharge'
 
-sem1 <- sem(sem1_model, data=PerCov_FWT)
+sem1 <- sem(sem1_model, data=PerCov_FWT, estimator="MLM")  
 
+AIC(sem1)
+fitMeasures(sem1, "pvalue")
 summary(sem1, rsquare=T, standardized=T)
+parameterEstimates(sem1)
+residuals(sem1) ; residuals(sem1, type="cor")
 
 semPaths(sem1, "std")                    
  
@@ -85,7 +90,10 @@ sem1a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES
 
 sem1a <- sem(sem1a_model, data=PerCov_FWT)
 
+AIC(sem1a)
+fitMeasures(sem1a, "pvalue")
 summary(sem1a, rsquare=T, standardized=T)
+residuals(sem1a) ; residuals(sem1a, type="cor")
 
 semPaths(sem1a, "std")
 
@@ -279,8 +287,9 @@ sem2i_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +  ATemp_YearlyMn 
                 '
 
-sem2i <- sem(sem2i_model, data=PerCov_FWT)
+sem2i <- sem(sem2i_model, data=PerCov_FWT)  #, estimator="MLM"
 
+AIC(sem2i)
 summary(sem2i, rsquare=T, standardized=T, fit.measures=T)
 modificationIndices(sem2i, standardized=F)
 parameterEstimates(sem2i)
