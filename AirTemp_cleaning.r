@@ -29,7 +29,7 @@ a_temp <- a_temp_raw %>%
           dplyr::mutate(DATE = str_replace_all(DATE, "/", "-"),
                         Time = sapply(strsplit(as.character(DATE), split=" ") , function(x) x[2]),
                         Date = sapply(strsplit(as.character(DATE), split=" ") , function(x) x[1]),
-                        Date = parse_date_time(a_temp$Date, c('ymd','mdy')), 
+                        Date = parse_date_time(Date, c('ymd','mdy')), 
                         Year = sapply(strsplit(as.character(Date), split="-") , function(x) x[1]),
                         Month = sapply(strsplit(as.character(Date), split="-") , function(x) x[2]), 
                         Day = sapply(strsplit(as.character(Date), split="-") , function(x) x[3]) 
