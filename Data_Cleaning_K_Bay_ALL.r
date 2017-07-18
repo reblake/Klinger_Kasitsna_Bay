@@ -235,10 +235,8 @@ fix_data3 <- function(df) {
                                                "NOTE_WHEN_THE_NUMBER_OF_SPORELINGS_GERMLINGS_IS_IT_IS_LIKELY_AN_UNDERESTIMATE_SEE_THE_GERMLING_ESTIMATES_IN_THE_BARNACLE_COUNT_DATA",
                                                "NOTE_THE_NUMBER_OF_ADULTS_IS_AN_ESTIMATE_ESP_ROUGH_ESTIMATE_AS_THE_NUMBER_OF_INDIVIDUALS_INCREASES_ESP_WHEN_OVER_APPROACHES_"
                                                ),
-                                  TRIPLET %in% c(1:12)) %>%
+                                  TRIPLET %in% c(1:12))
                    
-               # converts select columns to numeric
-             
              # replace NAs with 0, because Terrie says missing values represent 0s for certain categories
              df1[is.na(df1)] <- 0 
              
