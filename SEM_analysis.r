@@ -19,6 +19,10 @@ source("Fresh_Discharge_cleaning.r")
 # Air temperature data
 source("AirTemp_cleaning.r")
 
+# Water temperature data
+source("WaterTemp_cleaning.r")   # WTemp_Yr, WTemp_June, WTemp_Dec
+
+
 
 # add in the environmental data
 
@@ -46,21 +50,28 @@ PerCov_FWT <- AllData_clean %>%
                             ATemp_YearlyMn = ATemp_YearMn,
                             mn_yr_discharge = mean_yearly_discharge_m3s1,
                             FWD_Sign = Sign) %>%
-              dplyr::full_join(spr, by="Year") %>%
+              dplyr::full_join(spr, by="Year") %>%  # join in the spring air temp data
               dplyr::rename(ATemp_SpringMn = ATemp_YearMn, 
                             Spr_Days_Less_0 = Num_Day_Less_0) %>%
-              dplyr::full_join(sum, by="Year") %>%
+              dplyr::full_join(sum, by="Year") %>%  # join in the summer air temp data
               dplyr::rename(ATemp_SummerMn = ATemp_YearMn, 
                             Summ_Days_More_15 = Num_Day_More_15) %>%
-          #    dplyr::filter(Year != "2015") %>%
+              dplyr::full_join(WTemp_Yr, by="Year") %>%  # join in the annual water temp data
+              dplyr::full_join(WTemp_June, by="Year") %>%  # join in the June water temp data
+              dplyr::full_join(WTemp_Dec, by="Year") %>%  # join in the December water temp data
               dplyr::arrange(Year)
+
+# write.csv(PerCov_FWT, file = "K_Bay_All_Data_SEM.csv", row.names=FALSE)
 
 #########
 # Looking at correlations
-pairs.panels(PerCov_FWT[,c(7,8,22,24,28,29,33,37,40,51,54,57:62)], smooth=F, density=T, ellipses=F, lm=T, 
+pairs.panels(PerCov_FWT[,c(7,8,22,24,28,29,33,37,40,51,54,57:65)], smooth=F, density=T, ellipses=F, lm=T, 
              digits=3, scale=T)
 
-pairs.panels(PerCov_FWT[,c(51,54,57:62)], smooth=F, density=T, ellipses=F, lm=T, 
+pairs.panels(PerCov_FWT[,c(51,54,57:65)], smooth=F, density=T, ellipses=F, lm=T, 
+             digits=3, scale=T)
+
+pairs.panels(PerCov_FWT[,c(7,8,22,24,28,29,33,37,40)], smooth=F, density=T, ellipses=F, lm=T, 
              digits=3, scale=T)
 
 
