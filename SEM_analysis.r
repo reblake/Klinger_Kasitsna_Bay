@@ -7,7 +7,7 @@
 
 # load packages
 library(lavaan) ; library(dplyr) ; library(car) ; library(ggm) ; library(semPlot)  
-library(semTools) ; library(psych)
+library(semTools) ; library(psych) ; library(stats)
 
 
 # source the data cleaning script to get the % cover data
@@ -63,6 +63,15 @@ PerCov_FWT <- AllData_clean %>%
 
 # write.csv(PerCov_FWT, file = "K_Bay_All_Data_SEM.csv", row.names=FALSE)
 
+##NOTE: We are missing Freshwater data 2015-2017, Dec water temp 2015, and lag Dec temp creates NA in 1999
+# without any NAs
+PerCov_FWT_NA <- PerCov_FWT %>%
+                 dplyr::filter(!Year %in% c(2015, 2016, 2017)) %>%
+                 dplyr::select(-WTemp_Dec_Lag) %>%
+                 dplyr::mutate_at(c(5:20,22,24:50), funs(as.numeric))  # converts select columns to numeric
+                 
+
+
 #########
 # Looking at correlations
 pairs.panels(PerCov_FWT[,c(7,8,22,24,28,29,33,37,40,51,54,57:65)], smooth=F, density=T, ellipses=F, lm=T, 
@@ -79,11 +88,12 @@ pairs.panels(PerCov_FWT[,c(7,8,22,24,28,29,33,37,40)], smooth=F, density=T, elli
 ## SEM ##
 #########
 
-sem1_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES + MYTILUS
-               MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge
-               BARNACLES ~ mn_yr_discharge'
+sem1_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES + MYTILUS + Water_Temp_Yearly
+               MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Water_Temp_Yearly
+               BARNACLES ~ mn_yr_discharge 
+               '
 
-sem1 <- sem(sem1_model, data=PerCov_FWT, estimator="MLM")  
+sem1 <- sem(sem1_model, data=PerCov_FWT_NA, estimator="MLM")  # using a robust ML estimator due to some non-normality
 
 AIC(sem1)
 fitMeasures(sem1, "pvalue")
@@ -95,11 +105,12 @@ semPaths(sem1, "std")
  
 #
 
-sem1a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES 
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + FUCUS_PERCOV_TOTAL
-                BARNACLES ~ mn_yr_discharge'
+sem1a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES  + Water_Temp_Yearly
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + FUCUS_PERCOV_TOTAL + Water_Temp_Yearly
+                BARNACLES ~ mn_yr_discharge
+                '
 
-sem1a <- sem(sem1a_model, data=PerCov_FWT)
+sem1a <- sem(sem1a_model, data=PerCov_FWT_NA, estimator="MLM")
 
 AIC(sem1a)
 fitMeasures(sem1a, "pvalue")
@@ -110,37 +121,47 @@ semPaths(sem1a, "std")
 
 #
 
-sem1b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES 
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES
+sem1b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES  + Water_Temp_Yearly
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
                 BARNACLES ~ mn_yr_discharge'
 
-sem1b <- sem(sem1b_model, data=PerCov_FWT)
+sem1b <- sem(sem1b_model, data=PerCov_FWT_NA, estimator="MLM")
 
+AIC(sem1b)
+fitMeasures(sem1b, "pvalue")
 summary(sem1b, rsquare=T, standardized=T)
+residuals(sem1b) ; residuals(sem1b, type="cor")
 
 semPaths(sem1b, "std")
 
 #
 
-sem1c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES 
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES
+sem1c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES + Water_Temp_Yearly
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
                 BARNACLES ~ mn_yr_discharge + ATemp_YearlyMn'
 
-sem1c <- sem(sem1c_model, data=PerCov_FWT)
+sem1c <- sem(sem1c_model, data=PerCov_FWT_NA, estimator="MLM")
 
+AIC(sem1c)
+fitMeasures(sem1c, "pvalue")
 summary(sem1c, rsquare=T, standardized=T)
+residuals(sem1c) ; residuals(sem1c, type="cor")
 
 semPaths(sem1c, "std")
 
 #
 
-sem1d_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES + mn_yr_discharge
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES
+sem1d_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES + mn_yr_discharge + Water_Temp_Yearly
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
                 BARNACLES ~ mn_yr_discharge'
 
-sem1d <- sem(sem1d_model, data=PerCov_FWT)
+sem1d <- sem(sem1d_model, data=PerCov_FWT_NA, estimator="MLM")
 
+AIC(sem1d)
+fitMeasures(sem1d, "pvalue")
 summary(sem1d, rsquare=T, standardized=T)
+residuals(sem1d) ; residuals(sem1d, type="cor")
+
 
 semPaths(sem1d, "std")
 
@@ -148,16 +169,23 @@ semPaths(sem1d, "std")
 
 sem1e_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn 
                 MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES
-                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
-                '
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL 
+                '#+ Water_Temp_Yearly   + Water_Temp_Yearly
+           
+sem1e <- sem(sem1e_model, data=PerCov_FWT_NA, estimator="MLM")
 
-sem1e <- sem(sem1e_model, data=PerCov_FWT)
-
+AIC(sem1e)
+fitMeasures(sem1e, "pvalue")
 summary(sem1e, rsquare=T, standardized=T)
+residuals(sem1e) ; residuals(sem1e, type="cor")
 modificationIndices(sem1e, standardized=F)
 parameterEstimates(sem1e)
 
 semPaths(sem1e, "std")
+
+#
+
+AIC(sem1, sem1a, sem1b, sem1c, sem1d, sem1e)
 
 #####
 
@@ -166,9 +194,12 @@ sem2_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Spr_Days_Less_0 + Summ_Days
                BARNACLES ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + FUCUS_PERCOV_TOTAL
                '
 
-sem2 <- sem(sem2_model, data=PerCov_FWT)
+sem2 <- sem(sem2_model, data=PerCov_FWT_NA, estimator="MLM")
 
+AIC(sem2)
+fitMeasures(sem2, "pvalue")
 summary(sem2, rsquare=T, standardized=T, fit.measures=T)
+residuals(sem2) ; residuals(sem2, type="cor")
 modificationIndices(sem2, standardized=F)
 
 semPaths(sem2, "std")  
@@ -176,13 +207,16 @@ semPaths(sem2, "std")
 #
 
 sem2a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
-                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Summ_Days_More_15 + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + ATemp_YearlyMn
                 '
 
-sem2a <- sem(sem2a_model, data=PerCov_FWT)
+sem2a <- sem(sem2a_model, data=PerCov_FWT_NA, estimator="MLM")
 
+AIC(sem2a)
+fitMeasures(sem2a, "pvalue")
 summary(sem2a, rsquare=T, standardized=T, fit.measures=T)
+residuals(sem2a) ; residuals(sem2a, type="cor")
 modificationIndices(sem2a, standardized=F)
 parameterEstimates(sem2a)
 
@@ -190,40 +224,46 @@ semPaths(sem2a, "std")
 
 #
 
-sem2b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
-                BARNACLES ~ mn_yr_discharge + ATemp_YearlyMn + FUCUS_PERCOV_TOTAL
+sem2b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + Water_Temp_Dec
+                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Summ_Days_More_15 + BARNACLES + Water_Temp_June
+                BARNACLES ~ mn_yr_discharge + ATemp_YearlyMn + FUCUS_PERCOV_TOTAL + Water_Temp_Dec
                 '
 
-sem2b <- sem(sem2b_model, data=PerCov_FWT)
+sem2b <- sem(sem2b_model, data=PerCov_FWT_NA, estimator="MLM")
 
+AIC(sem2b)
+fitMeasures(sem2b, "pvalue")
 summary(sem2b, rsquare=T, standardized=T, fit.measures=T)
+residuals(sem2b) ; residuals(sem2b, type="cor")
 modificationIndices(sem2b, standardized=F)
 
 semPaths(sem2b, "std")  
 
 #                     
 
-sem2c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn  
-                MYTILUS ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
-                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
+sem2c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + Water_Temp_June
+                MYTILUS ~ mn_yr_discharge + Summ_Days_More_15 + BARNACLES + Water_Temp_June + Water_Temp_Dec
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + Water_Temp_June + Summ_Days_More_15
                 '
 
-sem2c <- sem(sem2c_model, data=PerCov_FWT)
+sem2c <- sem(sem2c_model, data=PerCov_FWT_NA, estimator="MLM")
 
+AIC(sem2c)
+fitMeasures(sem2c, "pvalue")
 summary(sem2c, rsquare=T, standardized=T, fit.measures=T)
+residuals(sem2c) ; residuals(sem2c, type="cor")
 modificationIndices(sem2c, standardized=F)
 
 semPaths(sem2c, "std")  
 
-#                          
+#               ###################################################################           
  
 sem2d_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn 
                 MYTILUS ~ mn_yr_discharge + Summ_Days_More_15 + BARNACLES
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL 
                 '
 
-sem2d <- sem(sem2d_model, data=PerCov_FWT)
+sem2d <- sem(sem2d_model, data=PerCov_FWT_NA, estimator="MLM")
 
 summary(sem2d, rsquare=T, standardized=T, fit.measures=T)
 modificationIndices(sem2d, standardized=F)
@@ -237,7 +277,7 @@ sem2e_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + mn_yr_discharge
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
                 '
 
-sem2e <- sem(sem2e_model, data=PerCov_FWT)
+sem2e <- sem(sem2e_model, data=PerCov_FWT_NA, estimator="MLM")
 
 summary(sem2e, rsquare=T, standardized=T, fit.measures=T)
 modificationIndices(sem2e, standardized=F)
@@ -251,7 +291,7 @@ sem2f_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL 
                 '
 
-sem2f <- sem(sem2f_model, data=PerCov_FWT)
+sem2f <- sem(sem2f_model, data=PerCov_FWT_NA, estimator="MLM")
 
 summary(sem2f, rsquare=T, standardized=T, fit.measures=T)
 modificationIndices(sem2f, standardized=F)
@@ -268,7 +308,7 @@ sem2g_model <- 'FUCUS_PERCOV_TOTAL ~ Summ_Days_More_15
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
                 '
 
-sem2g <- sem(sem2g_model, data=PerCov_FWT)
+sem2g <- sem(sem2g_model, data=PerCov_FWT_NA, estimator="MLM")
 
 summary(sem2g, rsquare=T, standardized=T, fit.measures=T)
 modificationIndices(sem2g, standardized=F)
@@ -283,7 +323,7 @@ sem2h_model <- 'FUCUS_PERCOV_TOTAL ~ Summ_Days_More_15 + mn_yr_discharge
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL
                 '
 
-sem2h <- sem(sem2h_model, data=PerCov_FWT)
+sem2h <- sem(sem2h_model, data=PerCov_FWT_NA, estimator="MLM")
 
 summary(sem2h, rsquare=T, standardized=T, fit.measures=T)
 modificationIndices(sem2h, standardized=F)
@@ -298,7 +338,7 @@ sem2i_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +  ATemp_YearlyMn 
                 '
 
-sem2i <- sem(sem2i_model, data=PerCov_FWT)  #, estimator="MLM"
+sem2i <- sem(sem2i_model, data=PerCov_FWT_NA, estimator="MLM")  #, estimator="MLM"
 
 AIC(sem2i)
 summary(sem2i, rsquare=T, standardized=T, fit.measures=T)
@@ -316,7 +356,7 @@ try2i_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + mn_yr_discharge + ATemp_Sp
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + ATemp_YearlyMn + ATemp_Summ_max
                 '
 
-try2i <- sem(try2i_model, data=PerCov_FWT)
+try2i <- sem(try2i_model, data=PerCov_FWT_NA, estimator="MLM")
 
 AIC(try2i)
 fitMeasures(try2i, "pvalue")
@@ -335,7 +375,7 @@ semb_model <- 'FUCUS_SPORELINGS_PERCOV ~ BARNACLES
                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL 
                BARNACLES ~ FUCUS_PERCOV_TOTAL + BARNACLE_SPAT
               '
-semb <- sem(semb_model, data=PerCov_FWT)
+semb <- sem(semb_model, data=PerCov_FWT_NA, estimator="MLM")
 
 summary(semb, rsquare=T, standardized=T, fit.measures=T)
 modificationIndices(semb, standardized=F)
@@ -354,7 +394,7 @@ semb2_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_
                 BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL + MYTILUS + mn_yr_discharge + ATemp_YearlyMn + Summ_Days_More_15 + Spr_Days_Less_0
                 '
 
-semb2 <- sem(semb2_model, data=PerCov_FWT)
+semb2 <- sem(semb2_model, data=PerCov_FWT_NA, estimator="MLM")
 
 summary(semb2, rsquare=T, standardized=T, fit.measures=T)
 modificationIndices(semb2, standardized=F)
@@ -373,7 +413,7 @@ tryb2_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + ATemp_Spr_min + ATemp_Summ
                 BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL + mn_yr_discharge + ATemp_YearlyMn + ATemp_Summ_max 
                 '
 
-tryb2 <- sem(tryb2_model, data=PerCov_FWT)
+tryb2 <- sem(tryb2_model, data=PerCov_FWT_NA, estimator="MLM")
 
 AIC(tryb2)
 fitMeasures(tryb2, "pvalue")
@@ -439,7 +479,7 @@ sem3_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_d
                PTEROSIPHONIA ~ MYTILUS 
                '
 #ELACHISTA ~ 
-sem3 <- sem(sem3_model, data=PerCov_FWT)
+sem3 <- sem(sem3_model, data=PerCov_FWT_NA, estimator="MLM")
 
 summary(sem3, rsquare=T, standardized=T, fit.measures=T)
 modificationIndices(sem3, standardized=F)
