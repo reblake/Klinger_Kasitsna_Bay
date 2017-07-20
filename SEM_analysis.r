@@ -68,7 +68,13 @@ PerCov_FWT <- AllData_clean %>%
 PerCov_FWT_NA <- PerCov_FWT %>%
                  dplyr::filter(!Year %in% c(2015, 2016, 2017)) %>%
                  dplyr::select(-WTemp_Dec_Lag) %>%
-                 dplyr::mutate_at(c(5:20,22,24:50), funs(as.numeric))  # converts select columns to numeric
+                 dplyr::mutate_at(c(5:20,22,24:50), funs(as.numeric)) %>% # converts select columns to numeric
+                 dplyr::group_by() %>%
+                 dplyr::mutate(L.SITKANA_scaled = L.SITKANA/10,
+                               LOTTIIDAE_scaled = LOTTIIDAE/10,
+                               FUCUS_PERCOV_TOTAL_scaled = FUCUS_PERCOV_TOTAL/10) %>%
+                 dplyr::ungroup()
+                 
                  
 
 
@@ -378,12 +384,13 @@ STTol <- 1/STVIF  # this is the tolerance
 
 #####             #################################################################
 
-sem3_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + ATemp_Summ_max + L.SITKANA
+sem3_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + ATemp_Summ_max + L.SITKANA_scaled + LOTTIIDAE_scaled + ELACHISTA + PTEROSIPHONIA
                MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max 
-               BARNACLES ~ FUCUS_PERCOV_TOTAL + BARNACLE_SPAT + mn_yr_discharge 
-               FUCUS_SPORELINGS_PERCOV ~ BARNACLES + ATemp_YearlyMn + ATemp_Summ_max + L.SITKANA
-               BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL + mn_yr_discharge + ATemp_YearlyMn + ATemp_Summ_max 
-               ELACHISTA ~ L.SITKANA
+               BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + BARNACLE_SPAT + mn_yr_discharge 
+               FUCUS_SPORELINGS_PERCOV ~ BARNACLES + ATemp_YearlyMn + ATemp_Summ_max  
+               BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn + ATemp_Summ_max 
+               ELACHISTA ~ L.SITKANA_scaled
+               PTEROSIPHONIA ~ MYTILUS 
                '
 
 sem3 <- sem(sem3_model, data=PerCov_FWT_NA, estimator="MLM")
@@ -396,15 +403,116 @@ modificationIndices(sem3, standardized=F)
 parameterEstimates(sem3)
 inspect(sem3, "sample") ; fitted(sem3) 
 
-
 semPaths(sem3, "std")  
+
+#
+
+sem3a_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + ATemp_Summ_max + L.SITKANA_scaled + LOTTIIDAE_scaled + ELACHISTA
+                MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max
+                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTEROSIPHONIA + L.SITKANA_scaled
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + L.SITKANA_scaled + PTEROSIPHONIA + LOTTIIDAE_scaled 
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn 
+                ELACHISTA ~ L.SITKANA_scaled + PTEROSIPHONIA 
+                PTEROSIPHONIA ~ MYTILUS + L.SITKANA_scaled + mn_yr_discharge
+               '
+
+sem3a <- sem(sem3a_model, data=PerCov_FWT_NA, estimator="MLM")
+
+AIC(sem3a)
+fitMeasures(sem3a, "pvalue")
+summary(sem3a, rsquare=T, standardized=T, fit.measures=T)
+residuals(sem3a) ; residuals(sem3a, type="cor")
+modificationIndices(sem3a, standardized=F)
+parameterEstimates(sem3a)
+inspect(sem3a, "sample") ; fitted(sem3a) 
+
+semPaths(sem3a, "std") 
+
+# 
+
+sem3b_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + LOTTIIDAE_scaled + ELACHISTA
+                MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max + PTEROSIPHONIA
+                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTEROSIPHONIA + L.SITKANA_scaled
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + PTEROSIPHONIA
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn 
+                PTEROSIPHONIA ~ L.SITKANA_scaled 
+               '
+
+sem3b <- sem(sem3b_model, data=PerCov_FWT_NA, estimator="MLM")
+
+AIC(sem3b)
+fitMeasures(sem3b, "pvalue")
+summary(sem3b, rsquare=T, standardized=T, fit.measures=T)
+residuals(sem3b) ; residuals(sem3b, type="cor")
+modificationIndices(sem3b, standardized=F)
+parameterEstimates(sem3b)
+inspect(sem3b, "sample") ; fitted(sem3b) 
+
+semPaths(sem3b, "std") 
+
+#
+
+sem3c_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + LOTTIIDAE_scaled
+                MYTILUS ~ mn_yr_discharge + Water_Temp_June + ATemp_Summ_max + PTEROSIPHONIA + L.SITKANA_scaled
+                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTEROSIPHONIA + L.SITKANA_scaled + LOTTIIDAE_scaled
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + ATemp_YearlyMn + LOTTIIDAE_scaled
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn + ATemp_Summ_max + Water_Temp_June
+                PTEROSIPHONIA ~ L.SITKANA_scaled + ATemp_YearlyMn 
+                LOTTIIDAE_scaled ~ MYTILUS
+                '
+#    
+sem3c <- sem(sem3c_model, data=PerCov_FWT_NA, estimator="MLM")
+
+AIC(sem3c)
+fitMeasures(sem3c, "pvalue")
+summary(sem3c, rsquare=T, standardized=T, fit.measures=T)
+residuals(sem3c) ; residuals(sem3c, type="cor")
+modificationIndices(sem3c, standardized=F)
+parameterEstimates(sem3c)
+inspect(sem3c, "sample") ; fitted(sem3c) 
+
+semPaths(sem3c, "std") 
+
+
+#  MYTILUS  ~          L.SITKANA_scaled 3.095     3.124
+#   BARNACLE_SPAT  ~           Water_Temp_June 3.061     3.090
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
  
 
+# from Yves Rosseel on lavaan forum
 
-
-
+# Try this:
+# 
+# fit <- growth(sem3a_model,data=PerCov_FWT_NA,estimator="MLM", do.fit = FALSE)
+# 
+# This will NOT fit the data. But still process the model, data, etc...
+# and give you back a lavaan object that can be inspected.
+# 
+# Next, try:
+# 
+# fitted(fit)$cov
+# 
+# and you will *see* the initial model-implied covariance matrix (Sigma).
+# Look for covariances that are larger than the corresponding variances.
+# 
+# Finally, add better starting values to avoid this (make sure the implied
+# variances are large enough).
+# 
+# Yves. 
 
 
 
