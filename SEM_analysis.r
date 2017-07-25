@@ -477,16 +477,51 @@ semPaths(sem3c, "std")
 #  MYTILUS  ~          L.SITKANA_scaled 3.095     3.124
 #   BARNACLE_SPAT  ~           Water_Temp_June 3.061     3.090
 
+#
 
+sem3d_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + LOTTIIDAE_scaled
+                MYTILUS ~ mn_yr_discharge + Water_Temp_June  + PTEROSIPHONIA + L.SITKANA_scaled 
+                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTEROSIPHONIA + L.SITKANA_scaled + LOTTIIDAE_scaled
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + ATemp_YearlyMn + LOTTIIDAE_scaled
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn + Water_Temp_June
+                PTEROSIPHONIA ~ L.SITKANA_scaled + ATemp_YearlyMn 
+                LOTTIIDAE_scaled ~ MYTILUS
+                '
+#     
+sem3d <- sem(sem3d_model, data=PerCov_FWT_NA, estimator="MLM")
 
+AIC(sem3d)
+fitMeasures(sem3d, "pvalue")
+summary(sem3d, rsquare=T, standardized=T, fit.measures=T)
+residuals(sem3d) ; residuals(sem3d, type="cor")
+modificationIndices(sem3d, standardized=F)
+parameterEstimates(sem3d)
+inspect(sem3d, "sample") ; fitted(sem3d) 
 
+semPaths(sem3d, "std") 
 
+# 
+ 
+sem3e_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + LOTTIIDAE_scaled
+                MYTILUS ~ mn_yr_discharge + Water_Temp_June  + PTEROSIPHONIA + L.SITKANA_scaled + LOTTIIDAE_scaled
+                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTEROSIPHONIA + L.SITKANA_scaled + LOTTIIDAE_scaled
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + ATemp_YearlyMn + LOTTIIDAE_scaled
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn + Water_Temp_June
+                PTEROSIPHONIA ~ L.SITKANA_scaled + ATemp_YearlyMn 
+               
+                '
+#     LOTTIIDAE_scaled ~ MYTILUS
+sem3e <- sem(sem3e_model, data=PerCov_FWT_NA, estimator="MLM")
 
+AIC(sem3e)
+fitMeasures(sem3e, "pvalue")
+summary(sem3e, rsquare=T, standardized=T, fit.measures=T)
+residuals(sem3e) ; residuals(sem3e, type="cor")
+modificationIndices(sem3e, standardized=F)
+parameterEstimates(sem3e)
+inspect(sem3e, "sample") ; fitted(sem3e) 
 
-
-
-
-
+semPaths(sem3e, "std") 
 
 
 
