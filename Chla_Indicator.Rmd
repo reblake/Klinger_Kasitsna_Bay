@@ -1,0 +1,39 @@
+---
+title: "Chla_Indicator"
+output: html_document
+---
+
+```{r , echo=FALSE}
+# get the Chla data
+
+chlaWQ <- read.csv("chla2_WQ_clean.csv", stringsAsFactors=FALSE,
+                   header=TRUE, row.names=NULL, strip.white=TRUE)
+
+
+chlaNT <- read.csv("chla2_NT_clean.csv", stringsAsFactors=FALSE,
+                   header=TRUE, row.names=NULL, strip.white=TRUE)
+
+```
+
+```{r, echo=FALSE}
+# get the water temp data
+source("WaterTemp_cleaning.r") 
+
+```
+
+```{r, echo=FALSE}
+# get the air temp data
+source("AirTemp_cleaning.r")
+
+```
+
+```{r, echo=FALSE}
+# get the freshwater data
+source("Fresh_Discharge_cleaning.r")
+
+```
+
+
+
+
+
