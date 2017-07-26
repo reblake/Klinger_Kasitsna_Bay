@@ -22,15 +22,18 @@ chla_file <- read.csv("./Chla_NERR/746178.csv", stringsAsFactors=FALSE,
                       header=TRUE, row.names=NULL, strip.white=TRUE)
 #print(object.size(chla_file),units="Gb")
 
+chla_file$StationCode <- trimws(chla_file$StationCode)
 
 chla_clean <- chla_file %>%
-              dplyr::select(StationCode, DateTimeStamp, ChlFluor, F_ChlFluor) %>%
+              dplyr::select(DateTimeStamp, StationCode, ChlFluor, F_ChlFluor) %>%
               dplyr::rename(Station_Code = StationCode) %>%
+              dplyr::mutate(Station_Code = toupper(Station_Code)) %>%  # make column all upper case
               dplyr::filter(!is.na(ChlFluor), 
                             F_ChlFluor %in% c("<0>", "<0> (CND)"))   %>%
               dplyr::mutate(Date = sapply(strsplit(as.character(DateTimeStamp), split=" ") , function(x) x[1]),
                             Year = sapply(strsplit(as.character(Date), split="/") , function(x) x[3]),
-                            Month = sapply(strsplit(as.character(Date), split="/") , function(x) x[1]))
+                            Month = sapply(strsplit(as.character(Date), split="/") , function(x) x[1])) %>%
+              dplyr::arrange(Year, Month) 
               
 #####
 chla_file2 <- read.csv("./Chla_NERR/151505/151505.csv", stringsAsFactors=FALSE,
@@ -68,7 +71,8 @@ chla2_WQ_clean <- chla2_WQ %>%
                   dplyr::mutate(Date = sapply(strsplit(as.character(DateTimeStamp), split=" ") , function(x) x[1]),
                                 Year = sapply(strsplit(as.character(Date), split="/") , function(x) x[3]),
                                 Month = sapply(strsplit(as.character(Date), split="/") , function(x) x[1])) %>%
-                  dplyr::arrange(Year, Month)
+                  dplyr::arrange(Year, Month) %>%
+                  dplyr::select(-isSWMP, -F_Record)
 
 #
 chla2_NT <- chla_file2[,c(52:91)] # select just the columns coming from the nutrient dataset
@@ -96,7 +100,30 @@ chla2_NT_clean <- chla2_NT2 %>%
                   dplyr::mutate(Date = sapply(strsplit(as.character(DateTimeStamp), split=" ") , function(x) x[1]),
                                 Year = sapply(strsplit(as.character(Date), split="/") , function(x) x[3]),
                                 Month = sapply(strsplit(as.character(Date), split="/") , function(x) x[1])) %>%
-                  dplyr::arrange(Year, Month)
+                  dplyr::arrange(Year, Month) %>%
+                  dplyr::select(-isSWMP, -CollMethd, -REP, -F_Record)
+
+
+
+# need to column bind these
+#all.equal(chla_clean,chla2_WQ_clean) # more lenient test of whether two dataframes are the same
+
+chla_all <- chla_clean %>%
+            dplyr::full_join(chla2_WQ_clean) %>%
+            dplyr::full_join(chla2_NT_clean, by=c("Station_Code","DateTimeStamp","Date",
+                                                  "Year","Month"))
+
+
+#NOTE: Not sure about differences in values for ChlFluor and CHLA_N
+
+# write.csv(chla_clean, file = "chla_clean.csv", row.names=FALSE)
+# write.csv(chla2_WQ_clean, file = "chla2_WQ_clean.csv", row.names=FALSE)
+# write.csv(chla2_NT_clean, file = "chla2_NT_clean.csv", row.names=FALSE)
+
+
+
+
+
 
 
 
