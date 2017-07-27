@@ -1,15 +1,17 @@
 ---
 title: "Chla_Indicator"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, include=FALSE}
 library(psych) ; library(gridExtra)
 
 ```
 
-```{r , echo=FALSE}
+```{r , echo=FALSE, message=FALSE}
 # get the Chla data
 
 chlaWQ <- read.csv("chla2_WQ_clean.csv", stringsAsFactors=FALSE,
@@ -21,7 +23,7 @@ chlaNT <- read.csv("chla2_NT_clean.csv", stringsAsFactors=FALSE,
 
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, include=FALSE}
 # get the water temp data
 source("WaterTemp_cleaning.r") 
 
@@ -31,7 +33,7 @@ WTemp_monthly <- WTemp_all %>%
 
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, include=FALSE}
 # get the air temp data
 source("AirTemp_cleaning.r")
 
@@ -43,7 +45,7 @@ Atemp_monthly <- ann_a_temp %>%
 
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, include=FALSE}
 # get the freshwater data
 source("Fresh_Discharge_cleaning.r")
 
@@ -65,7 +67,7 @@ FWD_monthly <- FWD_mon_mn %>%
 
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, include=FALSE}
 
 PerCov_CHL_WQ <- Atemp_monthly%>%
                  dplyr::full_join(WTemp_monthly, by=c("Year", "Month")) %>%  # join other data
@@ -94,7 +96,7 @@ pairs.panels(PerCov_CHL_WQ[,c(3:7)], smooth=F, density=T, ellipses=F, lm=T,
 
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}
 lmfit_cat <- lm(ChlaFluor_Month_LOG~ATemp_MonthMn, data=PerCov_CHL_WQ)  # lm() fit 
 
 cor_plotA <- ggplot(data=PerCov_CHL_WQ, aes(x=ATemp_MonthMn, y=ChlaFluor_Month_LOG)) + 
