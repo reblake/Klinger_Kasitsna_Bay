@@ -5,7 +5,7 @@ output: html_document
 
 
 ```{r, echo=FALSE}
-library(psych) 
+library(psych) ; library(gridExtra)
 
 ```
 
@@ -25,11 +25,21 @@ chlaNT <- read.csv("chla2_NT_clean.csv", stringsAsFactors=FALSE,
 # get the water temp data
 source("WaterTemp_cleaning.r") 
 
+WTemp_monthly <- WTemp_all %>%
+                 dplyr::select(-Water_Temp_Yearly) %>%
+                 dplyr::mutate_at(c(1,2), funs(as.integer)) # converts select columns
+
 ```
 
 ```{r, echo=FALSE}
 # get the air temp data
 source("AirTemp_cleaning.r")
+
+Atemp_monthly <- ann_a_temp %>%
+                 dplyr::select(-Day, -YrMnDy, -YrMn, -Month_Sign, -Month_Anom, -Ann_mn_all) %>%
+                 dplyr::distinct() %>%
+                 dplyr::mutate_at(c(1,2), funs(as.integer)) # converts select columns
+                 
 
 ```
 
@@ -37,57 +47,112 @@ source("AirTemp_cleaning.r")
 # get the freshwater data
 source("Fresh_Discharge_cleaning.r")
 
-```
-
-```{r, echo=FALSE}
-# NOTE: This code is taken directly from the SEM_analysis.r script
-# add in the environmental data
-
-spr <- spring_a_temp %>%
-       dplyr::select(Year, ATemp_YearMn, Num_Day_Less_0, ATemp_Spr_min) %>% 
-       dplyr::distinct()
-
-sum <- summer_a_temp %>%
-       dplyr::select(Year, ATemp_YearMn, Num_Day_More_15, ATemp_Summ_max) %>% 
-       dplyr::distinct()
-
-
-PerCov_FWT <- AllData_clean %>%
-              dplyr::select(-MYELOPHYCUS, -HALOSACCION, -COLPOMENIA, 
-                            -CRUSTOSE_CORALLINE, -CALLITHAMNION, -ERECT_CORALLINE, 
-                            -ACROSIPHONIA, -NEORHODOMELA, -PALMARIA) %>%
-              dplyr::rename(Year = YEAR) %>%
-              dplyr::filter(TREATMENT == "CONTROL") %>%
-              dplyr::mutate_at(vars(TRIPLET), funs(as.numeric)) %>%
-              dplyr::arrange(Year, TRIPLET) %>%
-              dplyr::full_join(FWD_ann_mn, by="Year") %>%  # join in the freshwater data
-              dplyr::full_join(year_a_temp, by="Year") %>%  # join in the air temp data
-              dplyr::rename(ATmp_Sign = Year_Sign,
-                            ATemp_Year_Anom = Year_Anom, 
-                            ATemp_YearlyMn = ATemp_YearMn,
-                            mn_yr_discharge = mean_yearly_discharge_m3s1,
-                            FWD_Sign = Sign) %>%
-              dplyr::full_join(spr, by="Year") %>%  # join in the spring air temp data
-              dplyr::rename(ATemp_SpringMn = ATemp_YearMn, 
-                            Spr_Days_Less_0 = Num_Day_Less_0) %>%
-              dplyr::full_join(sum, by="Year") %>%  # join in the summer air temp data
-              dplyr::rename(ATemp_SummerMn = ATemp_YearMn, 
-                            Summ_Days_More_15 = Num_Day_More_15) %>%
-              dplyr::full_join(WTemp_Yr, by="Year") %>%  # join in the annual water temp data
-              dplyr::full_join(WTemp_June, by="Year") %>%  # join in the June water temp data
-              dplyr::full_join(WTemp_Dec, by="Year") %>%  # join in the December water temp data
-              dplyr::arrange(Year) %>%
-              dplyr::mutate_at(vars(Year), funs(as.integer))
+FWD_monthly <- FWD_mon_mn %>%
+               dplyr::select(-Year_Month, -Year_Month2, -Sign, -mean_monthly_anomaly) %>%
+               dplyr::mutate(Month = str_replace_all(Month, "Jan", "01"),
+                             Month = str_replace_all(Month, "Feb", "02"),
+                             Month = str_replace_all(Month, "Mar", "03"),
+                             Month = str_replace_all(Month, "Apr", "04"),
+                             Month = str_replace_all(Month, "May", "05"),
+                             Month = str_replace_all(Month, "Jun", "06"),
+                             Month = str_replace_all(Month, "Jul", "07"),
+                             Month = str_replace_all(Month, "Aug", "08"),
+                             Month = str_replace_all(Month, "Sep", "09"),
+                             Month = str_replace_all(Month, "Oct", "10"),
+                             Month = str_replace_all(Month, "Nov", "11"),
+                             Month = str_replace_all(Month, "Dec", "12")) %>%
+               dplyr::mutate_at(c(1,2), funs(as.integer)) # converts select columns
 
 ```
 
 ```{r, echo=FALSE}
 
-PerCov_CHL <- PerCov_FWT %>%
-              dplyr::full_join(chlaWQ, by="Year") %>%  # join in the chl data
-              dplyr::filter(!is.na(ChlFluor))
+PerCov_CHL_WQ <- Atemp_monthly%>%
+                 dplyr::full_join(WTemp_monthly, by=c("Year", "Month")) %>%  # join other data
+                 dplyr::filter(Year %in% c("2007", "2008", "2011", "2012", "2013", 
+                                           "2014", "2015")) %>%
+                 dplyr::full_join(FWD_monthly, by=c("Year", "Month")) %>%  # join other data
+                 dplyr::filter(Year %in% c("2007", "2008", "2011", "2012", "2013", 
+                                           "2014", "2015"),
+                               !is.na(Water_Temp_Monthly),
+                               mean_monthly_discharge_m3s1 != 0.000000100) %>%
+                 dplyr::arrange(Year, Month) %>%
+                 dplyr::full_join(chlaWQ , by=c("Year", "Month")) %>%  # join other data
+                 dplyr::filter(Year %in% c("2007", "2008", "2011", "2012", "2013", 
+                                           "2014"),
+                               !is.na(ChlFluor_Month_Mn),
+                               !is.na(Water_Temp_Monthly)) %>%
+                 dplyr::mutate(ChlaFluor_Month_LOG = log(ChlFluor_Month_Mn))
 
 ```
+
+```{r, echo=FALSE}
+
+pairs.panels(PerCov_CHL_WQ[,c(3:7)], smooth=F, density=T, ellipses=F, lm=T, 
+             digits=3, scale=T)
+
+
+```
+
+```{r, echo=FALSE}
+lmfit_cat <- lm(ChlaFluor_Month_LOG~ATemp_MonthMn, data=PerCov_CHL_WQ)  # lm() fit 
+
+cor_plotA <- ggplot(data=PerCov_CHL_WQ, aes(x=ATemp_MonthMn, y=ChlaFluor_Month_LOG)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_cat)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_cat$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_cat$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_cat)$coef[2,4], 4)))
+            
+
+
+lmfit_cwt <- lm(ChlaFluor_Month_LOG~Water_Temp_Monthly, data=PerCov_CHL_WQ)  # lm() fit 
+
+cor_plotB <- ggplot(data=PerCov_CHL_WQ, aes(x=Water_Temp_Monthly, y=ChlaFluor_Month_LOG)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_cwt)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_cwt$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_cwt$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_cwt)$coef[2,4], 3)))
+            
+
+
+lmfit_cfw <- lm(ChlaFluor_Month_LOG~mean_monthly_discharge_m3s1, data=PerCov_CHL_WQ)  # lm() fit 
+
+cor_plotC <- ggplot(data=PerCov_CHL_WQ, aes(x=mean_monthly_discharge_m3s1, y=ChlaFluor_Month_LOG)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_cfw)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_cfw$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_cfw$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_cfw)$coef[2,4], 3)))
+            
+
+
+
+```
+
+```{r, echo=FALSE, fig.height=7, fig.width=8}
+# arranging above plots
+grid.arrange(cor_plotA, cor_plotB, cor_plotC, nrow=2)
+
+```
+
+```{r, echo=FALSE, fig.height=7, fig.width=8}
+PerCov_CHL_WQ_sub <- dplyr::select(PerCov_CHL_WQ, -Year, -Month)
+
+WQ_pca <- prcomp(PerCov_CHL_WQ_sub, scale. = T)
+
+biplot(WQ_pca, scale = 0)
+
+```
+
+
+
+
+
+
+
+
 
 
 
