@@ -71,8 +71,12 @@ chla2_WQ_clean <- chla2_WQ %>%
                   dplyr::mutate(Date = sapply(strsplit(as.character(DateTimeStamp), split=" ") , function(x) x[1]),
                                 Year = sapply(strsplit(as.character(Date), split="/") , function(x) x[3]),
                                 Month = sapply(strsplit(as.character(Date), split="/") , function(x) x[1])) %>%
-                  dplyr::arrange(Year, Month) %>%
-                  dplyr::select(-isSWMP, -F_Record)
+                  dplyr::group_by(Year, Month) %>%
+                  dplyr::mutate(ChlFluor_Month_Mn = mean(ChlFluor)) %>%
+                  dplyr::ungroup() %>% 
+                  dplyr::select(-isSWMP, -F_Record, -DateTimeStamp, -Date, -ChlFluor, -F_ChlFluor) %>%
+                  dplyr::distinct() %>%
+                  dplyr::arrange(Year, Month)
 
 #
 chla2_NT <- chla_file2[,c(52:91)] # select just the columns coming from the nutrient dataset
