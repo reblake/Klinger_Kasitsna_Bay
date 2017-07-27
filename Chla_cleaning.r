@@ -74,7 +74,7 @@ chla2_WQ_clean <- chla2_WQ %>%
                   dplyr::group_by(Year, Month) %>%
                   dplyr::mutate(ChlFluor_Month_Mn = mean(ChlFluor)) %>%
                   dplyr::ungroup() %>% 
-                  dplyr::select(-isSWMP, -F_Record, -DateTimeStamp, -Date, -ChlFluor, -F_ChlFluor) %>%
+                  dplyr::select(-isSWMP, -F_Record, -DateTimeStamp, -Date, -ChlFluor, -F_ChlFluor, -Station_Code) %>%
                   dplyr::distinct() %>%
                   dplyr::arrange(Year, Month)
 
@@ -105,7 +105,7 @@ chla2_NT_clean <- chla2_NT2 %>%
                                 Year = sapply(strsplit(as.character(Date), split="/") , function(x) x[3]),
                                 Month = sapply(strsplit(as.character(Date), split="/") , function(x) x[1])) %>%
                   dplyr::arrange(Year, Month) %>%
-                  dplyr::select(-isSWMP, -CollMethd, -REP, -F_Record)
+                  dplyr::select(-isSWMP, -CollMethd, -REP, -F_Record, -Date, -DateTimeStamp, -F_CHLA_N, -Station_Code)
 
 
 
