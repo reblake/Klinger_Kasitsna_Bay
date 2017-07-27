@@ -3,6 +3,12 @@ title: "Chla_Indicator"
 output: html_document
 ---
 
+
+```{r, echo=FALSE}
+library(psych) 
+
+```
+
 ```{r , echo=FALSE}
 # get the Chla data
 
@@ -33,7 +39,55 @@ source("Fresh_Discharge_cleaning.r")
 
 ```
 
+```{r, echo=FALSE}
+# NOTE: This code is taken directly from the SEM_analysis.r script
+# add in the environmental data
 
+spr <- spring_a_temp %>%
+       dplyr::select(Year, ATemp_YearMn, Num_Day_Less_0, ATemp_Spr_min) %>% 
+       dplyr::distinct()
+
+sum <- summer_a_temp %>%
+       dplyr::select(Year, ATemp_YearMn, Num_Day_More_15, ATemp_Summ_max) %>% 
+       dplyr::distinct()
+
+
+PerCov_FWT <- AllData_clean %>%
+              dplyr::select(-MYELOPHYCUS, -HALOSACCION, -COLPOMENIA, 
+                            -CRUSTOSE_CORALLINE, -CALLITHAMNION, -ERECT_CORALLINE, 
+                            -ACROSIPHONIA, -NEORHODOMELA, -PALMARIA) %>%
+              dplyr::rename(Year = YEAR) %>%
+              dplyr::filter(TREATMENT == "CONTROL") %>%
+              dplyr::mutate_at(vars(TRIPLET), funs(as.numeric)) %>%
+              dplyr::arrange(Year, TRIPLET) %>%
+              dplyr::full_join(FWD_ann_mn, by="Year") %>%  # join in the freshwater data
+              dplyr::full_join(year_a_temp, by="Year") %>%  # join in the air temp data
+              dplyr::rename(ATmp_Sign = Year_Sign,
+                            ATemp_Year_Anom = Year_Anom, 
+                            ATemp_YearlyMn = ATemp_YearMn,
+                            mn_yr_discharge = mean_yearly_discharge_m3s1,
+                            FWD_Sign = Sign) %>%
+              dplyr::full_join(spr, by="Year") %>%  # join in the spring air temp data
+              dplyr::rename(ATemp_SpringMn = ATemp_YearMn, 
+                            Spr_Days_Less_0 = Num_Day_Less_0) %>%
+              dplyr::full_join(sum, by="Year") %>%  # join in the summer air temp data
+              dplyr::rename(ATemp_SummerMn = ATemp_YearMn, 
+                            Summ_Days_More_15 = Num_Day_More_15) %>%
+              dplyr::full_join(WTemp_Yr, by="Year") %>%  # join in the annual water temp data
+              dplyr::full_join(WTemp_June, by="Year") %>%  # join in the June water temp data
+              dplyr::full_join(WTemp_Dec, by="Year") %>%  # join in the December water temp data
+              dplyr::arrange(Year) %>%
+              dplyr::mutate_at(vars(Year), funs(as.integer))
+
+```
+
+```{r, echo=FALSE}
+
+PerCov_CHL <- PerCov_FWT %>%
+              dplyr::full_join(chlaWQ, by="Year") %>%  # join in the chl data
+              dplyr::filter(!is.na(ChlFluor))
+
+```
 
 
 
