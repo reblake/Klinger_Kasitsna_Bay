@@ -130,8 +130,7 @@ PerCov_all <- PerCov_PDO %>%
                             ATemp_Year_Anom = Year_Anom, 
                             mn_yr_discharge = mean_yearly_discharge_m3s1,
                             FWD_Sign = Sign) %>%
-              dplyr::filter(Year != "2015",
-                            Year != "2017")
+              dplyr::filter(!Year %in% c("2015","2016","2017"))
 
 # subset to different dataframes
 sp_percov4 <- PerCov_all %>% 
