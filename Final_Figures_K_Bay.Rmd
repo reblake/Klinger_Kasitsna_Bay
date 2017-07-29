@@ -1,0 +1,257 @@
+---
+title: "Final Figures"
+author: "Rachael E. Blake"
+date: "July 28, 2017"
+output: html_document
+---
+
+
+```{r, include=FALSE, echo=FALSE, results='hide'}
+library(ggplot2) ; library(tidyverse) ; library(gridExtra)
+
+```
+
+```{r, echo=FALSE, include=FALSE}
+# PDO data
+source("PDO_cleaning.r")
+
+# dataframes are pdo_mon and pdo_ann
+
+pdo_mon_adj <- pdo_mon %>%
+               mutate(Month_number = forcats::fct_recode(Month, "01"="JAN", "02"="FEB", "03"="MAR",
+                                                                "04"="APR", "05"="MAY", "06"="JUN", 
+                                                                "07"="JUL", "08"="AUG", "09"="SEP", 
+                                                                "10"="OCT", "11"="NOV", "12"="DEC"),
+                      Yr_Mn = paste(Year, Month_number, sep="-"),
+                      Sign = ifelse(PDO>0, "A", "B"))
+               
+```
+
+```{r, echo=FALSE}
+# PDO plots
+pdo_plot <- ggplot(data=pdo_mon, aes(x=Year, y=PDO)) + geom_col() + 
+            geom_hline(yintercept=0, size=1.5) + ylab("PDO Index")
+
+  
+#
+pdo_plot2 <- ggplot(data=pdo_mon_adj, aes(x=Yr_Mn, y=PDO)) + 
+             geom_col(aes(fill=Sign)) + xlab("Year") +            #, show.legend=FALSE
+             geom_hline(yintercept=0, size=1) + ylab("PDO Index") + 
+             scale_x_discrete(breaks=c("1998-01","1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
+                                       "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", "2009-01", 
+                                       "2010-01", "2011-01", "2012-01", "2013-01", "2014-01", "2015-01", 
+                                       "2016-01"),
+                              labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005",
+                                       "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013",
+                                       "2014","2015", "2016"))
+
+```
+
+```{r, echo=FALSE, include=FALSE}
+# Freshwater Discharge Hill Model data
+source("Fresh_Discharge_cleaning.r")
+
+# dataframes are FWD_ann_mn and FWD_mon_mn
+
+```
+
+```{r, echo=FALSE}
+fwd_plot <- ggplot(data=FWD_ann_mn, aes(x=Year, y=(mean_yearly_anomaly*10))) + 
+            geom_col(aes(fill=Sign)) + ylab("Yearly Anomaly") + theme_bw() +
+            geom_hline(yintercept=0, size=1) + 
+            scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
+                              name="",
+                              labels=c("positive runoff", "negative runoff")) 
+ 
+  
+fwd_plot2 <- ggplot(data=FWD_mon_mn, aes(x=Year_Month, y=mean_monthly_anomaly)) + 
+             geom_col(aes(fill=Sign)) + xlab("Year") + ylab("Anomaly") + 
+             geom_hline(yintercept=0, size=1) +  
+             scale_x_discrete(breaks=c("1998-01", "1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
+                                       "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", 
+                                       "2009-01", "2010-01", "2011-01", "2012-01", "2013-01", 
+                                       "2014-01", "2015-01", "2016-01"),
+                              labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005",
+                                       "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013",
+                                       "2014","2015", "2016"),
+                              limits=c(levels(FWD_mon_mn$Year_Month)))
+                             
+
+```
+
+```{r, echo=FALSE, include=FALSE}
+# source air temperature cleaning script
+source("AirTemp_cleaning.r")
+
+# dataframes in this script are
+# spring_a_temp, summer_a_temp, fall_a_temp, winter_a_temp, ann_a_temp
+
+```
+
+```{r, echo=FALSE}
+# plot of annual air temp anomalies
+
+ann_a_temp$YrMnDy <- as.factor(ann_a_temp$YrMnDy)
+
+ann_a_temp2 <- ann_a_temp %>%
+               dplyr::select(YrMn, Month_Anom, Month_Sign) %>%
+               dplyr::distinct()
+
+ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=Month_Anom)) + 
+           geom_col(aes(fill=Month_Sign)) + ylab("Anomaly") + xlab("Year") + 
+           geom_hline(yintercept=0, size=1) + 
+           scale_x_discrete(breaks=c("1999-01", "2000-01", "2001-01", "2002-01","2003-01", 
+                                     "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", 
+                                     "2009-01", "2010-01", "2011-01", "2012-01", "2013-01", 
+                                     "2014-01", "2015-01", "2016-01"),
+                            labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005", 
+                                     "2006", "2007", "2008", "2009", "2010", "2011", "2012", 
+                                     "2013", "2014","2015", "2016"),
+                            limits=c(levels(ann_a_temp$YrMn)))
+
+
+
+```
+
+
+#Invertebrates: Percent Cover Data
+```{r, include=FALSE, echo=FALSE, results='hide'}
+# source the data cleaning script
+source("Data_Cleaning_K_Bay_ALL.r")
+
+AllData_clean2 <- AllData_clean %>% 
+                  dplyr::select(-FUCUS_NUM_ADULTS, -FUCUS_SPORELINGS_NUM) %>%
+                  dplyr::mutate(MASTO_PAP = str_replace_all(MASTO_PAP, ",",""),
+                                SIPHONARIA = gsub("[*]", "", SIPHONARIA)) %>%   # STILL A PROBLEM!!!!!!!
+                  dplyr::filter(PTEROSIPHONIA != "tr") %>%
+                  dplyr::mutate_at(c(5:57), funs(as.numeric)) # converts select columns
+
+  
+```
+
+```{r, echo=FALSE}
+# dataframe is called AllData_clean
+
+PerCov_long <- AllData_clean2 %>%
+               gather(TAXA, PER_COV_OR_COUNT, -YEAR, -TRIPLET, -QUAD, -TREATMENT)
+
+PerCov_anom <- PerCov_long %>%
+               dplyr::select(-TRIPLET, -QUAD) %>%
+               dplyr::filter(TREATMENT == "CONTROL") %>%
+               dplyr::mutate_at(c(4), funs(as.numeric)) %>% # converts select columns
+               dplyr::group_by(TAXA) %>%
+               dplyr::mutate(TAXA_Mean = mean(PER_COV_OR_COUNT),
+                             ANOMALY = PER_COV_OR_COUNT-TAXA_Mean) %>%
+               dplyr::ungroup() %>%
+               dplyr::group_by(TAXA, YEAR) %>%
+               dplyr::mutate(YEAR_Mean = mean(PER_COV_OR_COUNT),
+                             YEAR_Anom = mean(YEAR_Mean-TAXA_Mean),
+                             YEAR_Anom_Scale = YEAR_Anom/100,
+                             YEAR_Anom_Scale2 = YEAR_Anom/10) %>%
+               dplyr::ungroup() %>%
+               dplyr::arrange(YEAR, TREATMENT, TAXA)
+
+```
+
+```{r, echo=FALSE}
+
+explore_plots <- function(y_var){
+                 # Define order of the boxes (use this as "fill=" below)
+                 AllData_clean2$TREATMENT1 <- factor(AllData_clean2$TREATMENT,
+                                                     levels=c("CONTROL","SCRAPE99","SCRAPE00"))
+              
+                 # format Y axis labels
+                 y_label <- paste(toupper(substring(y_var, 1, 1)), tolower(substring(y_var, 2)), sep="")
+
+                
+                 p <- ggplot(data=AllData_clean2, aes_string(x="YEAR", y=y_var, fill="TREATMENT1")) + 
+                      geom_boxplot() + theme(legend.position="top", legend.title=element_blank()) + 
+                      theme_bw() + xlab("Year") + ylim(0,100) +
+                      ylab(paste(y_label, " percent cover", sep = "")) + 
+                      scale_fill_manual(breaks=c("CONTROL","SCRAPE99","SCRAPE00"),
+                                        labels=c("Control","Scrape 1999","Scrape 2000"),
+                                        values=c("#76eec6","#63b8ff","#ff6a6a")) + 
+                      theme(panel.grid=element_blank(),
+                            legend.title=element_blank(),
+                            #legend.position=c(.95, .85),
+                            #legend.position="top",
+                            legend.position="none",
+                            legend.justification=c(1,0),
+                            legend.text=element_text(size=11),
+                            axis.text.y=element_text(size=11),
+                            axis.text.x=element_text(size=11, angle=35, hjust=0.9),
+                            axis.title=element_text(size=13))
+
+                 return(p)
+}
+#
+    
+explore_plot2 <- function(y_var){
+                 # Define order of the boxes (use this as "fill=" below)
+                 AllData_clean2$TREATMENT1 <- factor(AllData_clean2$TREATMENT,
+                                                     levels=c("CONTROL","SCRAPE99","SCRAPE00"))
+                 
+                 # format Y axis labels
+                 y_label <- paste(toupper(substring(y_var, 1, 1)), tolower(substring(y_var, 2)), sep="")
+                 
+                 
+                 q <- ggplot(data=AllData_clean2, aes_string(x="YEAR", y=y_var, fill="TREATMENT1")) + 
+                      geom_boxplot() + theme(legend.position="top", legend.title=element_blank()) + 
+                      theme_bw() + xlab("Year") + 
+                      ylab(paste("Number of ", y_label)) + 
+                      scale_fill_manual(breaks=c("CONTROL","SCRAPE99","SCRAPE00"),
+                                        labels=c("Control","Scrape 1999","Scrape 2000"),
+                                        values=c("#76eec6","#63b8ff","#ff6a6a")) + 
+                      theme(panel.grid=element_blank(),
+                            legend.title=element_blank(),
+                            legend.position=c(.95, .85),
+                            #legend.position="top",
+                            legend.justification=c(0,1),
+                            legend.text=element_text(size=11),
+                            axis.text.y=element_text(size=11),
+                            axis.text.x=element_text(size=11, angle=35, hjust=0.9),
+                            axis.title=element_text(size=13))
+                  
+                 return(q)
+}       
+
+
+```
+
+```{r, echo=FALSE, fig.height=3.5, fig.width=7, warning=FALSE}
+# Fucus Total
+# ft <- explore_plots("FUCUS_TOTAL")
+# ft
+
+# make a plot for each variable
+# FUCUS_PERCOV_TOTAL_scaled , FUCUS_SPORELINGS_PERCOV , MYTILUS , PTEROSIPHONIA , BARNACLES , BARNACLE_SPAT
+var_names <- names(AllData_clean2[,c(8,9,26,27,42,54)])  
+
+PerCov_Plots <- lapply(var_names, function(x) FUN=explore_plots(y_var=x))
+
+BARN_SPAT_plot <- PerCov_Plots[[1]] + ylab("Barnacle spat percent cover")
+BARN_plot <- PerCov_Plots[[2]] + ylab("Barnacle percent cover")
+FUCUS_plot <- PerCov_Plots[[3]] + ylab(expression(paste(italic("Fucus"), " percent cover"))) 
+FUC_SPORE_plot <- PerCov_Plots[[4]] + ylab(expression(paste(italic("Fucus"), " sporeling percent cover"))) 
+MUSS_plot <- PerCov_Plots[[5]] + ylab(expression(paste(italic("Mytilus"), " percent cover"))) 
+PTERO_plot <- PerCov_Plots[[6]] + ylab(expression(paste(italic("Pterosiphonia"), " percent cover")))  
+
+##
+# make a plot for each variable
+#LOTTIIDAE_scaled , L.SITKANA_scaled 
+var_names2 <- names(AllData_clean2[,c(33,37)])  
+
+Count_Plots <- lapply(var_names2, function(x) FUN=explore_plot2(y_var=x))
+
+SNAIL_plot <- Count_Plots[[1]] + ylab(expression(paste("Number of ", italic("L. sitkana")))) +
+              theme(legend.position="none")  
+LIMP_plot <- Count_Plots[[2]] + ylab(expression(paste("Number of ", italic("Lottiidae")))) 
+
+```
+
+```{r, echo=FALSE, fig.height=12, fig.width=12}
+# arranging above plots
+grid.arrange(BARN_SPAT_plot, FUC_SPORE_plot, BARN_plot, FUCUS_plot, MUSS_plot, PTERO_plot, 
+             SNAIL_plot, LIMP_plot, ncol=2)
+
+```
