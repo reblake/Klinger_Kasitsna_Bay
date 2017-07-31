@@ -118,110 +118,39 @@ ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=Month_Anom)) +
 #Invertebrates: Percent Cover Data
 ```{r, include=FALSE, echo=FALSE, results='hide'}
 # source the data cleaning script
-source("Data_Cleaning_K_Bay_ALL.r")
+source("Data_Cleaning_K_Bay.r")
 
-AllData_clean2 <- AllData_clean %>% 
-                  dplyr::select(-FUCUS_NUM_ADULTS, -FUCUS_SPORELINGS_NUM) %>%
-                  dplyr::mutate(MASTO_PAP = str_replace_all(MASTO_PAP, ",",""),
-                                SIPHONARIA = gsub("[*]", "", SIPHONARIA)) %>%   # STILL A PROBLEM!!!!!!!
-                  dplyr::filter(PTEROSIPHONIA != "tr") %>%
-                  dplyr::mutate_at(c(5:57), funs(as.numeric)) # converts select columns
+# dataframe is called PerCov_clean
 
-  
-```
-
-```{r, echo=FALSE}
-# dataframe is called AllData_clean
-
-PerCov_long <- AllData_clean2 %>%
-               gather(TAXA, PER_COV_OR_COUNT, -YEAR, -TRIPLET, -QUAD, -TREATMENT)
+PerCov_long <- PerCov_clean %>%
+               gather(Taxa, Percent_Cover, -standard_code, -plot, -abbr_code, -Year, -Block, -Treatment)
 
 PerCov_anom <- PerCov_long %>%
-               dplyr::select(-TRIPLET, -QUAD) %>%
-               dplyr::filter(TREATMENT == "CONTROL") %>%
-               dplyr::mutate_at(c(4), funs(as.numeric)) %>% # converts select columns
-               dplyr::group_by(TAXA) %>%
-               dplyr::mutate(TAXA_Mean = mean(PER_COV_OR_COUNT),
-                             ANOMALY = PER_COV_OR_COUNT-TAXA_Mean) %>%
+               dplyr::select(-standard_code, -abbr_code) %>%
+               dplyr::filter(Treatment == "01") %>%
+               dplyr::group_by(Taxa) %>%
+               dplyr::mutate(Taxa_Mean = mean(Percent_Cover),
+                             PerCov_Anom = Percent_Cover-Taxa_Mean) %>%
                dplyr::ungroup() %>%
-               dplyr::group_by(TAXA, YEAR) %>%
-               dplyr::mutate(YEAR_Mean = mean(PER_COV_OR_COUNT),
-                             YEAR_Anom = mean(YEAR_Mean-TAXA_Mean),
-                             YEAR_Anom_Scale = YEAR_Anom/100,
-                             YEAR_Anom_Scale2 = YEAR_Anom/10) %>%
+               dplyr::group_by(Taxa, Year) %>%
+               dplyr::mutate(Year_Mean = mean(Percent_Cover),
+                             Year_Anom = mean(Year_Mean-Taxa_Mean),
+                             Year_Anom_Scale = Year_Anom/100,
+                             Year_Anom_Scale2 = Year_Anom/10) %>%
                dplyr::ungroup() %>%
-               dplyr::arrange(YEAR, TREATMENT, TAXA)
+               dplyr::arrange(Year, Block, Treatment, Taxa)
 
 ```
 
 ```{r, echo=FALSE}
 explore_plots <- function(y_var){
-                 # Define order of the boxes (use this as "fill=" below)
-                 AllData_clean2$TREATMENT1 <- factor(AllData_clean2$TREATMENT,
-                                                     levels=c("CONTROL","SCRAPE99","SCRAPE00"))
-                 
-                
-                 p <- ggplot(data=AllData_clean2, aes_string(x="YEAR", y=y_var, fill="TREATMENT1")) + 
-                      geom_boxplot() + theme(legend.position="top", legend.title=element_blank()) + 
-                      theme_bw() + xlab("Year") + ylim(0,100) +
-                      ylab(paste(toupper(substring(y_var, 1, 1)), 
-                                 tolower(substring(y_var, 2)), 
-                                 " percent cover", sep = "")) + 
-                      scale_fill_manual(breaks=c("CONTROL","SCRAPE99","SCRAPE00"),
-                                        labels=c("Control","Scrape 1999","Scrape 2000"),
-                                        values=c("#76eec6","#63b8ff","#ff6a6a")) + 
-                      theme(panel.grid=element_blank(),
-                            legend.title=element_blank(),
-                            legend.position=c(.95, .85),
-                            #legend.position="top",
-                            legend.justification=c(1,0),
-                            legend.text=element_text(size=13),
-                            axis.text.y=element_text(size=13),
-                            axis.text.x=element_text(size=13, angle=35, hjust=0.9),
-                            axis.title=element_text(size=19))
-
+                 p <- ggplot(data=PerCov_clean, aes_string(x="Year", y=y_var, fill="Treatment")) + 
+                      geom_boxplot() + theme(legend.position="top", legend.title=element_blank()) +
+                      scale_fill_manual(breaks=c("01","99","00","10"),
+                                        labels=c("Control","Treatment 1","Treatment 2","10"),
+                                        values=c("#086d44","#2d348f","#fc7307","#a8148b"))
                  return(p)
 }
-#
-    
-explore_plot2 <- function(y_var){
-                 # Define order of the boxes (use this as "fill=" below)
-                 AllData_clean2$TREATMENT1 <- factor(AllData_clean2$TREATMENT,
-                                                     levels=c("CONTROL","SCRAPE99","SCRAPE00"))
-                 
-                 # format Y axis labels
-                 y_label <- paste(toupper(substring(y_var, 1, 1)), tolower(substring(y_var, 2)), sep="")
-                 
-                 
-                 q <- ggplot(data=AllData_clean2, aes_string(x="YEAR", y=y_var, fill="TREATMENT1")) + 
-                      geom_boxplot() + theme(legend.position="top", legend.title=element_blank()) + 
-                      theme_bw() + xlab("Year") + 
-                      ylab(expression(paste("Number of ", italic(y_label)))) + 
-                      scale_fill_manual(breaks=c("CONTROL","SCRAPE99","SCRAPE00"),
-                                        labels=c("Control","Scrape 1999","Scrape 2000"),
-                                        values=c("#76eec6","#63b8ff","#ff6a6a")) + 
-                      theme(panel.grid=element_blank(),
-                            legend.title=element_blank(),
-                            legend.position=c(.95, .85),
-                            #legend.position="top",
-                            legend.justification=c(1,0),
-                            legend.text=element_text(size=13),
-                            axis.text.y=element_text(size=13),
-                            axis.text.x=element_text(size=13, angle=35, hjust=0.9),
-                            axis.title=element_text(size=19))
-                  
-                 return(q)
-}       
-
-
-
-
-                 # rename some columns for plot labeling purposes
-                # names(AllData_clean2)[names(AllData_clean2) == 'FUCUS_PERCOV_TOTAL'] <- 'FUCUS'
-                # names(AllData_clean2)[names(AllData_clean2) == 'FUCUS_SPORELINGS_PERCOV'] <- '`FUCUS SPORELINGS`'
-                # names(AllData_clean2)[names(AllData_clean2) == 'BARNACLES'] <- 'BARNACLE'   
-                # names(AllData_clean2)[names(AllData_clean2) == 'BARNACLE_SPAT'] <- '`BARNACLE SPAT`' 
-
 
 
 ```
@@ -232,17 +161,9 @@ explore_plot2 <- function(y_var){
 # ft
 
 # make a plot for each variable
-# FUCUS_PERCOV_TOTAL_scaled , FUCUS_SPORELINGS_PERCOV , MYTILUS , PTEROSIPHONIA , BARNACLES , BARNACLE_SPAT
-var_names <- names(AllData_clean2[,c(8,9,26,27,42,54)])  
+var_names <- names(PerCov_clean[,c(4:28)]) 
 
-PerCov_Plots <- lapply(var_names, function(x) FUN=explore_plots(y_var=x))
-
-##
-# make a plot for each variable
-#LOTTIIDAE_scaled , L.SITKANA_scaled 
-var_names2 <- names(AllData_clean2[,c(33,37)])  
-
-Count_Plots <- lapply(var_names2, function(x) FUN=explore_plot2(y_var=x))
+lapply(var_names, function(x) FUN=explore_plots(y_var=x))
 
 ```
 
