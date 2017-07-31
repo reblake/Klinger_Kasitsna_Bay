@@ -3,8 +3,8 @@ title: "Data Visualization"
 author: "Rachael E. Blake"
 date: "May 1, 2017"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r, include=FALSE, echo=FALSE, results='hide'}
@@ -30,7 +30,7 @@ pdo_mon_adj <- pdo_mon %>%
 
 ```{r, echo=FALSE}
 # PDO plots
-pdo_plot <- ggplot(data=pdo_mon, aes(x=Year, y=PDO)) + geom_col() + 
+pdo_plot <- ggplot(data=pdo_mon, aes(x=YEAR, y=PDO)) + geom_col() + 
             geom_hline(yintercept=0, size=1.5) + ylab("PDO Index")
 
   
@@ -57,7 +57,7 @@ source("Fresh_Discharge_cleaning.r")
 ```
 
 ```{r, echo=FALSE}
-fwd_plot <- ggplot(data=FWD_ann_mn, aes(x=Year, y=(mean_yearly_anomaly*10))) + 
+fwd_plot <- ggplot(data=FWD_ann_mn, aes(x=YEAR, y=(mean_yearly_anomaly*10))) + 
             geom_col(aes(fill=Sign)) + ylab("Yearly Anomaly") + theme_bw() +
             geom_hline(yintercept=0, size=1) + 
             scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
@@ -123,7 +123,6 @@ source("Data_Cleaning_K_Bay_ALL.r")
 AllData_clean2 <- AllData_clean %>% 
                   dplyr::select(-FUCUS_NUM_ADULTS, -FUCUS_SPORELINGS_NUM) %>%
                   dplyr::mutate(MASTO_PAP = str_replace_all(MASTO_PAP, ",",""),
-                             #   SIPHONARIA = str_replace_all(SIPHONARIA, fixed("*"),"")
                                 SIPHONARIA = gsub("[*]", "", SIPHONARIA)
                              ) %>%
                   dplyr::filter(PTEROSIPHONIA != "tr") %>%
@@ -135,7 +134,6 @@ AllData_clean2 <- AllData_clean %>%
 # dataframe is called AllData_clean
 
 PerCov_long <- AllData_clean2 %>%
-               
                gather(TAXA, PER_COV_OR_COUNT, -YEAR, -TRIPLET, -QUAD, -TREATMENT)
 
 PerCov_anom <- PerCov_long %>%
@@ -159,27 +157,25 @@ PerCov_anom <- PerCov_long %>%
 ```{r, echo=FALSE}
 explore_plots <- function(y_var){
                  p <- ggplot(data=AllData_clean2, aes_string(x="YEAR", y=y_var, fill="TREATMENT")) + 
-                      geom_boxplot() + theme(legend.position="top", legend.title=element_blank())# +
-                     # scale_fill_manual(breaks=c("01","99","00","10"),
-                                      #  labels=c("Control","Treatment 1","Treatment 2"),
-                                      #  values=c("#086d44","#2d348f","#fc7307","#a8148b"))
+                      geom_boxplot() + theme(legend.position="top", legend.title=element_blank()) +
+                      scale_fill_manual(breaks=c("CONTROL","SCRAPE99","SCRAPE00"),
+                                        labels=c("Control","Scrape 1999","Scrape 2000"),
+                                        values=c("#76eec6","#63b8ff","#ff6a6a"))
                  return(p)
 }
 
 
-       p <- ggplot(data=AllData_clean2, aes_string(x="YEAR", y="BARNACLES", fill="TREATMENT")) + 
-            geom_boxplot() + theme(legend.position="top", legend.title=element_blank())
-
+ 
 
 ```
 
 ```{r, echo=FALSE, fig.height=3.5, fig.width=7}
 # Fucus Total
-# ft <- explore_plots("FUCUS_TOTAL")
+# ft <- explore_plots("FUCUS_PERCOV_TOTAL")
 # ft
 
 # make a plot for each variable
-var_names <- names(AllData_clean2[,c(5:59)]) 
+var_names <- names(AllData_clean2[,c(5:57)]) 
 
 lapply(var_names, function(x) FUN=explore_plots(y_var=x))
 
@@ -187,25 +183,25 @@ lapply(var_names, function(x) FUN=explore_plots(y_var=x))
 
 ```{r, echo=FALSE, eval=FALSE}
 # Mussel anomaly plot
-anom_muss <- ggplot(data=PerCov_anom[PerCov_anom$Taxa == "Mytilus",]) + 
-             geom_col(aes(x=Year,y=Year_Anom_Scale))
+anom_muss <- ggplot(data=PerCov_anom[PerCov_anom$TAXA == "MYTILUS",]) + 
+             geom_col(aes(x=YEAR,y=YEAR_Anom_Scale))
 
 # Fucus anomaly plot
-anom_fucu <- ggplot(data=PerCov_anom[PerCov_anom$Taxa == "FUCUS_TOTAL",]) + 
-             geom_col(aes(x=Year,y=Year_Anom_Scale))
+anom_fucu <- ggplot(data=PerCov_anom[PerCov_anom$TAXA == "FUCUS_PERCOV_TOTAL",]) + 
+             geom_col(aes(x=YEAR,y=YEAR_Anom_Scale))
 
 ```
 
 ```{r, echo=FALSE, fig.height=5, fig.width=8}
 # combined PDO and mussel anomaly plot
 anom_pdo_muss <- pdo_plot2 + 
-                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "Mytilus",], 
-                          aes(x=Year,y=Year_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
+                 geom_col(data=PerCov_anom[PerCov_anom$TAXA == "MYTILUS",], 
+                          aes(x=YEAR,y=YEAR_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
                  ylab("Anomaly") + theme_bw() + ylim(-4,4) +
                  scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                                    name="",
                                    labels=c("positive PDO", "negative PDO")) +
-                 scale_color_manual(values="#595959", name="", labels="Mytilus % cover") + 
+                 scale_color_manual(values="#595959", name="", labels="MYTILUS % cover") + 
                  theme(panel.grid.major=element_blank(),
                        panel.grid.minor=element_blank(),
                        panel.border=element_blank(),
@@ -218,8 +214,8 @@ anom_pdo_muss
 
 # combined PDO and Fucus anomaly plot
 anom_pdo_fucu <- pdo_plot2 + 
-                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "FUCUS_TOTAL",], 
-                          aes(x=Year,y=Year_Anom_Scale, color="#696366"), width=2) + 
+                 geom_col(data=PerCov_anom[PerCov_anom$TAXA == "FUCUS_PERCOV_TOTAL",], 
+                          aes(x=YEAR,y=YEAR_Anom_Scale, color="#696366"), width=2) + 
                  ylab("Anomaly") + theme_bw() + ylim(-4,4) +
                  scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                                    name="",
@@ -237,8 +233,8 @@ anom_pdo_fucu
 
 # combined PDO and Barnacles anomaly plot
 anom_pdo_barn <- pdo_plot2 + 
-                 geom_col(data=PerCov_anom[PerCov_anom$Taxa == "Barnacles",], 
-                          aes(x=Year, y=Year_Anom_Scale, color="#696366"), width=2) + 
+                 geom_col(data=PerCov_anom[PerCov_anom$TAXA == "BARNACLES",], 
+                          aes(x=YEAR, y=YEAR_Anom_Scale, color="#696366"), width=2) + 
                  ylab("Anomaly") + theme_bw() + ylim(-4,4) +
                  scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                                    name="",
@@ -259,14 +255,14 @@ anom_pdo_barn
 
 ```{r, echo=FALSE, fig.height=5, fig.width=8}
 # combined freshwater discharge and invert plots
-myt_sub <- unique(PerCov_anom[PerCov_anom$Taxa == "Mytilus",c(2,10,11)])
-myt_sub <- dplyr::mutate(myt_sub, Year_Mon = paste(Year,"-06", sep=""))
-myt_sub$Year <- as.factor(myt_sub$Year)
+myt_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "MYTILUS",c(2,9,10)])
+myt_sub <- dplyr::mutate(myt_sub, YEAR_Mon = paste(YEAR,"-06", sep=""))
+myt_sub$YEAR <- as.factor(myt_sub$YEAR)
 
 
 fwdplot_myt <- fwd_plot2 + 
                geom_col(data=myt_sub, 
-                        aes(x=Year_Mon, y=Year_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
+                        aes(x=YEAR_Mon, y=YEAR_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
                ylab("Anomaly") + xlab("Year") + theme_bw() + ylim(-0.45,0.45) + 
                scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                                  name="",
@@ -283,13 +279,13 @@ fwdplot_myt <- fwd_plot2 +
 fwdplot_myt
 
 ###
-fuc_sub <- unique(PerCov_anom[PerCov_anom$Taxa == "FUCUS_TOTAL",c(2,10,11)])
-fuc_sub <- dplyr::mutate(fuc_sub, Year_Mon = paste(Year,"-06", sep=""))
-fuc_sub$Year <- as.factor(fuc_sub$Year)
+fuc_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "FUCUS_PERCOV_TOTAL",c(2,9,10)])
+fuc_sub <- dplyr::mutate(fuc_sub, YEAR_Mon = paste(YEAR,"-06", sep=""))
+fuc_sub$YEAR <- as.factor(fuc_sub$YEAR)
 
 fwdplot_fuc <- fwd_plot2 + 
                geom_col(data=fuc_sub, 
-                        aes(x=Year_Mon, y=Year_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
+                        aes(x=YEAR_Mon, y=YEAR_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
                ylab("Anomaly") + xlab("Year") + theme_bw() + ylim(-0.45,0.45) + 
                scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                                  name="",
@@ -306,13 +302,13 @@ fwdplot_fuc <- fwd_plot2 +
 fwdplot_fuc
 
 ###
-brn_sub <- unique(PerCov_anom[PerCov_anom$Taxa == "Barnacles",c(2,10,11)])
-brn_sub <- dplyr::mutate(brn_sub, Year_Mon = paste(Year,"-06", sep=""))
-brn_sub$Year <- as.factor(brn_sub$Year)
+brn_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "BARNACLES",c(2,9,10)])
+brn_sub <- dplyr::mutate(brn_sub, YEAR_Mon = paste(YEAR,"-06", sep=""))
+brn_sub$YEAR <- as.factor(brn_sub$YEAR)
 
 fwdplot_brn <- fwd_plot2 + 
                geom_col(data=brn_sub, 
-                        aes(x=Year_Mon, y=Year_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
+                        aes(x=YEAR_Mon, y=YEAR_Anom_Scale, color="#696366"), width=2) +    #show.legend=TRUE   
                ylab("Anomaly") + xlab("Year") + theme_bw() + ylim(-0.45,0.45) + 
                scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                                  name="",
@@ -334,45 +330,45 @@ fwdplot_brn
 ```{r, echo=FALSE}
 # subsetting and arranging data for temperature plots below
 myt_sub2 <- PerCov_anom %>%
-            dplyr::filter(Taxa == "Mytilus") %>%
-            dplyr::mutate(Year_Mon = paste(Year,"-06", sep="")) %>%
-            dplyr::select(Year, Year_Anom, Year_Anom_Scale2, Year_Mon) %>%
+            dplyr::filter(TAXA == "MYTILUS") %>%
+            dplyr::mutate(YEAR_Mon = paste(YEAR,"-06", sep="")) %>%
+            dplyr::select(YEAR, YEAR_Anom, YEAR_Anom_Scale2, YEAR_Mon) %>%
             dplyr::distinct()
             
-myt_sub2$Year <- as.factor(myt_sub2$Year)
+myt_sub2$YEAR <- as.factor(myt_sub2$YEAR)
 #
 
 fuc_sub2 <- PerCov_anom %>%
-            dplyr::filter(Taxa == "FUCUS_TOTAL") %>%
-            dplyr::mutate(Year_Mon = paste(Year,"-06", sep="")) %>%
-            dplyr::select(Year, Year_Anom, Year_Anom_Scale2, Year_Mon) %>%
+            dplyr::filter(TAXA == "FUCUS_PERCOV_TOTAL") %>%
+            dplyr::mutate(YEAR_Mon = paste(YEAR,"-06", sep="")) %>%
+            dplyr::select(YEAR, YEAR_Anom, YEAR_Anom_Scale2, YEAR_Mon) %>%
             dplyr::distinct()
             
-fuc_sub2$Year <- as.factor(fuc_sub2$Year)
+fuc_sub2$YEAR <- as.factor(fuc_sub2$YEAR)
 #
 
 brn_sub2 <- PerCov_anom %>%
-            dplyr::filter(Taxa == "Barnacles") %>%
-            dplyr::mutate(Year_Mon = paste(Year,"-06", sep="")) %>%
-            dplyr::select(Year, Year_Anom, Year_Anom_Scale2, Year_Mon) %>%
+            dplyr::filter(TAXA == "BARNACLES") %>%
+            dplyr::mutate(YEAR_Mon = paste(YEAR,"-06", sep="")) %>%
+            dplyr::select(YEAR, YEAR_Anom, YEAR_Anom_Scale2, YEAR_Mon) %>%
             dplyr::distinct()
             
-brn_sub2$Year <- as.factor(brn_sub2$Year)
+brn_sub2$YEAR <- as.factor(brn_sub2$YEAR)
 
 ```
 
 
 ```{r, echo=FALSE}
 # plots of invert percent cover for over-plotting below
-myt <- ggplot(data=myt_sub2, aes(x=Year, y=Year_Anom)) + 
+myt <- ggplot(data=myt_sub2, aes(x=YEAR, y=YEAR_Anom)) + 
        geom_col(width=0.25, alpha=0.5) + theme_bw() + 
        geom_hline(yintercept=0, size=0.5)
 
-fuc <- ggplot(data=fuc_sub2, aes(x=Year, y=Year_Anom)) + 
+fuc <- ggplot(data=fuc_sub2, aes(x=YEAR, y=YEAR_Anom)) + 
        geom_col(width=0.25, alpha=0.5) + theme_bw() + 
        geom_hline(yintercept=0, size=0.5)
 
-brn <- ggplot(data=brn_sub2, aes(x=Year, y=Year_Anom)) + 
+brn <- ggplot(data=brn_sub2, aes(x=YEAR, y=YEAR_Anom)) + 
        geom_col(width=0.25, alpha=0.5) + theme_bw() + 
        geom_hline(yintercept=0, size=0.5)
 
@@ -590,7 +586,7 @@ grid.arrange(spr2, fal2, sum2, win2)
 
 at_myt <- ann_air + 
           geom_col(data=myt_sub2, 
-                   aes(x=Year_Mon,y=Year_Anom_Scale2, color="#696366"), width=2) +    #show.legend=TRUE   
+                   aes(x=YEAR_Mon,y=YEAR_Anom_Scale2, color="#696366"), width=2) +    #show.legend=TRUE   
           ylab("Anomaly") + theme_bw() + ylim(-14,14) + 
           scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                             name="",
@@ -611,7 +607,7 @@ at_myt
 
 at_fuc <- ann_air + 
           geom_col(data=fuc_sub2, 
-                   aes(x=Year_Mon,y=Year_Anom_Scale2, color="#696366"), width=2) +    #show.legend=TRUE   
+                   aes(x=YEAR_Mon,y=YEAR_Anom_Scale2, color="#696366"), width=2) +    #show.legend=TRUE   
           ylab("Anomaly") + theme_bw() + ylim(-14,14) + 
           scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                             name="",
@@ -632,7 +628,7 @@ at_fuc
 
 at_brn <- ann_air + 
           geom_col(data=brn_sub2, 
-                   aes(x=Year_Mon,y=Year_Anom_Scale2, color="#696366"), width=2) +    #show.legend=TRUE   
+                   aes(x=YEAR_Mon,y=YEAR_Anom_Scale2, color="#696366"), width=2) +    #show.legend=TRUE   
           ylab("Anomaly") + theme_bw() + ylim(-14,14) + 
           scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                             name="",
@@ -667,7 +663,7 @@ source("NMDS_analysis.r")
 # prettier plotting
 # build a data frame with NMDS coordinates and metadata
 NMDS_ord <- data.frame(NMDS1 = percov_mds$points[,1], NMDS2 = percov_mds$points[,2],
-                       PDO_Sign = PerCov_PDO$PDO_Sign, Year = PerCov_PDO$Year)
+                       PDO_Sign = PerCov_PDO$PDO_Sign, YEAR = PerCov_PDO$Year)
 
 # now the plot
 ord1 <- ggplot(NMDS_ord, aes(x=NMDS1, y=NMDS2, color=PDO_Sign)) +
@@ -679,7 +675,7 @@ ord1 <- ggplot(NMDS_ord, aes(x=NMDS1, y=NMDS2, color=PDO_Sign)) +
               panel.grid.minor=element_blank())
 ord1
 
-ord2 <- ggplot(NMDS_ord, aes(x=MDS1, y=MDS2, color=Year)) +
+ord2 <- ggplot(NMDS_ord, aes(x=NMDS1, y=NMDS2, color=YEAR)) +
         geom_point() + #stat_ellipse() +
         theme_bw() + labs(title = "NMDS Plot by Year")
 
@@ -695,7 +691,7 @@ percov_perm
 # prettier plotting
 # build a data frame with NMDS coordinates and metadata
 NMDS_ord2 <- data.frame(NMDS1 = percov_mds2$points[,1], NMDS2 = percov_mds2$points[,2],
-                        Year = fresh_treats$Year, FWD_Anom_Sign = fresh_treats$FWD_Sign)
+                        YEAR = fresh_treats$Year, FWD_Anom_Sign = fresh_treats$FWD_Sign)
 
 # now the plot
 ord3 <- ggplot(NMDS_ord2, aes(x=NMDS1, y=NMDS2, color=FWD_Anom_Sign)) +
@@ -719,7 +715,7 @@ percov_perm2
 # prettier plotting
 # build a data frame with NMDS coordinates and metadata
 NMDS_ord3 <- data.frame(NMDS1 = percov_mds3$points[,1], NMDS2 = percov_mds3$points[,2],
-                        Year = atemp_treats$Year, ATmp_Anom_Sign = atemp_treats$ATmp_Sign)
+                        YEAR = atemp_treats$Year, ATmp_Anom_Sign = atemp_treats$ATmp_Sign)
 
 # now the plot
 ord4 <- ggplot(NMDS_ord3, aes(x=NMDS1, y=NMDS2, color=ATmp_Anom_Sign)) +
@@ -743,7 +739,7 @@ percov_perm3
 # prettier plotting
 # build a data frame with NMDS coordinates and metadata
 NMDS_ord4 <- data.frame(NMDS1 = percov_mds4$points[,1], NMDS2 = percov_mds4$points[,2],
-                        Year = all_treats$Year, ATmp_Anom_Sign = all_treats$ATmp_Sign,
+                        YEAR = all_treats$Year, ATmp_Anom_Sign = all_treats$ATmp_Sign,
                         FWD_annSign = all_treats$FWD_Sign, PDOSign = all_treats$PDO_Sign)
 
 # now the plot
@@ -770,27 +766,27 @@ percov_perm4
 # prettier plotting
 # build a data frame with NMDS coordinates and metadata
 NMDS_ord5 <- data.frame(NMDS1 = percov_mds5$points[,1], NMDS2 = percov_mds5$points[,2],
-                        Year = all_treats2$Year, Plot = all_treats2$plot,
+                        YEAR = all_treats2$Year, QUAD = all_treats2$QUAD,
                         ATmp_Anom_Sign = all_treats2$ATmp_Sign,
                         FWD_annSign = all_treats2$FWD_Sign, PDOSign = all_treats2$PDO_Sign)
 
 # make convex hulls for each plot across all years
 find_hull <- function(df) df[chull(df$NMDS1, df$NMDS2), ]
-hulls_all <- ddply(NMDS_ord5, "Plot", find_hull)
+hulls_all <- ddply(NMDS_ord5, "QUAD", find_hull)
 
 # now the plot
-ord6 <- ggplot(NMDS_ord5, aes(x=NMDS1, y=NMDS2, color=Plot)) +
+ord6 <- ggplot(NMDS_ord5, aes(x=NMDS1, y=NMDS2, color=QUAD)) +
         geom_point(size=4) + theme_bw() + 
-        geom_polygon(data=hulls_all, aes(fill=Plot), alpha=0.3, size=1) +
+        geom_polygon(data=hulls_all, aes(fill=QUAD), alpha=0.3, size=1) +
         theme(panel.grid.major=element_blank(),
               panel.grid.minor=element_blank())
 ord6
 
 # make convex hulls for each year across all plots
-hulls_all2 <- ddply(NMDS_ord5, "Year", find_hull)
+hulls_all2 <- ddply(NMDS_ord5, "YEAR", find_hull)
 
 # now the plot
-ord7 <- ggplot(NMDS_ord5, aes(x=NMDS1, y=NMDS2, color=Year)) +
+ord7 <- ggplot(NMDS_ord5, aes(x=NMDS1, y=NMDS2, color=YEAR)) +
         geom_point(size=4) + theme_bw() + 
         geom_polygon(data=hulls_all2, aes(fill=ATmp_Anom_Sign), alpha=0, size=1) +
         theme(panel.grid.major=element_blank(),
@@ -851,9 +847,9 @@ grid.arrange(cor_plot2, cor_plot1, cor_plot3, nrow=2)
 
 ### Correlations between other variables
 ```{r, echo=FALSE, fig.height=6, fig.width=8}
-lmfit_tm <- lm(ATemp_YearMn~Mytilus, data=PerCov_all)  # lm() fit 
+lmfit_tm <- lm(ATemp_YearMn~MYTILUS, data=PerCov_all)  # lm() fit 
 
-cor_plot4 <- ggplot(data=PerCov_all, aes(x=Mytilus, y=ATemp_YearMn)) + 
+cor_plot4 <- ggplot(data=PerCov_all, aes(x=MYTILUS, y=ATemp_YearMn)) + 
              geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
              labs(title=paste("Adj R^2 =",signif(summary(lmfit_tm)$adj.r.squared, 4),
                                #"Intercept =",signif(lmfit_tm$coef[[1]],5 ),
@@ -863,9 +859,9 @@ cor_plot4 <- ggplot(data=PerCov_all, aes(x=Mytilus, y=ATemp_YearMn)) +
             
 
 
-lmfit_tfu <- lm(ATemp_YearMn~FUCUS_TOTAL, data=PerCov_all)  # lm() fit 
+lmfit_tfu <- lm(ATemp_YearMn~FUCUS_PERCOV_TOTAL, data=PerCov_all)  # lm() fit 
 
-cor_plot5 <- ggplot(data=PerCov_all, aes(x=FUCUS_TOTAL, y=ATemp_YearMn)) + 
+cor_plot5 <- ggplot(data=PerCov_all, aes(x=FUCUS_PERCOV_TOTAL, y=ATemp_YearMn)) + 
              geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
              labs(title=paste("Adj R^2 =",signif(summary(lmfit_tfu)$adj.r.squared, 4),
                                #"Intercept =",signif(lmfit_tfu$coef[[1]],5 ),
@@ -874,9 +870,9 @@ cor_plot5 <- ggplot(data=PerCov_all, aes(x=FUCUS_TOTAL, y=ATemp_YearMn)) +
              theme(plot.title = element_text(size=9))
 
 
-lmfit_tbn <- lm(ATemp_YearMn~Barnacles, data=PerCov_all)  # lm() fit 
+lmfit_tbn <- lm(ATemp_YearMn~BARNACLES, data=PerCov_all)  # lm() fit 
 
-cor_plot5b <- ggplot(data=PerCov_all, aes(x=Barnacles, y=ATemp_YearMn)) + 
+cor_plot5b <- ggplot(data=PerCov_all, aes(x=BARNACLES, y=ATemp_YearMn)) + 
               geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
               labs(title=paste("Adj R^2 =",signif(summary(lmfit_tbn)$adj.r.squared, 4),
                                 #"Intercept =",signif(lmfit_tbn$coef[[1]],5 ),
@@ -885,9 +881,9 @@ cor_plot5b <- ggplot(data=PerCov_all, aes(x=Barnacles, y=ATemp_YearMn)) +
              theme(plot.title = element_text(size=10))
             
 #####
-lmfit_fwm <- lm(mn_yr_discharge~Mytilus, data=PerCov_all)  # lm() fit 
+lmfit_fwm <- lm(mn_yr_discharge~MYTILUS, data=PerCov_all)  # lm() fit 
 
-cor_plot6 <- ggplot(data=PerCov_all, aes(x=Mytilus, y=mn_yr_discharge)) + 
+cor_plot6 <- ggplot(data=PerCov_all, aes(x=MYTILUS, y=mn_yr_discharge)) + 
              geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
              labs(title=paste("Adj R^2 =",signif(summary(lmfit_fwm)$adj.r.squared, 4),
                                #"Intercept =",signif(lmfit_fwm$coef[[1]],5 ),
@@ -898,9 +894,9 @@ cor_plot6 <- ggplot(data=PerCov_all, aes(x=Mytilus, y=mn_yr_discharge)) +
             
 
 
-lmfit_fwf <- lm(mn_yr_discharge~FUCUS_TOTAL, data=PerCov_all)  # lm() fit 
+lmfit_fwf <- lm(mn_yr_discharge~FUCUS_PERCOV_TOTAL, data=PerCov_all)  # lm() fit 
 
-cor_plot7 <- ggplot(data=PerCov_all, aes(x=FUCUS_TOTAL, y=mn_yr_discharge)) + 
+cor_plot7 <- ggplot(data=PerCov_all, aes(x=FUCUS_PERCOV_TOTAL, y=mn_yr_discharge)) + 
              geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
              labs(title=paste("Adj R^2 =",signif(summary(lmfit_fwf)$adj.r.squared, 4),
                                #"Intercept =",signif(lmfit_fwf$coef[[1]],5 ),
@@ -910,9 +906,9 @@ cor_plot7 <- ggplot(data=PerCov_all, aes(x=FUCUS_TOTAL, y=mn_yr_discharge)) +
              scale_y_continuous(labels=function(x) sprintf("%.2f", x))
             
 
-lmfit_fwb <- lm(mn_yr_discharge~Barnacles, data=PerCov_all)  # lm() fit 
+lmfit_fwb <- lm(mn_yr_discharge~BARNACLES, data=PerCov_all)  # lm() fit 
 
-cor_plot8 <- ggplot(data=PerCov_all, aes(x=Barnacles, y=mn_yr_discharge)) + 
+cor_plot8 <- ggplot(data=PerCov_all, aes(x=BARNACLES, y=mn_yr_discharge)) + 
              geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
              labs(title=paste("Adj R^2 =",signif(summary(lmfit_fwb)$adj.r.squared, 4),
                                #"Intercept =",signif(lmfit_fwb$coef[[1]],5 ),
@@ -930,10 +926,10 @@ grid.arrange(cor_plot4, cor_plot5, cor_plot5b, cor_plot6, cor_plot7, cor_plot8, 
 
 ```
 
-```{r, echo=FALSE, fig.height=6, fig.width=8}
-lmfit_fb <- lm(Barnacles~FUCUS_TOTAL, data=PerCov_all)  # lm() fit 
+```{r, echo=FALSE, fig.height=3, fig.width=4}
+lmfit_fb <- lm(BARNACLES~FUCUS_PERCOV_TOTAL, data=PerCov_all)  # lm() fit 
 
-cor_plot9 <- ggplot(data=PerCov_all, aes(x=FUCUS_TOTAL, y=Barnacles)) + 
+cor_plot9 <- ggplot(data=PerCov_all, aes(x=FUCUS_PERCOV_TOTAL, y=BARNACLES)) + 
              geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
              labs(title=paste("Adj R^2 =",signif(summary(lmfit_fb)$adj.r.squared, 4),
                                #"Intercept =",signif(lmfit_fb$coef[[1]],5 ),
@@ -945,8 +941,8 @@ cor_plot9
 ```
 
 
-# MVABUND Results
 ```{r, echo=FALSE}
+## MVABUND Results
 #anova(glm_percov, p.uni="adjusted")
 
 ```
