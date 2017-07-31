@@ -19,7 +19,7 @@ WaterTempDat <- function(data_url){
                                  stringsAsFactors=FALSE, header=TRUE)
                 
                 df1 <- df %>%
-                       select(-X,-N,-R) %>%
+                      # select(-X,-N,-R) %>%
                        dplyr::rename(Date_Time = Date.Time,
                                      Water_Temp_C = Water.Temperature) %>%
                        dplyr::filter(!is.na(Water_Temp_C)) %>%
@@ -76,13 +76,13 @@ WTemp_Yr <- WTemp_all %>%
 
 WTemp_June <- WTemp_all %>%
               dplyr::select(-Water_Temp_Yearly) %>%
-              dplyr::filter(Month %in% c(6)) %>%
+              dplyr::filter(Month == "06") %>%
               dplyr::rename(Water_Temp_June = Water_Temp_Monthly) %>%
               dplyr::select(-Month)
 
 WTemp_Dec <- WTemp_all %>%
              dplyr::select(-Water_Temp_Yearly) %>%
-             dplyr::filter(Month %in% c(12)) %>%
+             dplyr::filter(Month == "12") %>%
              dplyr::rename(Water_Temp_Dec = Water_Temp_Monthly) %>%
              dplyr::select(-Month) %>% 
              dplyr::mutate(WTemp_Dec_Lag = lag(Water_Temp_Dec))
