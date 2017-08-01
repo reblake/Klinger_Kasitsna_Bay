@@ -144,7 +144,9 @@ ann_a_temp <- a_temp %>%
 year_a_temp <- a_temp %>%
                dplyr::mutate(Ann_mn_all = mean(HOURLYDRYBULBTEMPC)) %>%
                dplyr::group_by(Year) %>%
-               dplyr::mutate(ATemp_YearMn = mean(HOURLYDRYBULBTEMPC)) %>%
+               dplyr::mutate(ATemp_YearMn = mean(HOURLYDRYBULBTEMPC),
+                             ATemp_YearSD = sd(HOURLYDRYBULBTEMPC),
+                             ATemp_YearSE = ATemp_YearSD/sqrt(n())) %>%
                dplyr::ungroup() %>%
                dplyr::select(-Time, -Day, -Month, -HOURLYDRYBULBTEMPC, -DATE, -Date) %>%
                dplyr::distinct() %>%

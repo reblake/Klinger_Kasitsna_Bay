@@ -127,9 +127,12 @@ FWD_anomaly <- FWD_less %>%
 FWD_ann_mn <- FWD_anomaly %>%
               dplyr::group_by(Year) %>%
               dplyr::mutate(mean_yearly_discharge_m3s1 = mean(mean_daily_discharge_m3s1),
+                            SD_yearly_discharge_m3s1 = sd(mean_daily_discharge_m3s1),
+                            SE_yearly_discharge_m3s1 = SD_yearly_discharge_m3s1/sqrt(n()),
                             mean_yearly_anomaly = mean(daily_anomaly)) %>%
               dplyr::ungroup() %>%
-              dplyr::select(Year, mean_yearly_discharge_m3s1, mean_yearly_anomaly) %>%
+              dplyr::select(Year, mean_yearly_discharge_m3s1, mean_yearly_anomaly,
+                            SD_yearly_discharge_m3s1,SE_yearly_discharge_m3s1) %>%
               dplyr::distinct() %>%
               dplyr::mutate(Sign = ifelse(mean_yearly_anomaly>0, "A", "B"))
               

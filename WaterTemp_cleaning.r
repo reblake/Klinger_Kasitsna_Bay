@@ -28,12 +28,15 @@ WaterTempDat <- function(data_url){
                                      Month = sapply(strsplit(as.character(Date), split="-") , function(x) x[2])) %>%
                        dplyr::mutate_at(c(5), funs(as.numeric)) %>% 
                        dplyr::group_by(Year, Month) %>%
-                       dplyr::mutate(Water_Temp_Monthly = mean(Water_Temp_C, na.rm = T)) %>%
+                       dplyr::mutate(Water_Temp_Monthly = mean(Water_Temp_C, na.rm = T),
+                                     Water_Temp_Monthly_SD = sd(Water_Temp_C, na.rm = T),
+                                     Water_Temp_Monthly_SE = Water_Temp_Monthly_SD/sqrt(n())) %>%
                        dplyr::ungroup() %>%
                        dplyr::group_by(Year) %>%
                        dplyr::mutate(Water_Temp_Yearly = mean(Water_Temp_C, na.rm = T)) %>%
                        dplyr::ungroup() %>%
-                       dplyr::select(Year, Month, Water_Temp_Monthly, Water_Temp_Yearly) %>%
+                       dplyr::select(Year, Month, Water_Temp_Monthly, Water_Temp_Yearly, 
+                                     Water_Temp_Monthly_SD, Water_Temp_Monthly_SE) %>%
                        dplyr::distinct()
                 
                 return(df1)
