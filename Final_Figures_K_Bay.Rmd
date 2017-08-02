@@ -2,12 +2,14 @@
 title: "Final Figures"
 author: "Rachael E. Blake"
 date: "July 28, 2017"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
 ```{r, include=FALSE, echo=FALSE, results='hide'}
-library(ggplot2) ; library(tidyverse) ; library(gridExtra)
+library(ggplot2) ; library(tidyverse) ; library(gridExtra) ; library(egg)
 
 ```
 
@@ -226,37 +228,46 @@ explore_plot2 <- function(y_var){
 
     
 explore_plot3 <- function(y_var){
-                 # Define order of the boxes (use this as "fill=" below)
-                 AllData_clean2$TREATMENT1 <- factor(AllData_clean2$TREATMENT,
-                                                     levels=c("CONTROL","SCRAPE99","SCRAPE00"))
-                 
                  # format Y axis labels
                  y_label <- paste(toupper(substring(y_var, 1, 1)), tolower(substring(y_var, 2)), sep="")
                  
+                 # have to define my own standard error function because one doesn't exist in base R!!!
+                 se <- function(x) sqrt(var(x)/length(x))
+                 
                  # subset only to CONTROLs, calculate SD and SE for each species in each year
                  CONTData_clean <- AllData_clean2 %>%
-                                   group_by() %>%
-                                   summarize_all()
+                                   dplyr::filter(TREATMENT == "CONTROL") %>%
+                                   dplyr::select(TRIPLET, QUAD, TREATMENT, YEAR, BARNACLE_SPAT, BARNACLES, 
+                                                 FUCUS_PERCOV_TOTAL, FUCUS_SPORELINGS_PERCOV, MYTILUS,
+                                                 PTEROSIPHONIA, L.SITKANA, LOTTIIDAE) %>%
+                                   group_by(YEAR) %>%
+                                   mutate_at(vars(BARNACLE_SPAT:LOTTIIDAE), funs(Mean=mean), na.rm=TRUE) %>%
+                                   mutate_at(vars(BARNACLE_SPAT:LOTTIIDAE), funs(SD=sd), na.rm=TRUE) %>%
+                                   mutate_at(vars(BARNACLE_SPAT:LOTTIIDAE), funs(SE=se)) %>%
+                                   ungroup()
                  
+                 # making the error bar min and max
+                 y_axis <- as.name(paste(y_var, "_Mean", sep=""))
+                 SE_name <- as.name(paste(y_var, "_SE", sep=""))
+                 ymins <- paste(y_axis, SE_name, sep='-')
+                 ymaxs <- paste(y_axis, SE_name, sep='+')
+              #   bars <- aes_string(ymin=y_axis-SE_name, ymax=y_axis+SE_name, width=.2)
+
                  
-                 q <- ggplot(data=CONTData_clean, aes_string(x="YEAR", y=y_var, fill="TREATMENT1")) + 
-                      geom_boxplot() + theme(legend.position="top", legend.title=element_blank()) + 
-                      theme_bw() + xlab("Year") + 
-                      ylab(paste("Number of ", y_label)) + 
-                      scale_fill_manual(breaks=c("CONTROL","SCRAPE99","SCRAPE00"),
-                                        labels=c("Control","Scrape 1999","Scrape 2000"),
-                                        values=c("#76eec6","#63b8ff","#ff6a6a")) + 
+                 b <- ggplot(data=CONTData_clean, aes_string(x="YEAR", y=y_axis, group=1)) + 
+                      geom_point(size=3) + geom_line(size=1) + theme_bw() + xlab("Year") +
+                      geom_errorbar(data=CONTData_clean, 
+                                    aes_string(ymin=ymins, ymax=ymaxs, width=.2)) +   
+                      ylab(y_label) +
                       theme(panel.grid=element_blank(),
                             legend.title=element_blank(),
-                            #legend.position=c(.95, .55),
-                            legend.position="none",
-                            legend.justification=c(1,0),
-                            legend.text=element_text(size=11),
                             axis.text.y=element_text(size=11),
                             axis.text.x=element_text(size=11, angle=35, hjust=0.9),
-                            axis.title=element_text(size=13))
+                            axis.title=element_text(size=13))#,
+                           # axis.title.x=element_text(),
+                            #axis.text.x=element_blank())
                   
-                 return(q)
+                 return(b)
 } 
 
 
@@ -273,25 +284,18 @@ var_names <- names(AllData_clean2[,c(8,9,26,27,42,54)])
 
 PerCov_Plots <- lapply(var_names, function(x) FUN=explore_plot1(y_var=x))
 
-BARN_SPAT_plot <- PerCov_Plots[[1]] + ylab("Barnacle spat % cover") + theme(legend.position="none",
-                                                                            axis.title.x=element_blank(),
-                                                                            axis.text.x=element_blank())  
-BARN_plot <- PerCov_Plots[[2]] + ylab("Barnacle % cover") + theme(legend.position="none",
-                                                                  axis.title.x=element_blank(),
-                                                                  axis.text.x=element_blank()) 
-FUCUS_plot <- PerCov_Plots[[3]] + ylab(expression(paste(italic("Fucus"), " % cover")))  +
-              theme(legend.position="none",
-                    axis.title.x=element_blank(),
-                    axis.text.x=element_blank()) 
-FUC_SPORE_plot <- PerCov_Plots[[4]] + ylab(expression(paste(italic("Fucus"), " sporeling % cover")))  +
-                  theme(legend.position="none",
-                        axis.title.x=element_blank(),
-                        axis.text.x=element_blank()) 
-MUSS_plot <- PerCov_Plots[[5]] + ylab(expression(paste(italic("Mytilus"), " % cover")))  +
-             theme(legend.position="none",
-                   axis.title.x=element_blank(),
-                   axis.text.x=element_blank()) 
-PTERO_plot <- PerCov_Plots[[6]] + ylab(expression(paste(italic("Pterosiphonia"), " % cover"))) +
+BARN_SPAT_plot <- PerCov_Plots[[1]] + ylab("Barnacle spat % cover") + labs(title="a.") +
+                  theme(legend.position="none", axis.title.x=element_blank(), axis.text.x=element_blank())  
+BARN_plot <- PerCov_Plots[[2]] + ylab("Barnacle % cover") + labs(title="c.") +
+             theme(legend.position="none", axis.title.x=element_blank(), axis.text.x=element_blank()) 
+FUCUS_plot <- PerCov_Plots[[3]] + ylab(expression(paste(italic("Fucus"), " % cover"))) + labs(title="d.") +
+              theme(legend.position="none", axis.title.x=element_blank(), axis.text.x=element_blank()) 
+FUC_SPORE_plot <- PerCov_Plots[[4]] + ylab(expression(paste(italic("Fucus"), " sporeling % cover")))  + 
+                  labs(title="b.") + theme(legend.position="none", axis.title.x=element_blank(),
+                                           axis.text.x=element_blank()) 
+MUSS_plot <- PerCov_Plots[[5]] + ylab(expression(paste(italic("Mytilus"), " % cover"))) + labs(title="e.") +
+             theme(legend.position="none", axis.title.x=element_blank(), axis.text.x=element_blank()) 
+PTERO_plot <- PerCov_Plots[[6]] + ylab(expression(paste(italic("Pterosiphonia"), " % cover"))) + labs(title="f.") +
               theme(axis.title.x=element_blank(), axis.text.x=element_blank())
 
 ##
@@ -301,23 +305,65 @@ var_names2 <- names(AllData_clean2[,c(33,37)])
 
 Count_Plots <- lapply(var_names2, function(x) FUN=explore_plot2(y_var=x))
 
-SNAIL_plot <- Count_Plots[[1]] + ylab(expression(paste(italic("L. sitkana"), " abundance"))) 
-LIMP_plot <- Count_Plots[[2]] + ylab(expression(paste(italic("Lottiidae"), " abundance"))) 
+SNAIL_plot <- Count_Plots[[1]] + ylab(expression(paste(italic("L. sitkana"), " abundance"))) + labs(title="g.") 
+LIMP_plot <- Count_Plots[[2]] + ylab(expression(paste(italic("Lottiidae"), " abundance"))) + labs(title="h.") 
+
 
 ```
 
 ```{r, echo=FALSE, fig.height=12, fig.width=12}
 # arranging above plots
-grid.arrange(BARN_SPAT_plot, FUC_SPORE_plot, BARN_plot, FUCUS_plot, MUSS_plot, PTERO_plot, 
-             SNAIL_plot, LIMP_plot, ncol=2)
+# grid.arrange(BARN_SPAT_plot, FUC_SPORE_plot, BARN_plot, FUCUS_plot, MUSS_plot, PTERO_plot, 
+#              SNAIL_plot, LIMP_plot, ncol=2)
+
+ggarrange(BARN_SPAT_plot, FUC_SPORE_plot, BARN_plot, FUCUS_plot, MUSS_plot, PTERO_plot, 
+          SNAIL_plot, LIMP_plot, ncol=2)
 
 ```
+
+```{r, echo=FALSE, fig.height=4, fig.width=7, warning=FALSE}
+# make a plot for each variable
+var_names3 <- names(AllData_clean2[,c(8,9,26,27,33,37,42,54)]) 
+
+Line_Plots <- lapply(var_names3, function(x) FUN=explore_plot3(y_var=x))
+
+BS_line <- Line_Plots[[1]] + ylab("Barnacle spat % cover") + ylim(0,100) + labs(title="a.") +
+           theme(legend.position="none", axis.title.x=element_blank(), axis.text.x=element_blank()) 
+BN_line <- Line_Plots[[2]] + ylab("Barnacle % cover") + ylim(0,100) + labs(title="c.") +
+           theme(legend.position="none", axis.title.x=element_blank(), axis.text.x=element_blank()) 
+FU_line <- Line_Plots[[3]] + ylab(expression(paste(italic("Fucus"), " % cover"))) + ylim(0,100) + 
+           labs(title="d.") + theme(legend.position="none", axis.title.x=element_blank(),
+                                    axis.text.x=element_blank()) 
+FS_line <- Line_Plots[[4]] + ylab(expression(paste(italic("Fucus"), " sporeling % cover"))) + ylim(0,100) +
+           labs(title="b.") + theme(legend.position="none", axis.title.x=element_blank(),
+                                    axis.text.x=element_blank())
+SN_line <- Line_Plots[[5]] + ylab(expression(paste(italic("L. sitkana"), " abundance"))) + labs(title="g.")  
+LP_line <- Line_Plots[[6]] + ylab(expression(paste(italic("Lottiidae"), " abundance"))) + labs(title="h.") 
+MS_line <- Line_Plots[[7]] + ylab(expression(paste(italic("Mytilus"), " % cover"))) + ylim(0,100) +
+           labs(title="e.") + theme(legend.position="none", axis.title.x=element_blank(),
+                                    axis.text.x=element_blank())
+PT_line <- Line_Plots[[8]] + ylab(expression(paste(italic("Pterosiphonia"), " % cover"))) + ylim(0,100) +
+           labs(title="f.") + theme(legend.position="none", axis.title.x=element_blank(),
+                                    axis.text.x=element_blank())
+
+
+```
+
+```{r, echo=FALSE, fig.height=12, fig.width=12}
+# arranging above plots
+#grid.arrange(BS_line,FS_line,BN_line,FU_line,MS_line,PT_line,SN_line,LP_line, ncol=2)
+
+ggarrange(BS_line,FS_line,BN_line,FU_line,MS_line,PT_line,SN_line,LP_line, ncol=2)
+
+```
+
+
 
 #Environmental Drivers:
 ```{r, echo=FALSE}
 # NOTE: Error bars are standard error
 WT_plot1 <- ggplot(data=WTemp_June, aes(x=Year, y=Water_Temp_June, group=1)) + 
-            geom_point(size=3) + geom_line(size=1) + theme_bw() + 
+            geom_point(size=3) + geom_line(size=1) + theme_bw() + ylim(0,10.5) +
             geom_errorbar(aes(ymin=Water_Temp_June-Water_Temp_Monthly_SE,
                               ymax=Water_Temp_June+Water_Temp_Monthly_SE), width=.2) +
             ylab(expression(paste("June water temperature ( ", degree ~ C,")"))) +
@@ -330,7 +376,7 @@ WT_plot1 <- ggplot(data=WTemp_June, aes(x=Year, y=Water_Temp_June, group=1)) +
                   axis.text.x=element_blank())
 ##
 AT_plot1 <- ggplot(data=year_a_temp, aes(x=Year, y=ATemp_YearMn, group=1)) + 
-            geom_point(size=3) + geom_line(size=1) + theme_bw() + 
+            geom_point(size=3) + geom_line(size=1) + theme_bw() + ylim(0,10.5) +
             geom_errorbar(aes(ymin=ATemp_YearMn-ATemp_YearSE,
                               ymax=ATemp_YearMn+ATemp_YearSE), width=.2) + 
             ylab(expression(paste("Annual air temperature ( ", degree ~ C,")"))) +
@@ -348,17 +394,17 @@ FWD_plot1 <- ggplot(data=FWD_ann_mn, aes(x=Year, y=mean_yearly_discharge_m3s1, g
              theme(panel.grid=element_blank(),
                    legend.title=element_blank(),
                    axis.text.y=element_text(size=11),
-                   #axis.text.x=element_text(size=11, angle=35, hjust=0.9),
-                   axis.title=element_text(size=13),
-                   axis.title.x=element_blank(),
-                   axis.text.x=element_blank())
+                   axis.text.x=element_text(size=11, angle=35, hjust=0.9),
+                   axis.title=element_text(size=13))
   
   
 ```
 
-```{r, echo=FALSE, fig.height=12, fig.width=12}
+```{r, echo=FALSE, fig.height=8, fig.width=12}
 # arranging above plots
-grid.arrange(WT_plot1, FWD_plot1, AT_plot1, ncol=2)
+#grid.arrange(WT_plot1, FWD_plot1, AT_plot1, ncol=2)
+
+ggarrange(WT_plot1, FWD_plot1, AT_plot1, ncol=2)
 
 ```
 
