@@ -3,12 +3,12 @@ title: "Data Visualization"
 author: "Rachael E. Blake"
 date: "May 1, 2017"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r, include=FALSE, echo=FALSE, results='hide'}
-library(ggplot2) ; library(tidyverse) ; library(gridExtra)
+library(ggplot2) ; library(tidyverse) ; library(gridExtra) ; library(grid)
 
 ```
 
@@ -80,7 +80,7 @@ fwd_plot2 <- ggplot(data=FWD_mon_mn, aes(x=Year_Month, y=mean_monthly_anomaly)) 
 
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, include=FALSE}
 # source air temperature cleaning script
 source("AirTemp_cleaning.r")
 
@@ -111,6 +111,15 @@ ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=Month_Anom)) +
                             limits=c(levels(ann_a_temp$YrMn)))
 
 
+
+```
+
+```{r, echo=FALSE, include=FALSE}
+# source air temperature cleaning script
+source("WaterTemp_cleaning.r")
+
+# dataframes in this script are
+# WTemp_all, WTemp_Yr, WTemp_June, WTemp_Dec
 
 ```
 
@@ -659,7 +668,7 @@ source("NMDS_analysis.r")
 
 ```
 ### PDO
-```{r, echo=FALSE, fig.height=6, fig.width=8}
+```{r, echo=FALSE, fig.height=7, fig.width=8}
 # prettier plotting
 # build a data frame with NMDS coordinates and metadata
 NMDS_ord <- data.frame(NMDS1 = percov_mds$points[,1], NMDS2 = percov_mds$points[,2],
@@ -687,7 +696,7 @@ percov_perm
 ```
 
 ### Freshwater
-```{r, echo=FALSE, fig.height=6, fig.width=8}
+```{r, echo=FALSE, fig.height=7, fig.width=8}
 # prettier plotting
 # build a data frame with NMDS coordinates and metadata
 NMDS_ord2 <- data.frame(NMDS1 = percov_mds2$points[,1], NMDS2 = percov_mds2$points[,2],
@@ -711,7 +720,7 @@ percov_perm2
 ```
 
 ### Air Temp
-```{r, echo=FALSE, fig.height=6, fig.width=8}
+```{r, echo=FALSE, fig.height=7, fig.width=8}
 # prettier plotting
 # build a data frame with NMDS coordinates and metadata
 NMDS_ord3 <- data.frame(NMDS1 = percov_mds3$points[,1], NMDS2 = percov_mds3$points[,2],
@@ -762,13 +771,15 @@ percov_perm4
 ```
 
 ### Biological NMDS
-```{r, echo=FALSE, fig.height=6, fig.width=8}
+```{r, echo=FALSE, fig.height=7, fig.width=10}
 # prettier plotting
 # build a data frame with NMDS coordinates and metadata
 NMDS_ord5 <- data.frame(NMDS1 = percov_mds5$points[,1], NMDS2 = percov_mds5$points[,2],
-                        YEAR = all_treats2$Year, QUAD = all_treats2$QUAD,
-                        ATmp_Anom_Sign = all_treats2$ATmp_Sign,
-                        FWD_annSign = all_treats2$FWD_Sign, PDOSign = all_treats2$PDO_Sign)
+                        YEAR = all_treats2$Year, QUAD = all_treats2$QUAD, 
+                        FWD_Disc = round(all_treats2$mn_yr_discharge, digits=2), 
+                        FWD_annSign = all_treats2$FWD_Sign,
+                        ATmp_Anom_Sign = all_treats2$ATmp_Sign, ATemp_YearMn = round(all_treats2$ATemp_YearMn),
+                        Water_Temp_June = round(all_treats2$Water_Temp_June), PDOSign = all_treats2$PDO_Sign)
 
 # make convex hulls for each plot across all years
 find_hull <- function(df) df[chull(df$NMDS1, df$NMDS2), ]
@@ -788,10 +799,66 @@ hulls_all2 <- ddply(NMDS_ord5, "YEAR", find_hull)
 # now the plot
 ord7 <- ggplot(NMDS_ord5, aes(x=NMDS1, y=NMDS2, color=YEAR)) +
         geom_point(size=4) + theme_bw() + 
-        geom_polygon(data=hulls_all2, aes(fill=ATmp_Anom_Sign), alpha=0, size=1) +
+        geom_polygon(data=hulls_all2, aes(fill=YEAR), alpha=0.3, size=1) +
         theme(panel.grid.major=element_blank(),
               panel.grid.minor=element_blank())
 ord7
+
+##
+# now the plot
+vecs5 <- vegan::envfit(percov_mds5$points, sp_percov5, perm=1000)
+vecs5
+sp_vecs <- as.data.frame(vegan::scores(vecs5, display="vectors"))
+sp_vecs <- cbind(sp_vecs, Species = rownames(sp_vecs))
+
+
+ord8 <- ggplot(data=NMDS_ord5, aes(x=NMDS1, y=NMDS2)) +
+        geom_point(size=4, aes(color=QUAD)) + theme_bw() + 
+        geom_segment(data=sp_vecs, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey", size=1.25,
+                     arrow=arrow(length=unit(0.35, "cm"))) +
+        geom_text(data=sp_vecs, aes(x=MDS1, y=MDS2, label=Species), size=4) +
+        theme(panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank())
+ord8
+
+# now the plot
+ord9 <- ggplot(data=NMDS_ord5, aes(x=NMDS1, y=NMDS2)) +
+        geom_point(size=4, aes(color=YEAR)) + theme_bw() + 
+        geom_segment(data=sp_vecs, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey", size=1.25,
+                     arrow=arrow(length=unit(0.35, "cm"))) +
+        geom_text(data=sp_vecs, aes(x=MDS1, y=MDS2, label=Species), size=4) +
+        theme(panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank())
+ord9
+
+##
+# now the plot
+vecs6 <- vegan::envfit(percov_mds5$points, all_treats2[,c(5,8,11)], perm=1000)
+vecs6
+sp_vecs2 <- as.data.frame(vegan::scores(vecs6, display="vectors"))
+sp_vecs2 <- cbind(sp_vecs2, Species = rownames(sp_vecs2))
+
+# now the plot
+ord10 <- ggplot(data=NMDS_ord5, aes(x=NMDS1, y=NMDS2)) +
+         geom_point(size=4, aes(color=YEAR)) + theme_bw() + 
+         geom_segment(data=sp_vecs2, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey", size=1.25,
+                      arrow=arrow(length=unit(0.35, "cm"))) +
+         geom_text(data=sp_vecs2, aes(x=MDS1, y=MDS2, label=Species), size=4) +
+         theme(panel.grid.major=element_blank(),
+               panel.grid.minor=element_blank())
+ord10
+
+
+# now the plot
+ord11 <- ggplot(data=NMDS_ord5, aes(x=NMDS1, y=NMDS2)) +
+         geom_point(size=4, aes(color=PDOSign)) + theme_bw() + 
+         geom_segment(data=sp_vecs, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey", size=1.25,
+                     arrow=arrow(length=unit(0.35, "cm"))) +
+        geom_text(data=sp_vecs, aes(x=MDS1, y=MDS2, label=Species), size=4) +
+         theme(panel.grid.major=element_blank(),
+               panel.grid.minor=element_blank())
+ord11
+
 
 
 ```
@@ -802,7 +869,7 @@ percov_perm5
 ```
 
 ### Correlations between env. variables
-```{r, echo=FALSE, fig.height=6, fig.width=8}
+```{r, echo=FALSE, fig.height=7, fig.width=8}
 lmfit_pf <- lm(mn_yr_discharge~PDO_anul_mn, data=PerCov_all)  # lm() fit 
 
 cor_plot1 <- ggplot(data=PerCov_all, aes(x=PDO_anul_mn, y=mn_yr_discharge)) + 
@@ -824,6 +891,16 @@ cor_plot2 <- ggplot(data=PerCov_all, aes(x=PDO_anul_mn, y=ATemp_YearMn)) +
                               " p =",signif(summary(lmfit_pt)$coef[2,4], 3)))
             
 
+lmfit_pw <- lm(PDO_anul_mn~Water_Temp_June, data=PerCov_all)  # lm() fit 
+
+cor_plot2b <- ggplot(data=PerCov_all, aes(x=Water_Temp_June, y=PDO_anul_mn)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_pw)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_pw$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_pw$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_pw)$coef[2,4], 3)))
+            
+
 
 lmfit_tf <- lm(ATemp_YearMn~mn_yr_discharge, data=PerCov_all)  # lm() fit 
 
@@ -835,13 +912,22 @@ cor_plot3 <- ggplot(data=PerCov_all, aes(x=mn_yr_discharge, y=ATemp_YearMn)) +
                               " p =",signif(summary(lmfit_tf)$coef[2,4], 3)))
             
 
+lmfit_ww <- lm(ATemp_YearMn~Water_Temp_June, data=PerCov_all)  # lm() fit 
+
+cor_plot3b <- ggplot(data=PerCov_all, aes(x=Water_Temp_June, y=ATemp_YearMn)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_ww)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_ww$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_ww$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_ww)$coef[2,4], 3)))
+            
 
 
 ```
 
-```{r, echo=FALSE, fig.height=7, fig.width=8}
+```{r, echo=FALSE, fig.height=8, fig.width=10}
 # arranging above plots
-grid.arrange(cor_plot2, cor_plot1, cor_plot3, nrow=2)
+grid.arrange(cor_plot2, cor_plot1, cor_plot3b, cor_plot2b, cor_plot3,  ncol=2)
 
 ```
 
@@ -916,13 +1002,48 @@ cor_plot8 <- ggplot(data=PerCov_all, aes(x=BARNACLES, y=mn_yr_discharge)) +
                               " p =",signif(summary(lmfit_fwb)$coef[2,4], 3))) +
              theme(plot.title = element_text(size=10)) +
              scale_y_continuous(labels=function(x) sprintf("%.2f", x))
-            
+       
+
+lmfit_jm <- lm(Water_Temp_June~MYTILUS, data=PerCov_all)  # lm() fit 
+
+cor_plot9 <- ggplot(data=PerCov_all, aes(x=MYTILUS, y=Water_Temp_June)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_jm)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_jm$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_jm$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_jm)$coef[2,4], 3))) +
+             theme(plot.title = element_text(size=9))
+                 
+
+lmfit_jf <- lm(Water_Temp_June~FUCUS_PERCOV_TOTAL, data=PerCov_all)  # lm() fit 
+
+cor_plot10 <- ggplot(data=PerCov_all, aes(x=FUCUS_PERCOV_TOTAL, y=Water_Temp_June)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_jf)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_jf$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_jf$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_jf)$coef[2,4], 3))) +
+             theme(plot.title = element_text(size=9))
+         
+
+lmfit_jb <- lm(Water_Temp_June~BARNACLES, data=PerCov_all)  # lm() fit 
+
+cor_plot11 <- ggplot(data=PerCov_all, aes(x=BARNACLES, y=Water_Temp_June)) + 
+             geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
+             labs(title=paste("Adj R^2 =",signif(summary(lmfit_jb)$adj.r.squared, 4),
+                               #"Intercept =",signif(lmfit_jb$coef[[1]],5 ),
+                               #" Slope =",signif(lmfit_jb$coef[[2]], 5),
+                              " p =",signif(summary(lmfit_jb)$coef[2,4], 3))) +
+             theme(plot.title = element_text(size=9))
+                 
 
 ```
 
-```{r, echo=FALSE, fig.height=6, fig.width=10}
+```{r, echo=FALSE, fig.height=10, fig.width=12}
 # arranging above plots
-grid.arrange(cor_plot4, cor_plot5, cor_plot5b, cor_plot6, cor_plot7, cor_plot8, ncol=3)
+grid.arrange(cor_plot4, cor_plot5, cor_plot5b, ncol=2)
+grid.arrange(cor_plot6, cor_plot7, cor_plot8, ncol=2)
+grid.arrange(cor_plot9, cor_plot10, cor_plot11, ncol=2)
 
 ```
 
