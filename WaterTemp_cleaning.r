@@ -82,7 +82,8 @@ WTemp_June <- WTemp_all %>%
               dplyr::select(-Water_Temp_Yearly) %>%
               dplyr::filter(Month == "06") %>%
               dplyr::rename(Water_Temp_June = Water_Temp_Monthly) %>%
-              dplyr::select(-Month)
+              dplyr::select(-Month) %>%
+              dplyr::mutate(LAG_WTemp_June = lag(Water_Temp_June))
 
 WTemp_Dec <- WTemp_all %>%
              dplyr::select(-Water_Temp_Yearly) %>%
