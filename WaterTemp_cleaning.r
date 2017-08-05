@@ -74,7 +74,8 @@ WT_df_list <- lapply(URLS, FUN=WaterTempDat) # for every element of the list of 
 WTemp_all <- bind_rows(WT_df_list) # bind the list of dataframes output by lapply() into one large dataframe
 
 WTemp_Yr <- WTemp_all %>%
-            dplyr::select(-Month, -Water_Temp_Monthly) %>%
+            dplyr::select(-Month, -Water_Temp_Monthly, -Water_Temp_Monthly_SD,
+                          -Water_Temp_Monthly_SE) %>%
             distinct()
 
 WTemp_June <- WTemp_all %>%
