@@ -126,6 +126,7 @@ percov_perm3 <- vegan::adonis(sp_percov3~ATemp_YearMn, atemp_treats, perm=1000, 
 PerCov_all <- PerCov_PDO %>%
               dplyr::full_join(FWD_ann_mn, by="Year") %>%
               dplyr::full_join(year_a_temp, by="Year") %>%
+              dplyr::full_join(WTemp_June, by="Year") %>%
               dplyr::rename(ATmp_Sign = Year_Sign,
                             ATemp_Year_Anom = Year_Anom, 
                             mn_yr_discharge = mean_yearly_discharge_m3s1,
@@ -165,14 +166,15 @@ sp_percov5 <- AllData_clean %>%
               dplyr::summarize_all(funs(mean)) %>%
               dplyr::ungroup() %>%
               dplyr::select(FUCUS_PERCOV_TOTAL, BARNACLES, MYTILUS, PTEROSIPHONIA,
-                            ENDOCLADIA, 
-                            CLAD_SERICEA, MASTO_PAP, GLOIOPELTIS, ELACHISTA)
+                            BARNACLE_SPAT, FUCUS_SPORELINGS_PERCOV, 
+                            LOTTIIDAE, L.SITKANA)
 
 all_treats2 <- AllData_clean %>%
                dplyr::rename(Year = YEAR) %>%
                dplyr::left_join(pdo_ann, by="Year") %>%
                dplyr::full_join(FWD_ann_mn, by="Year") %>%
                dplyr::full_join(year_a_temp, by="Year") %>%
+               dplyr::full_join(WTemp_June, by="Year") %>%
                dplyr::filter(TREATMENT == "CONTROL",
                              !Year %in% c("2015","2016","2017")) %>%
                dplyr::rename(FWD_Sign = Sign,
@@ -181,7 +183,7 @@ all_treats2 <- AllData_clean %>%
                              mn_yr_discharge = mean_yearly_discharge_m3s1) %>%
                dplyr::mutate(PDO_Sign = ifelse(PDO_anul_mn>0, "A", "B")) %>%
                dplyr::select(Year, QUAD, PDO_anul_mn, PDO_Sign, mn_yr_discharge, mean_yearly_anomaly,
-                             FWD_Sign, ATemp_YearMn, ATemp_Year_Anom, ATmp_Sign) %>%
+                             FWD_Sign, ATemp_YearMn, ATemp_Year_Anom, ATmp_Sign, Water_Temp_June) %>%
                dplyr::arrange(Year)
 
 
@@ -189,7 +191,7 @@ all_treats2 <- AllData_clean %>%
 percov_mds5 <- vegan::metaMDS(sp_percov5, distance="bray", k=2, trymax=1000, autotransform=TRUE)
 
 # calculate PERMANOVA 
-percov_perm5 <- vegan::adonis(sp_percov5~ATemp_YearMn*mn_yr_discharge, all_treats2, perm=1000, method="bray")
+percov_perm5 <- vegan::adonis(sp_percov5~ATemp_YearMn*mn_yr_discharge*Water_Temp_June, all_treats2, perm=1000, method="bray")
 
 
 
