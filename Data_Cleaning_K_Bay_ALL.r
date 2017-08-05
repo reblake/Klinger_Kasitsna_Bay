@@ -187,6 +187,14 @@ clean_99_00 <- full_join(clean_1999n, clean_2000, by=c("TRIPLET","QUAD","TREATME
 # }
 
 
+#' Function to clean dataframes from excel
+#'
+#' @param df 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 fix_data3 <- function(df) {
              # make column names
              names(df) <- as.character(unlist(df[1,]))
