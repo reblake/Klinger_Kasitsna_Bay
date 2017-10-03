@@ -778,8 +778,10 @@ NMDS_ord5 <- data.frame(NMDS1 = percov_mds5$points[,1], NMDS2 = percov_mds5$poin
                         YEAR = all_treats2$Year, QUAD = all_treats2$QUAD, 
                         FWD_Disc = round(all_treats2$mn_yr_discharge, digits=2), 
                         FWD_annSign = all_treats2$FWD_Sign,
-                        ATmp_Anom_Sign = all_treats2$ATmp_Sign, ATemp_YearMn = round(all_treats2$ATemp_YearMn),
-                        Water_Temp_June = round(all_treats2$Water_Temp_June), PDOSign = all_treats2$PDO_Sign)
+                        ATmp_Anom_Sign = all_treats2$ATmp_Sign, 
+                        ATemp_YearMn = round(all_treats2$ATemp_YearMn),
+                        Water_Temp_June = round(all_treats2$Water_Temp_June), 
+                        PDOSign = all_treats2$PDO_Sign)
 
 # make convex hulls for each plot across all years
 find_hull <- function(df) df[chull(df$NMDS1, df$NMDS2), ]

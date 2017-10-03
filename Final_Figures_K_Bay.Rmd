@@ -37,15 +37,21 @@ pdo_plot <- ggplot(data=pdo_mon, aes(x=Year, y=PDO)) + geom_col() +
   
 #
 pdo_plot2 <- ggplot(data=pdo_mon_adj, aes(x=Yr_Mn, y=PDO)) + 
-             geom_col(aes(fill=Sign)) + xlab("Year") +            #, show.legend=FALSE
-             geom_hline(yintercept=0, size=1) + ylab("PDO Index") + 
+             geom_col(aes(fill=Sign)) + xlab("Year") + theme_bw() +            
+             geom_hline(yintercept=0, size=1) + ylab("PDO Index") + labs(title="d.") +
              scale_x_discrete(breaks=c("1998-01","1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
                                        "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", "2009-01", 
                                        "2010-01", "2011-01", "2012-01", "2013-01", "2014-01", "2015-01", 
                                        "2016-01"),
                               labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005",
                                        "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013",
-                                       "2014","2015", "2016"))
+                                       "2014","2015", "2016")) + 
+             theme(panel.grid=element_blank(),
+                   legend.title=element_blank(),
+                   legend.position="none",
+                   axis.text.y=element_text(size=11),
+                   axis.text.x=element_text(size=11, angle=35, hjust=0.9),
+                   axis.title=element_text(size=13))  
 
 ```
 
@@ -76,7 +82,7 @@ fwd_plot2 <- ggplot(data=FWD_mon_mn, aes(x=Year_Month, y=mean_monthly_anomaly)) 
                               labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005",
                                        "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013",
                                        "2014","2015", "2016"),
-                              limits=c(levels(FWD_mon_mn$Year_Month)))
+                              limits=c(levels(FWD_mon_mn$Year_Month))) 
                              
 
 ```
@@ -109,7 +115,7 @@ ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=Month_Anom)) +
                             labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005", 
                                      "2006", "2007", "2008", "2009", "2010", "2011", "2012", 
                                      "2013", "2014","2015", "2016"),
-                            limits=c(levels(ann_a_temp$YrMn)))
+                            limits=c(levels(ann_a_temp$YrMn))) 
 
 
 
@@ -366,7 +372,7 @@ WT_plot1 <- ggplot(data=WTemp_June, aes(x=Year, y=Water_Temp_June, group=1)) +
             geom_point(size=3) + geom_line(size=1) + theme_bw() + ylim(0,10.5) +
             geom_errorbar(aes(ymin=Water_Temp_June-Water_Temp_Monthly_SE,
                               ymax=Water_Temp_June+Water_Temp_Monthly_SE), width=.2) +
-            ylab(expression(paste("June water temperature ( ", degree ~ C,")"))) +
+            ylab(expression(paste("June water temperature ( ", degree ~ C,")"))) + labs(title="a.") +
             theme(panel.grid=element_blank(),
                   legend.title=element_blank(),
                   axis.text.y=element_text(size=11),
@@ -379,7 +385,7 @@ AT_plot1 <- ggplot(data=year_a_temp, aes(x=Year, y=ATemp_YearMn, group=1)) +
             geom_point(size=3) + geom_line(size=1) + theme_bw() + ylim(0,10.5) +
             geom_errorbar(aes(ymin=ATemp_YearMn-ATemp_YearSE,
                               ymax=ATemp_YearMn+ATemp_YearSE), width=.2) + 
-            ylab(expression(paste("Annual air temperature ( ", degree ~ C,")"))) +
+            ylab(expression(paste("Annual air temperature ( ", degree ~ C,")"))) + labs(title="b.") +
             theme(panel.grid=element_blank(),
                   legend.title=element_blank(),
                   axis.text.y=element_text(size=11),
@@ -387,15 +393,17 @@ AT_plot1 <- ggplot(data=year_a_temp, aes(x=Year, y=ATemp_YearMn, group=1)) +
                   axis.title=element_text(size=13))
 ##
 FWD_plot1 <- ggplot(data=FWD_ann_mn, aes(x=Year, y=mean_yearly_discharge_m3s1, group=1)) + 
-             geom_point(size=3) + geom_line(size=1) + theme_bw() + 
+             geom_point(size=3) + geom_line(size=1) + theme_bw() + labs(title="c.") +
              geom_errorbar(aes(ymin=mean_yearly_discharge_m3s1-SE_yearly_discharge_m3s1,
                                ymax=mean_yearly_discharge_m3s1+SE_yearly_discharge_m3s1), width=.2) + 
              ylab(expression(paste("Annual freshwater discharge ( ", m^3, s^-1,")"))) +
              theme(panel.grid=element_blank(),
                    legend.title=element_blank(),
                    axis.text.y=element_text(size=11),
-                   axis.text.x=element_text(size=11, angle=35, hjust=0.9),
-                   axis.title=element_text(size=13))
+                  # axis.text.x=element_text(size=11, angle=35, hjust=0.9),
+                   axis.title=element_text(size=13),
+                   axis.title.x=element_blank(),
+                   axis.text.x=element_blank())
   
   
 ```
@@ -404,8 +412,49 @@ FWD_plot1 <- ggplot(data=FWD_ann_mn, aes(x=Year, y=mean_yearly_discharge_m3s1, g
 # arranging above plots
 #grid.arrange(WT_plot1, FWD_plot1, AT_plot1, ncol=2)
 
-ggarrange(WT_plot1, FWD_plot1, AT_plot1, ncol=2)
+ggarrange(WT_plot1, FWD_plot1, AT_plot1, pdo_plot2, ncol=2)
 
 ```
+
+# NMDS:
+```{r, echo=FALSE, include=FALSE}
+source("NMDS_analysis.r")
+
+# need to use NMDS output percov_mds$points
+
+```
+
+```{r, echo=FALSE, fig.height=7, fig.width=8}
+# prettier plotting
+# build a data frame with NMDS coordinates and metadata
+NMDS_ord <- data.frame(NMDS1 = percov_mds$points[,1], NMDS2 = percov_mds$points[,2],
+                       PDO_Sign = PerCov_PDO$PDO_Sign, YEAR = PerCov_PDO$Year)
+
+find_hull <- function(df) df[chull(df$NMDS1, df$NMDS2), ]
+hulls <- ddply(NMDS_ord, "PDO_Sign", find_hull)
+
+# now the plot
+ord1 <- ggplot(NMDS_ord, aes(x=NMDS1, y=NMDS2, color=PDO_Sign)) +
+        geom_point() + #stat_ellipse() +
+        geom_polygon(data = hulls, alpha = 0.3, aes(fill=PDO_Sign)) +
+        theme_bw() +
+        scale_color_manual(values=c("A"="#f88379", "B"="#00BFC4"), name="",
+                           labels=c("positive PDO","negative PDO")) + 
+        scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"), name="",
+                          labels=c("positive PDO","negative PDO")) + 
+        theme(panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank(),
+              axis.text.y=element_text(size=11),
+              axis.text.x=element_text(size=11, hjust=0.5),
+              axis.title=element_text(size=13))
+ord1
+
+
+```
+
+
+
+
+
 
 
