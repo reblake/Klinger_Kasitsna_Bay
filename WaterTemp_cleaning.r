@@ -73,6 +73,38 @@ WT_df_list <- lapply(URLS, FUN=WaterTempDat) # for every element of the list of 
 
 WTemp_all <- bind_rows(WT_df_list) # bind the list of dataframes output by lapply() into one large dataframe
 
+#this is face data inserted to be able to plot the anomalies
+blank_months <- data.frame(YrMn = c("2011-01", "2011-02", "2012-01", "2012-02", "2012-03", "2012-04",
+                                    "2015-08", "2015-09", "2015-10", "2015-11", "2015-12", "2016-01",
+                                    "2016-02", "2016-03", "2016-04", "2016-05", "2016-08", "2016-09",
+                                    "2016-10", "2016-11", "2016-12", "2017-01"),
+                           Year = c("2011","2011", "2012", "2012", "2012", "2012", "2015", "2015", "2015",
+                                    "2015", "2015", "2016", "2016", "2016", "2016", "2016", "2016",
+                                    "2016", "2016", "2016", "2016", "2017"),
+                           Month = c("01","02", "01", "02", "03", "04", "08", "09", "10", "11", "12",
+                                     "01", "02", "03", "04", "05", "08", "09", "10", "11", "12", "01"),
+                           Water_Temp_Monthly = c(999,999,999,999,999,999,999,999,999,999,999,999,999,
+                                                  999,999,999,999,999,999,999,999,999),
+                           Water_Temp_Yearly = c(999,999,999,999,999,999,999,999,999,999,999,999,999,
+                                                 999,999,999,999,999,999,999,999,999),
+                           Water_Temp_Monthly_SD = c(999,999,999,999,999,999,999,999,999,999,999,999,999,
+                                                     999,999,999,999,999,999,999,999,999),
+                           Water_Temp_Monthly_SE = c(999,999,999,999,999,999,999,999,999,999,999,999,999,
+                                                     999,999,999,999,999,999,999,999,999),
+                           Water_Temp_ALL_Mn = c(999,999,999,999,999,999,999,999,999,999,999,999,999,
+                                                 999,999,999,999,999,999,999,999,999),
+                           Water_Temp_Anom = c(999,999,999,999,999,999,999,999,999,999,999,999,999,
+                                               999,999,999,999,999,999,999,999,999),
+                           Month_Sign = c("A","A","A","A","A","A","A","A","A","A","A","A","A","A","A",
+                                          "A","A","A","A","A","A","A"))
+
+WTemp_Anom <- WTemp_all %>%
+              dplyr::mutate(Water_Temp_ALL_Mn = mean(Water_Temp_Monthly),
+                            Water_Temp_Anom = Water_Temp_Monthly - Water_Temp_ALL_Mn,
+                            Month_Sign = ifelse(Water_Temp_Anom>0, "A", "B"),
+                            YrMn = paste(Year, Month, sep="-")) %>%
+              dplyr::bind_rows(blank_months)
+
 WTemp_Yr <- WTemp_all %>%
             dplyr::select(-Month, -Water_Temp_Monthly, -Water_Temp_Monthly_SD,
                           -Water_Temp_Monthly_SE) %>%

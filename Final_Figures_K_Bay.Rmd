@@ -3,8 +3,8 @@ title: "Final Figures"
 author: "Rachael E. Blake"
 date: "July 28, 2017"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 
@@ -38,7 +38,7 @@ pdo_plot <- ggplot(data=pdo_mon, aes(x=Year, y=PDO)) + geom_col() +
 #
 pdo_plot2 <- ggplot(data=pdo_mon_adj, aes(x=Yr_Mn, y=PDO)) + 
              geom_col(aes(fill=Sign)) + xlab("Year") + theme_bw() +            
-             geom_hline(yintercept=0, size=1) + ylab("PDO Index") + labs(title="d.") +
+             geom_hline(yintercept=0, size=1) + ylab("PDO Index") + labs(title="g.") +
              scale_x_discrete(breaks=c("1998-01","1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
                                        "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", "2009-01", 
                                        "2010-01", "2011-01", "2012-01", "2013-01", "2014-01", "2015-01", 
@@ -73,8 +73,8 @@ fwd_plot <- ggplot(data=FWD_ann_mn, aes(x=Year, y=(mean_yearly_anomaly*10))) +
  
   
 fwd_plot2 <- ggplot(data=FWD_mon_mn, aes(x=Year_Month, y=mean_monthly_anomaly)) + 
-             geom_col(aes(fill=Sign)) + xlab("Year") + ylab("Anomaly") + 
-             geom_hline(yintercept=0, size=1) +  
+             geom_col(aes(fill=Sign)) + xlab("Year") + ylab("Monthly freshwater discharge anomaly") + 
+             geom_hline(yintercept=0, size=1) + theme_bw() + ylim(-0.44,0.44) + labs(title="f.") +
              scale_x_discrete(breaks=c("1998-01", "1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
                                        "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", 
                                        "2009-01", "2010-01", "2011-01", "2012-01", "2013-01", 
@@ -82,7 +82,15 @@ fwd_plot2 <- ggplot(data=FWD_mon_mn, aes(x=Year_Month, y=mean_monthly_anomaly)) 
                               labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005",
                                        "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013",
                                        "2014","2015", "2016"),
-                              limits=c(levels(FWD_mon_mn$Year_Month))) 
+                              limits=c(levels(FWD_mon_mn$Year_Month))) + 
+             theme(panel.grid=element_blank(),
+                   legend.title=element_blank(),
+                   legend.position="none",
+                   axis.text.y=element_text(size=11),
+                   #axis.text.x=element_text(size=11, angle=35, hjust=0.9),
+                   axis.title=element_text(size=13),
+                   axis.title.x=element_blank(),
+                   axis.text.x=element_blank()) 
                              
 
 ```
@@ -106,8 +114,9 @@ ann_a_temp2 <- ann_a_temp %>%
                dplyr::distinct()
 
 ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=Month_Anom)) + 
-           geom_col(aes(fill=Month_Sign)) + ylab("Anomaly") + xlab("Year") + 
-           geom_hline(yintercept=0, size=1) + 
+           geom_col(aes(fill=Month_Sign)) + xlab("Year") + labs(title="b.") +
+           ylab(expression(paste("Monthly air temperature anomaly (", ~~degree ~C,")"))) +
+           geom_hline(yintercept=0, size=1) + theme_bw() + ylim(-16,16) + 
            scale_x_discrete(breaks=c("1999-01", "2000-01", "2001-01", "2002-01","2003-01", 
                                      "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", 
                                      "2009-01", "2010-01", "2011-01", "2012-01", "2013-01", 
@@ -115,7 +124,19 @@ ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=Month_Anom)) +
                             labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005", 
                                      "2006", "2007", "2008", "2009", "2010", "2011", "2012", 
                                      "2013", "2014","2015", "2016"),
-                            limits=c(levels(ann_a_temp$YrMn))) 
+                            limits=c(levels(ann_a_temp$YrMn))) + 
+             theme(panel.grid=element_blank(),
+                   legend.title=element_blank(),
+                   legend.position="none",
+                   axis.text.y=element_text(size=11),
+                   #axis.text.x=element_text(size=11, angle=35, hjust=0.9),
+                   axis.title=element_text(size=13),
+                   axis.title.x=element_blank(),
+                   axis.text.x=element_blank()) 
+ 
+
+#ylab(expression(paste(Latitude^o,~'N'))) +
+#   ylab(expression(paste("Temperature (", degree ~ C,")"))) + 
 
 
 
@@ -126,7 +147,7 @@ ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=Month_Anom)) +
 source("WaterTemp_cleaning.r")
 
 # dataframes in this script are
-# WTemp_all, WTemp_Yr, WTemp_June, WTemp_Dec
+# WTemp_all, WTemp_Yr, WTemp_June, WTemp_Dec, WTemp_Anom
 
 ```
 
@@ -372,7 +393,7 @@ WT_plot1 <- ggplot(data=WTemp_June, aes(x=Year, y=Water_Temp_June, group=1)) +
             geom_point(size=3) + geom_line(size=1) + theme_bw() + ylim(0,10.5) +
             geom_errorbar(aes(ymin=Water_Temp_June-Water_Temp_Monthly_SE,
                               ymax=Water_Temp_June+Water_Temp_Monthly_SE), width=.2) +
-            ylab(expression(paste("June water temperature ( ", degree ~ C,")"))) + labs(title="a.") +
+            ylab(expression(paste("June water temperature ( ", degree ~ C,")"))) + labs(title="c.") +
             theme(panel.grid=element_blank(),
                   legend.title=element_blank(),
                   axis.text.y=element_text(size=11),
@@ -385,34 +406,61 @@ AT_plot1 <- ggplot(data=year_a_temp, aes(x=Year, y=ATemp_YearMn, group=1)) +
             geom_point(size=3) + geom_line(size=1) + theme_bw() + ylim(0,10.5) +
             geom_errorbar(aes(ymin=ATemp_YearMn-ATemp_YearSE,
                               ymax=ATemp_YearMn+ATemp_YearSE), width=.2) + 
-            ylab(expression(paste("Annual air temperature ( ", degree ~ C,")"))) + labs(title="b.") +
+            ylab(expression(paste("Annual air temperature ( ", degree ~ C,")"))) + labs(title="a.") +
             theme(panel.grid=element_blank(),
                   legend.title=element_blank(),
                   axis.text.y=element_text(size=11),
-                  axis.text.x=element_text(size=11, angle=35, hjust=0.9),
-                  axis.title=element_text(size=13))
+                  #axis.text.x=element_text(size=11, angle=35, hjust=0.9),
+                  axis.title=element_text(size=13),
+                  axis.title.x=element_blank(),
+                  axis.text.x=element_blank())
 ##
 FWD_plot1 <- ggplot(data=FWD_ann_mn, aes(x=Year, y=mean_yearly_discharge_m3s1, group=1)) + 
-             geom_point(size=3) + geom_line(size=1) + theme_bw() + labs(title="c.") +
+             geom_point(size=3) + geom_line(size=1) + theme_bw() + labs(title="e.") +
              geom_errorbar(aes(ymin=mean_yearly_discharge_m3s1-SE_yearly_discharge_m3s1,
                                ymax=mean_yearly_discharge_m3s1+SE_yearly_discharge_m3s1), width=.2) + 
              ylab(expression(paste("Annual freshwater discharge ( ", m^3, s^-1,")"))) +
              theme(panel.grid=element_blank(),
                    legend.title=element_blank(),
                    axis.text.y=element_text(size=11),
-                  # axis.text.x=element_text(size=11, angle=35, hjust=0.9),
-                   axis.title=element_text(size=13),
-                   axis.title.x=element_blank(),
-                   axis.text.x=element_blank())
-  
+                   axis.text.x=element_text(size=11, angle=35, hjust=0.9),
+                   axis.title=element_text(size=13))
+##
+## anomaly plot of water temp
+WT_plot_anom <- ggplot(data=WTemp_Anom, aes(x=YrMn, y=Water_Temp_Anom)) +
+                geom_col(aes(fill=Month_Sign)) + xlab("Year") + ylim(7,-7) + labs(title="d.") +
+                ylab(expression(paste("Monthly water temperature anomaly (", ~~degree ~C,")"))) +
+                geom_hline(yintercept=0, size=1) + theme_bw() +
+                scale_x_discrete(breaks=c("1999-01", "2000-01", "2001-01", "2002-01","2003-01", 
+                                          "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", 
+                                          "2009-01", "2010-01", "2011-01", "2012-01", "2013-01", 
+                                          "2014-01", "2015-01", "2016-01"),
+                                 labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005", 
+                                          "2006", "2007", "2008", "2009", "2010", "2011", "2012", 
+                                          "2013", "2014","2015", "2016"),
+                                 limits=c(levels(WTemp_Anom$YrMn))) + 
+                theme(panel.grid=element_blank(),
+                      legend.title=element_blank(),
+                      legend.position="none",
+                      axis.text.y=element_text(size=11),
+                      #axis.text.x=element_text(size=11, angle=35, hjust=0.9),
+                      axis.title=element_text(size=13),
+                      axis.title.x=element_blank(),
+                      axis.text.x=element_blank()) 
+
+       
+    
+# create blank ggplot for final figure
+df <- data.frame()
+blank_plot <- ggplot(df) + theme(panel.background = element_blank())
   
 ```
 
-```{r, echo=FALSE, fig.height=8, fig.width=12}
+```{r, echo=FALSE, fig.height=12, fig.width=24, warning=FALSE}
 # arranging above plots
 #grid.arrange(WT_plot1, FWD_plot1, AT_plot1, ncol=2)
 
-ggarrange(WT_plot1, FWD_plot1, AT_plot1, pdo_plot2, ncol=2)
+ggarrange(AT_plot1, ann_air, WT_plot1, WT_plot_anom, FWD_plot1, fwd_plot2, blank_plot, pdo_plot2, ncol=2)
 
 ```
 
