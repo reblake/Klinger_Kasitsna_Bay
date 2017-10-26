@@ -3,8 +3,8 @@ title: "Final Figures"
 author: "Rachael E. Blake"
 date: "July 28, 2017"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 
@@ -322,7 +322,8 @@ FUC_SPORE_plot <- PerCov_Plots[[4]] + ylab(expression(paste(italic("Fucus"), " s
                                            axis.text.x=element_blank()) 
 MUSS_plot <- PerCov_Plots[[5]] + ylab(expression(paste(italic("Mytilus"), " % cover"))) + labs(title="e.") +
              theme(legend.position="none", axis.title.x=element_blank(), axis.text.x=element_blank()) 
-PTERO_plot <- PerCov_Plots[[6]] + ylab(expression(paste(italic("Pterosiphonia"), " % cover"))) + labs(title="f.") +
+PTERO_plot <- PerCov_Plots[[6]] + ylab(expression(paste(italic("Pterosi. "), " complex % cover"))) +
+              labs(title="f.") +
               theme(axis.title.x=element_blank(), axis.text.x=element_blank())
 
 ##
@@ -369,7 +370,8 @@ LP_line <- Line_Plots[[6]] + ylab(expression(paste(italic("Lottiidae"), " abunda
 MS_line <- Line_Plots[[7]] + ylab(expression(paste(italic("Mytilus"), " % cover"))) + ylim(0,100) +
            labs(title="e.") + theme(legend.position="none", axis.title.x=element_blank(),
                                     axis.text.x=element_blank())
-PT_line <- Line_Plots[[8]] + ylab(expression(paste(italic("Pterosiphonia"), " % cover"))) + ylim(0,100) +
+PT_line <- Line_Plots[[8]] + ylab(expression(paste(italic("Pterosi."), " complex % cover"))) +
+           ylim(0,100) +
            labs(title="f.") + theme(legend.position="none", axis.title.x=element_blank(),
                                     axis.text.x=element_blank())
 
@@ -456,7 +458,7 @@ blank_plot <- ggplot(df) + theme(panel.background = element_blank())
   
 ```
 
-```{r, echo=FALSE, fig.height=12, fig.width=24, warning=FALSE}
+```{r, echo=FALSE, fig.height=20, fig.width=15, warning=FALSE}
 # arranging above plots
 #grid.arrange(WT_plot1, FWD_plot1, AT_plot1, ncol=2)
 
