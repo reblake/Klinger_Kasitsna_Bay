@@ -18,8 +18,8 @@ pdo_raw <- read_html(URL_pdo)
 pdo_pre <- pdo_raw %>% 
            html_node("p") %>%
            html_text()
-pdo_cols <- scan(textConnection(pdo_pre), skip=31, nlines=1, what=character())# Get header row
-pdo_df <- read.table(file=textConnection(pdo_pre), skip=32, nrows=118, stringsAsFactors=F, sep="", 
+pdo_cols <- scan(textConnection(pdo_pre), skip=29, nlines=1, what=character())# Get header row
+pdo_df <- read.table(file=textConnection(pdo_pre), skip=31, nrows=119, stringsAsFactors=F, sep="", 
                      header=FALSE, col.names=pdo_cols, strip.white=TRUE, fill=TRUE)
 pdo_df$YEAR <- substr(pdo_df$YEAR, 1, 4) # removes asterisks from years 2002-2015
 
