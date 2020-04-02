@@ -5,16 +5,19 @@
 #####  1 May 2017                                          #####
 ################################################################
 
-library(plyr) ; library(readxl) ; library(tidyverse) ; library(reshape2) ; library(stringr)
+library(readxl) ; library(tidyverse) ; library(reshape2) ; library(stringr)
 
 
 # read in excel file 
 # this function creates a list of data frames, one for each excel sheet 
 read_excel_allsheets <- function(filename) {
                         sheets <- readxl::excel_sheets(filename)
-                        x <- lapply(sheets, function(X) readxl::read_excel(filename, sheet=X, skip=1))
+                        x <- lapply(sheets, function(X) 
+                                    readxl::read_excel(filename, sheet=X, skip=1,
+                                                       col_types = "text"))
                         names(x) <- sheets
-                        x
+                        
+                        return(x)
 }
 
 X_sheets_m <- read_excel_allsheets("ClearedPlots_1999-2017.xlsx")
@@ -30,13 +33,17 @@ X_long_1999 <- X_long_all$`1999`
 X_long_2000 <- X_long_all$`2000`
 
 # format 1999 dataframe
-names(X_long_1999) <- as.character(unlist(X_long_1999[1,])) # make column names 
-X_long_1999 <- X_long_1999[-c(1:2),]
-X_long_1999 <- X_long_1999[ , !duplicated(colnames(X_long_1999))]  # removing duplicate columns called `NA` 
+X_long_1999 <- tibble::rownames_to_column(X_long_1999)
+X_long_1999 <- mutate_all(X_long_1999, as.character)
+X_long_1999[1,2] <- as.character(X_long_1999[3,1])
+X_long_1999 <- X_long_1999[ , -c(1)]  # remove first column (isn't important)
+names(X_long_1999) <- as.character(unlist(X_long_1999[1, ])) # make column names
+X_long_1999 <- X_long_1999[-c(1:2), ]  # remove first two rows containing column names
+X_long_1999 <- X_long_1999[!is.na(names(X_long_1999))] # removing columns with NA as name 
 
 clean_1999 <- X_long_1999 %>%
-              tibble::rownames_to_column() %>%  # making column of rownames
-              dplyr::select(-rowname, -`Fucus wt wt (kg) scrape '99`, -`Ralfsia (%)`, -`Hildenbrandia (%)`,
+              # tibble::rownames_to_column() %>%  # making column of rownames
+              dplyr::select(-`Triplet/Tag No.`, -`Fucus wt wt (kg) scrape '99`, -`Ralfsia (%)`, -`Hildenbrandia (%)`, # -rowname, 
                             -`Petrocelis (%)`, -`Total Algal Coverage (%)`, -`Barnacle adult (%)`,
                             -`Total Animal Cover (%)`, -`Bare Rock (%)`, -`Total Coverage (%)`,
                             -`Total Alg+Anim Cvr (%)`) %>%   # removing the columns
@@ -82,7 +89,7 @@ clean_1999 <- X_long_1999 %>%
 names(clean_1999) <- make.names(names(clean_1999))  # will turn names into accepted formats
   
 clean_1999n <- clean_1999 %>%
-               dplyr::rename(TRIPLET = `NA.`) %>%
+               # dplyr::rename(TRIPLET = `NA.`) %>%
                dplyr::mutate(YEAR = "1999",
                              TREATMENT = ifelse(QUAD %in% c(102,105,108,116,120,122,170,505,532,
                                                             537,542,546), "CONTROL",
@@ -92,10 +99,11 @@ clean_1999n <- clean_1999 %>%
                                                             536,540,547), "SCRAPE99", "")))) %>%
                setNames(toupper(names(.))) %>% # make column names all upper case
                dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
-               dplyr::mutate_at(c(3:5,7:38), funs(as.numeric)) %>% # converts select columns to numeric
+               dplyr::mutate_at(c(3:4,7:38), funs(as.numeric)) %>% # converts select columns to numeric
                dplyr::mutate(LOTTIIDAE = LOTTIIDAE_JUV + LOTTIA_P_BOREALIS) %>%
                dplyr::select(-LOTTIIDAE_JUV, -LOTTIA_P_BOREALIS) %>%
-               tidyr::gather(-TRIPLET, -QUAD, -TREATMENT, -YEAR, key=TAXA, value=PER_COV_OR_COUNT)
+               tidyr::gather(-QUAD, -TREATMENT, -YEAR, key=TAXA, value=PER_COV_OR_COUNT)
+
 # replace NAs with 0, because Terrie says missing values represent 0s for some variables
 clean_1999n[is.na(clean_1999n)] <- 0
   
@@ -103,8 +111,8 @@ clean_1999n[is.na(clean_1999n)] <- 0
 # format 2000 dataframe
 names(X_long_2000) <- as.character(unlist(X_long_2000[1,])) # make column names 
 X_long_2000 <- X_long_2000[-1,]
-X_long_2000 <- X_long_2000[ , !duplicated(colnames(X_long_2000))]  # removing one column called `NA`
-X_long_2000 <- X_long_2000[,-22]  # removing the other `NA`` column
+X_long_2000 <- X_long_2000[!is.na(names(X_long_2000))]  # removing two columns called `NA`
+# X_long_2000 <- X_long_2000[,-22]  # removing the other `NA`` column
             
 clean_2000 <- X_long_2000 %>%
               tibble::rownames_to_column() %>%  # making column of rownames
@@ -124,9 +132,9 @@ clean_2000 <- X_long_2000 %>%
                             ) %>%  # rename columns that had special characters
               setNames(toupper(names(.))) %>% # make column names all upper case
               dplyr::filter(!(TREATMENT %in% c("avg, sd","avg,sd","AVG,STD"))) %>%
-              dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
-              dplyr::mutate_at(c(4:6,8:35), funs(as.numeric)) %>% # converts select columns to numeric
               dplyr::mutate(YEAR = "2000") %>% 
+              dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
+              dplyr::mutate_at(c(4:6,8:36), funs(as.numeric)) %>% # converts select columns to numeric
               tidyr::gather(-TRIPLET, -QUAD, -TREATMENT, -YEAR, key=TAXA, value=PER_COV_OR_COUNT)
               
 # replace NAs with 0, because Terrie says missing values represent 0s for many columns
@@ -135,7 +143,7 @@ clean_2000[is.na(clean_2000)] <- 0
 
 
 ## Bind 1999 and 2000 together into one dataframe
-clean_99_00 <- full_join(clean_1999n, clean_2000, by=c("TRIPLET","QUAD","TREATMENT","YEAR",
+clean_99_00 <- full_join(clean_1999n, clean_2000, by=c("QUAD","TREATMENT","YEAR", # "TRIPLET",
                                                        "TAXA","PER_COV_OR_COUNT"))
  
 
@@ -206,11 +214,10 @@ fix_data3 <- function(df) {
                     tibble::rownames_to_column(var="TRIPLET") %>%   # row names to column 
                     setNames(toupper(names(.))) %>%  # make column names all upper case
                     dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
-                    tidyr::gather(-TRIPLET, -QUAD, -TREATMENT, key=TAXA, value=PER_COV_OR_COUNT) %>%
-                    # split off extra numerals from "TRIPLET" column
-                    dplyr::mutate(TRIPLET = ifelse(!(TRIPLET %in% c(1:12)), 
-                                                   sapply(strsplit(as.character(TRIPLET), split="__") , function(x) x[1]),
-                                                   TRIPLET),
+                    tidyr::gather(-TRIPLET, -QUAD, -TREATMENT, key=TAXA, value=PER_COV_OR_COUNT) 
+             
+             df2 <- df1 %>%  
+                    dplyr::mutate(TRIPLET = gsub("\\.\\.\\..*$", "", TRIPLET), # split off extra numerals from "TRIPLET" column
                                   TAXA = str_replace_all(TAXA, "#ADULTS", " NUM_ADULTS"),
                                   TAXA = str_replace_all(TAXA, "%TOTAL", " PERCOV_TOTAL"),
                                   TAXA = str_replace_all(TAXA, "SPORELINGS#", "SPORELINGS_NUM"),
@@ -246,10 +253,10 @@ fix_data3 <- function(df) {
                                   TRIPLET %in% c(1:12))
                    
              # replace NAs with 0, because Terrie says missing values represent 0s for certain categories
-             df1[is.na(df1)] <- 0 
+             df2[is.na(df2)] <- 0 
              
              # return
-             return(df1)
+             return(df2)
 }
 
 # make list of just those more uniform dataframes
