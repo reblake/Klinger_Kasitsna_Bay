@@ -12,6 +12,7 @@ library(rvest) ; library(tidyr) ; library(stringr) ; library(dplyr) ; library(lu
 # NOTE: This air temperature data was downloaded from https://www.ncdc.noaa.gov/cdo-web/datatools/lcd
 # on 15 June 2017.  This data can't be scraped from the web, but rather has to be requested, and
 # is then e-mailed to the requester within an hour or less.  
+# Data from 2017 through 2019 were requested on 11/4/2020 from this same source. 
 
 
 first_file <- read.csv("./Homer_Airport/LCD_1999_2008.csv", stringsAsFactors=FALSE,
@@ -21,6 +22,8 @@ first_file <- read.csv("./Homer_Airport/LCD_1999_2008.csv", stringsAsFactors=FAL
 second_file <- read.csv("./Homer_Airport/LCD_2009_2017_06.csv", stringsAsFactors=FALSE,
                         header=TRUE, row.names=NULL, strip.white=TRUE,
                         colClasses=c(rep('character', 90)))
+
+third_file <- read.csv("./Homer_Airport/LCD_2017")
 
 a_temp_raw <- dplyr::bind_rows(first_file, second_file)
 

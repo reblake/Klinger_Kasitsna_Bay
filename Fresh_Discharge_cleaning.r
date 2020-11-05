@@ -1,6 +1,6 @@
 #################################################################
 #####  Terrie Klinger's Kasitsna Bay Data                   #####
-#####  Hill mode freshwater discharge data cleaning script  #####
+#####  Hill model freshwater discharge data cleaning script #####
 #####  by Rachael E. Blake                                  #####
 #####  17 May 2017                                          #####
 #################################################################

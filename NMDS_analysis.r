@@ -31,10 +31,11 @@ source("AirTemp_cleaning.r")
 # add in the PDO data
 PerCov_PDO <- AllData_clean %>%
               dplyr::rename(Year = YEAR) %>%
+              dplyr::mutate_if(is.numeric, as.character) %>% 
               dplyr::left_join(pdo_ann, by="Year") %>%
               dplyr::filter(TREATMENT == "CONTROL") %>%
               dplyr::select(-TRIPLET, -QUAD, -TREATMENT, -FUCUS_NUM_ADULTS, -FUCUS_SPORELINGS_NUM) %>%
-              dplyr::mutate_at(c(2:55), funs(as.numeric)) %>% # converts select columns to numeric
+              dplyr::mutate_if(is.character, as.numeric) %>% # converts columns to numeric
               dplyr::group_by(Year) %>%
               dplyr::summarize_all(funs(mean)) %>%
               dplyr::ungroup() %>%

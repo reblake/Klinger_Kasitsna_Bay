@@ -6,8 +6,8 @@
 #################################################################
 
 # load packages
-library(lavaan) ; library(dplyr) ; library(car) ; library(ggm) ; library(semPlot)  
-library(semTools) ; library(psych) ; library(stats)
+library(lavaan) ; library(plyr) ; library(dplyr) ; library(car) ; library(ggm) ; library(semPlot)  
+library(semTools) ; library(psych) ; library(stats) 
 
 
 # source the data cleaning script to get the % cover data

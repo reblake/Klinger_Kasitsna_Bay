@@ -2,7 +2,7 @@
 #####  Terrie Klinger's Kasitsna Bay Data                  #####
 #####  All Invertebrate Data Cleaning Script               #####
 #####  by Rachael E. Blake                                 #####
-#####  1 May 2017                                          #####
+#####  1 May 2017 - updated Nov 2020                       #####
 ################################################################
 
 library(readxl) ; library(tidyverse) ; library(reshape2) ; library(stringr)
@@ -20,10 +20,10 @@ read_excel_allsheets <- function(filename) {
                         return(x)
 }
 
-X_sheets_m <- read_excel_allsheets("ClearedPlots_1999-2017.xlsx")
+X_sheets_m <- read_excel_allsheets("ClearedPlots_1999-2019.xlsx")
 
 # remove the "notes" sheet
-X_sheets_yrs <- X_sheets_m[c(2:20)]  
+X_sheets_yrs <- X_sheets_m[c(2:22)]  
 
 # make each data frame long instead of wide
 X_long_all <- lapply(X_sheets_yrs, function(x) as.data.frame(t(x)))
@@ -260,8 +260,8 @@ fix_data3 <- function(df) {
 }
 
 # make list of just those more uniform dataframes
-X_recent <- X_long_all[c("2017","2016","2015","2014","2013","2012","2011","2010","2009",
-                         "2008","2007","2006","2005","2004","2003","2002","2001")] 
+X_recent <- X_long_all[c("2019", "2018","2017","2016","2015","2014","2013","2012","2011","2010",
+                         "2009","2008","2007","2006","2005","2004","2003","2002","2001")] 
 #12, 09, 08, 03, 01  # these need help in other dimension
 
 # apply fix_data function to list of data frames
