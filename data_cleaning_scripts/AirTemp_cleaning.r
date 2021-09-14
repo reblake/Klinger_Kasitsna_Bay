@@ -5,33 +5,85 @@
 #####  9 June 2017                                     #####
 ############################################################
 
-## load packages (order matters)
-library(httr) ; library(plyr) ; library(XML) ; library(curl)
-library(rvest) ; library(tidyr) ; library(stringr) ; library(dplyr) ; library(lubridate)
+## load packages 
+library(httr) ; library(tidyverse) ; library(XML) ; library(curl)
+library(rvest) ; library(tidyr) ; library(stringr) ; library(lubridate)
+library(rnoaa)
 
 # NOTE: This air temperature data was downloaded from https://www.ncdc.noaa.gov/cdo-web/datatools/lcd
 # on 15 June 2017.  This data can't be scraped from the web, but rather has to be requested, and
 # is then e-mailed to the requester within an hour or less.  
-# Data from 2017 through 2019 were requested on 11/4/2020 from this same source. 
+
+# NOTE: As of 13 Sept 2021, the manually downloaded LCD data are no longer available as per Mark Seiderman at NOAA.
+# See this email message: 
+#########################
+# Subject: 	Re: ms*Fwd: CDO support request: 2708954
+# Date: 	Mon, 13 Sep 2021 15:03:17 -0400
+# From: 	Mark Seiderman - NOAA Federal <mark.seiderman@noaa.gov>
+# To: 	rblake@sesync.org
+# 
+# 
+# Rachael,
+# 
+# Unfortunately we do not offer this product anymore. 
+# 
+# Thanks,
+# 
+# Mark Seiderman
+# Meteorologist
+# NOAA's National Centers for Environmental Information (NCEI)
+# Climatic Science and Services Division (CSSD)
+# 151 Patton Ave
+# Asheville, NC 28801
+# Mark.Seiderman@noaa.gov
+# Phone: 828-271-4800 ext. 3171
+# To be kept aware of NCEI planned and unplanned Outages see: https://www.ncei.noaa.gov/alerts
+# To be kept aware of changes to NCEI and NESDIS' products and services, see: https://www.nesdis.noaa.gov/content/notice-changes
+# 
+# The newly formed NCEI merges the National Climatic Data Center (NCDC), the National Geophysical Data Center (NGDC), and the National Oceanographic Data Center (NODC).
+#########################
 
 
-first_file <- read.csv("./Homer_Airport/LCD_1999_2008.csv", stringsAsFactors=FALSE,
-                       header=TRUE, row.names=NULL, strip.white=TRUE,
-                       colClasses=c(rep('character', 90)))
+# New approach is to use the R package `rnoaa`, which uses the 
+# NOAA API (docs here: https://www.ncdc.noaa.gov/cdo-web/webservices/v2)
+# NOTE: The temperature values are in degrees F, so will have to be converted to C in the R code below.   
 
-second_file <- read.csv("./Homer_Airport/LCD_2009_2017_06.csv", stringsAsFactors=FALSE,
-                        header=TRUE, row.names=NULL, strip.white=TRUE,
-                        colClasses=c(rep('character', 90)))
+stations <- "70341025507"
 
-third_file <- read.csv("./Homer_Airport/LCD_2017")
+years <- c(1999:2021)
 
-a_temp_raw <- dplyr::bind_rows(first_file, second_file)
+get_lcd <- function(w_station, w_year){
+           df <- rnoaa::lcd(station = w_station, year = w_year) # download data
+           df <- df %>% 
+                 rename(hourlydrybulbtemperatureF = hourlydrybulbtemperature) %>%  # rename column  
+                 mutate(across(hourlydrybulbtemperatureF, as.numeric)) %>% 
+                 mutate(across(!select(hourlydrybulbtemperatureF), as.character))
+                 
+                 
+           return(df)
+           }
 
-a_temp <- a_temp_raw %>%
-          dplyr::select(DATE, HOURLYDRYBULBTEMPC) %>%
+lcd_list <- lapply(years, get_lcd, w_station = stations)
+
+lcd_df <-  lcd_list %>% 
+           purrr::reduce(full_join) 
+
+
+a_temp <- lcd_df %>% 
+          select(date, hourlydrybulbtemperatureF) %>%
+          mutate(across(hourlydrybulbtemperatureF, as.numeric)) %>% 
+          mutate(hourlydrybulbtemperatureC = (hourlydrybulbtemperatureF -32)*(5/9),
+                 hourlydrybulbtemperatureC = round(hourlydrybulbtemperatureC, 1))  # convert from F to C
+
+
+
+
+  
+
+    
           dplyr::mutate(DATE = str_replace_all(DATE, "/", "-"),
                         Time = sapply(strsplit(as.character(DATE), split=" ") , function(x) x[2]),
-                        Date = sapply(strsplit(as.character(DATE), split=" ") , function(x) x[1]),
+                        Date = sapply(strsplit(as.character(DATE), split=" ") , function(x) x[1]), 
                         Date = parse_date_time(Date, c('ymd','mdy')), 
                         Year = sapply(strsplit(as.character(Date), split="-") , function(x) x[1]),
                         Month = sapply(strsplit(as.character(Date), split="-") , function(x) x[2]), 
