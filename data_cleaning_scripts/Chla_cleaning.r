@@ -5,9 +5,9 @@
 #####  9 June 2017                                     #####
 ############################################################
 
-## load packages (order matters)
-library(httr) ; library(plyr) ; library(XML) ; library(curl)
-library(rvest) ; library(tidyr) ; library(stringr) ; library(dplyr)
+## load packages 
+library(httr) ; library(tidyverse) ; library(XML) ; library(curl)
+library(rvest) 
 
 # NOTE: These data were downloaded from the NERR data repository 
 # http://cdmo.baruch.sc.edu/aqs/output/746178.zip on June 30, 2017.  
@@ -20,7 +20,7 @@ library(rvest) ; library(tidyr) ; library(stringr) ; library(dplyr)
 #####
 chla_file <- read.csv("./Chla_NERR/746178.csv", stringsAsFactors=FALSE,
                       header=TRUE, row.names=NULL, strip.white=TRUE)
-#print(object.size(chla_file),units="Gb")
+# print(object.size(chla_file),units="Gb")
 
 chla_file$StationCode <- trimws(chla_file$StationCode)
 
@@ -38,7 +38,7 @@ chla_clean <- chla_file %>%
 #####
 chla_file2 <- read.csv("./Chla_NERR/151505/151505.csv", stringsAsFactors=FALSE,
                        header=TRUE, row.names=NULL, strip.white=TRUE)
-#print(object.size(chla_file2),units="Gb")
+# print(object.size(chla_file2),units="Gb")
 
 #
 chla2_WQ <- chla_file2[,c(1:51)] # select just the columns coming from the water quality dataset
@@ -110,7 +110,7 @@ chla2_NT_clean <- chla2_NT2 %>%
 
 
 # need to column bind these
-#all.equal(chla_clean,chla2_WQ_clean) # more lenient test of whether two dataframes are the same
+# all.equal(chla_clean,chla2_WQ_clean) # more lenient test of whether two dataframes are the same
 
 chla_all <- chla_clean %>%
             dplyr::full_join(chla2_WQ_clean) %>%

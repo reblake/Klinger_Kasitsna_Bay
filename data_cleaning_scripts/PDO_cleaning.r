@@ -9,6 +9,7 @@
 library(httr) ; library(tidyverse) ; library(XML) ; library(curl)
 library(rvest) ; library(xml2)
 
+### NOTE: You MUST UPDATE THIS URL, because the URL contains the dates it will pull in from ERDDAP!  Ugh!
 ### Download the data programmatically using web scraping (depends on the validity of the URL)
 ###  Pacific Decadal Oscillation Index (PDO): 
 URL_pdo <- "https://oceanview.pfeg.noaa.gov/erddap/tabledap/cciea_OC_PDO.htmlTable?&time%3E=1900-01-01&time%3C=2021-12-31"
