@@ -9,8 +9,9 @@
 library(ncdf4) ; library(chron) ; library(dplyr) ; library(forcats) ; library(ggplot2)
 
 ### read in the netcdf file and parse and clean the parts
-nc_kbay <- nc_open("GOA_RUNOFF_DISCHARGE.ncml.nc")
-#print(nc_kbay)
+# nc_kbay <- nc_open("GOA_RUNOFF_DISCHARGE.ncml.nc") # uses a static file downloaded in 2017
+nc_kbay <- nc_open("http://thredds.aoos.org/thredds/dodsC/GOA_RUNOFF_DISCHARGE.ncml") # download directly from OPeNDAP
+# print(nc_kbay)
 
 # get time 
 time_date <- ncvar_get(nc_kbay, "time")
