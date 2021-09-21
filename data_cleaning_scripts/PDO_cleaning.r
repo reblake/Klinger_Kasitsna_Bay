@@ -2,7 +2,7 @@
 #####  Terrie Klinger's Kasitsna Bay Data              #####
 #####  PDO data cleaning script                        #####
 #####  by Rachael E. Blake                             #####
-#####  1 May 2017                                      #####
+#####  1 May 2017 ; updated Sept 2021                  #####
 ############################################################
 
 ## load packages 
