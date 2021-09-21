@@ -4,12 +4,12 @@
 ##### Script by Rachael Blake, July 17, 2017
 ##################################################
 
-library(httr) ; library(dplyr) 
+library(httr) ; library(tidyverse) 
 
 ### Have to download data one year at a time per the CO-OPS online download restrictions!  :-P
 
 
-# Function to read in the 19 years of water temp data from Seldovia, AK - Station ID: 9455500
+# Function to read in the years of water temp data from Seldovia, AK - Station ID: 9455500
   
 WaterTempDat <- function(data_url){
                 dataGet <- GET(data_url)
@@ -26,7 +26,7 @@ WaterTempDat <- function(data_url){
                        dplyr::mutate(Date = sapply(strsplit(as.character(Date_Time), split=" ") , function(x) x[1]),
                                      Year = sapply(strsplit(as.character(Date), split="-") , function(x) x[1]),
                                      Month = sapply(strsplit(as.character(Date), split="-") , function(x) x[2])) %>%
-                       dplyr::mutate_at(c(5), funs(as.numeric)) %>% 
+                       dplyr::mutate_at(c(5), list(as.numeric)) %>% 
                        dplyr::group_by(Year, Month) %>%
                        dplyr::mutate(Water_Temp_Monthly = mean(Water_Temp_C, na.rm = T),
                                      Water_Temp_Monthly_SD = sd(Water_Temp_C, na.rm = T),
@@ -65,15 +65,19 @@ URLS <- list("https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=199901
              "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20140101%2000:00&end_date=20141231%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
              "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20150101%2000:00&end_date=20151231%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
              "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20160101%2000:00&end_date=20161231%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
-             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20170101%2000:00&end_date=20170630%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv"
+             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20170101%2000:00&end_date=20170630%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
+             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20180101%2000:00&end_date=20180630%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
+             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20190101%2000:00&end_date=20190630%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
+             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20200101%2000:00&end_date=20200630%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
+             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20210101%2000:00&end_date=20210630%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv"
              )
 
 
-WT_df_list <- lapply(URLS, FUN=WaterTempDat) # for every element of the list of URLs run my function
+WT_df_list <- lapply(URLS, FUN = WaterTempDat) # for every element of the list of URLs run my function
 
 WTemp_all <- bind_rows(WT_df_list) # bind the list of dataframes output by lapply() into one large dataframe
 
-#this is face data inserted to be able to plot the anomalies
+# this is fake data inserted to be able to plot the anomalies
 blank_months <- data.frame(YrMn = c("2011-01", "2011-02", "2012-01", "2012-02", "2012-03", "2012-04",
                                     "2015-08", "2015-09", "2015-10", "2015-11", "2015-12", "2016-01",
                                     "2016-02", "2016-03", "2016-04", "2016-05", "2016-08", "2016-09",
