@@ -9,19 +9,11 @@
 library(ncdf4) ; library(chron) ; library(dplyr) ; library(forcats) ; library(ggplot2)
 
 ### read in the netcdf file and parse and clean the parts
-# nc_kbay <- nc_open("GOA_RUNOFF_DISCHARGE.ncml.nc") # uses a static file downloaded in 2017
-nc_kbay <- nc_open("http://thredds.aoos.org/thredds/dodsC/GOA_RUNOFF_DISCHARGE.ncml") # download directly from OPeNDAP
-# print(nc_kbay)
+nc_kbay <- nc_open("GOA_RUNOFF_DISCHARGE.ncml.nc") # uses a static file created in 2017
+# nc_kbay <- nc_open("http://thredds.aoos.org/thredds/dodsC/GOA_RUNOFF_DISCHARGE.ncml") # download directly from OPeNDAP
+# print(nc_kbay) # shows info about the file
 
-# get time 
-time_date <- ncvar_get(nc_kbay, "time")
-time_date_units <- ncatt_get(nc_kbay, "time", "units")
 
-# get discharge
-mean_daily_discharge_m3s1 <- ncvar_get(nc_kbay, "q")
-discharge_lname <- ncatt_get(nc_kbay, "q", "long_name")
-discharge_units <- ncatt_get(nc_kbay, "q", "units")
-discharge_fillvalue <- ncatt_get(nc_kbay, "q", "_FillValue")
 
 # get latitude
 latitude_deg_north <- ncvar_get(nc_kbay, "lat")
@@ -32,6 +24,20 @@ lat_units <- ncatt_get(nc_kbay, "lat", "units")
 longitude_deg_east <- ncvar_get(nc_kbay, "lon")
 lon_lname <- ncatt_get(nc_kbay, "lon", "long_name")
 lon_units <- ncatt_get(nc_kbay, "lon", "units")
+
+# look at extent of file; 2017 file was spatially subset
+# plot_df <- data.frame(as.vector(latitude_deg_north), as.vector(longitude_deg_east))
+# ggplot(data = plot_df, aes(x=longitude_deg_east, y=latitude_deg_north)) + geom_tile() + coord_equal() 
+
+# get time 
+time_date <- ncvar_get(nc_kbay, "time")
+time_date_units <- ncatt_get(nc_kbay, "time", "units")
+
+# get discharge
+mean_daily_discharge_m3s1 <- ncvar_get(nc_kbay, "q")
+discharge_lname <- ncatt_get(nc_kbay, "q", "long_name")
+discharge_units <- ncatt_get(nc_kbay, "q", "units")
+discharge_fillvalue <- ncatt_get(nc_kbay, "q", "_FillValue")
 
 # get general attributes
 title <- ncatt_get(nc_kbay, 0, "title")
@@ -86,7 +92,7 @@ slice_2_df <- function(slice){
 }
 ###
 
-num_slices <- c(1:5722)   # this is the known nmber of slices in the original array
+num_slices <- c(1:5722)   # this is the known number of slices in the original array
 
 FWD_list <- lapply(num_slices, function(x) slice_2_df(x))
 
