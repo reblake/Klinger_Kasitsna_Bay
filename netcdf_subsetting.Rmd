@@ -1,0 +1,110 @@
+---
+title: "NetCDF subsetting"
+author: "Quentin Read"
+date: "9/28/2021"
+output: html_document
+---
+
+First, do a query to get the latitude and longitude values for each cell. We get a matrix for each one in the `stars` object. The first one is latitude and the second longitude.
+
+```{r get latlon}
+library(stars)
+library(glue)
+
+baseurl <- 'http://thredds.aoos.org/thredds/dodsC/GOA_RUNOFF_DISCHARGE.ncml'
+
+query_latlon <- glue('{baseurl}?lat,lon')
+
+# latlon <- read_ncdf(query_latlon)
+```
+
+```{r}
+# read using ncdf4
+test_latlon <- nc_open(query_latlon)
+print(test_latlon)
+
+# get latitude
+lat_deg_north <- ncvar_get(test_latlon, "lat")
+# get longitude
+lon_deg_east <- ncvar_get(test_latlon, "lon")
+
+latlon_df <- data.frame(as.vector(lat_deg_north), as.vector(lon_deg_east))
+names(latlon_df) <- c("latitude_deg_north", "longitude_deg_east")
+# ggplot(data = latlon_df, aes(x=longitude_deg_east, y=latitude_deg_north)) + geom_tile() + coord_equal()
+
+
+```
+
+Next, we want to translate Rachael's desired extent into cell indexes so we can do a reduced query for just the cells we need. The first step is to get vectors of lats and longs.
+
+```{r lat lon vectors}
+limits <- c(-151.40, 59.44, -151.63, 59.54)
+# lat_vec <- as.numeric(latlon[[1]][1,])
+# lon_vec <- as.numeric(latlon[[2]][,1])
+```
+
+Now find the range of indexes for the desired extent. We have to subtract one because the netCDF is indexed 0-based, and R is 1-based.
+
+```{r index ranges}
+# lat_limits <- range(which(lat_vec >= limits[2] & lat_vec <= limits[4])) - 1
+# lon_limits <- range(which(lon_vec >= limits[3] & lon_vec <= limits[1])) - 1
+# 
+# lat_limits
+# 
+# lon_limits
+```
+
+```{r}
+# 900 columns and 1810 rows
+
+# get the indexes for latitude values in the desired range
+lat_m <- which(lat_deg_north >= limits[2] & lat_deg_north <= limits[4], arr.ind=TRUE)
+lat_df <- data.frame(lat_m)
+min(lat_df$row); max(lat_df$row)#; unique(lat_df$row)  # 1810 unique rows
+min(lat_df$col)-1; max(lat_df$col)-1#; sort(unique(lat_df$col)) 
+# So, need all rows, and only certain columns
+
+# get the indexes for longitude values in the desired range
+lon_m <- which(lon_deg_east >= limits[3] & lon_deg_east <= limits[1], arr.ind=TRUE)
+lon_df <- data.frame(lon_m)
+min(lon_df$row)-1; max(lon_df$row)-1#; sort(unique(lon_df$row))
+min(lon_df$col); max(lon_df$col)#;unique(lon_df$col)  # 900 unique cols
+# So need all cols, and only certain rows
+
+```
+
+For the final query, the dimensions of `q` are ordered `(time, y, x)`. If `y` is latitude and `x` is longitude this should be correct but please check this!
+
+```{r final query}
+# query_final <- glue('{baseurl}?q[0:1:12784][{lat_limits[1]}:1:{lat_limits[2]}][{lon_limits[1]}:1:{lon_limits[2]}]')
+# 
+# query_final <- glue('{baseurl}?q[0:1:12784][{lon_limits[1]}:1:{lon_limits[2]}][{lat_limits[1]}:1:{lat_limits[2]}]')
+# 
+# dat <- read_ncdf(query_final)
+# 
+# dim(dat[['q']]) 
+```
+
+Dimensions check out!
+
+Let's check the geography:
+
+NOTE: Had to just tweak and then plot, and then tweak and then plot to get the correct indexing.  Never was able to get the correct indexing with the above code. 
+
+```{r map}
+query_finale <- glue("{baseurl}?lat[353:1:363][314:1:325],lon[353:1:363][314:1:325],q[0:1:12784][353:1:363][314:1:325],time[0:1:12784]")
+
+test_dat <- nc_open(query_finale)
+
+# get latitude
+latitude_deg_north <- ncvar_get(test_dat, "lat")
+# get longitude
+longitude_deg_east <- ncvar_get(test_dat, "lon")
+
+# look at extent of file
+plot_df <- data.frame(as.vector(latitude_deg_north), as.vector(longitude_deg_east))
+names(plot_df) <- c("latitude_deg_north", "longitude_deg_east")
+ggplot(data = plot_df, aes(x=longitude_deg_east, y=latitude_deg_north)) + 
+       geom_tile() + coord_equal()
+
+```
