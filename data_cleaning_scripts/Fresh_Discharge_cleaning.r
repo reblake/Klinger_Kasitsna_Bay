@@ -7,7 +7,7 @@
 
 ###########################
 ### load necessary packages
-library(ncdf4) ; library(chron) ; library(tidyverse) ; library(forcats) ; library(glue)
+library(ncdf4) ; library(chron) ; library(tidyverse) ; library(forcats) ; library(glue) ; library(forcats)
 
 ###########################
 ### figure out how to pull in a subset of the full modeled data (too large for R)
@@ -24,7 +24,7 @@ library(ncdf4) ; library(chron) ; library(tidyverse) ; library(forcats) ; librar
 # 
 # limits <- c(-151.40, 59.44, -151.63, 59.54) # limits of data needed
 
-# try to find the limits programmatically
+### try to find the limits programmatically
 # get the indexes for latitude values in the desired range
 # lat_m <- which(lat_deg_north >= limits[2] & lat_deg_north <= limits[4], arr.ind=TRUE)
 # lat_df <- data.frame(lat_m)
@@ -38,6 +38,8 @@ library(ncdf4) ; library(chron) ; library(tidyverse) ; library(forcats) ; librar
 
 ### NOTE: ended up just tweaking the query to the base URL, and then plotting to get the correct
 ### subset of data within the limits (defined above).  Programmatic way failed. 
+### Had to arrive at final index numbers by trial and error.
+### Final indexes for y were 353:363, and for x were 314:325 
 # query_finale <- glue("{baseurl}?lat[353:1:363][314:1:325],lon[353:1:363][314:1:325],q[0:1:12784][353:1:363][314:1:325],time[0:1:12784]")
 # test_dat <- nc_open(query_finale)
 # lat_deg_north <- ncvar_get(test_dat, "lat") # get latitude
@@ -72,10 +74,8 @@ lat_units <- ncatt_get(nc_kbay, "lat", "units")
 # lon_lname <- ncatt_get(nc_kbay, "lon", "long_name")
 # lon_units <- ncatt_get(nc_kbay, "lon", "units")
 
-
 # look at extent of file; 2017 file was spatially subset
 # ggplot(data = latlon, aes(x=longitude_deg_east, y=latitude_deg_north)) + geom_tile() + coord_equal() 
->>>>>>> da8e6107b6538e2d0c3a3f5afff29e24daab40b8
 
 # # get time 
 # time_date <- ncvar_get(nc_kbay, "time")
@@ -111,8 +111,8 @@ make_time_human <- function(ncfile){
                    # open file
                    nc_file <- nc_open(ncfile)   
                    # read time
-                   time_date <- ncvar_get(ncfile, "time")    
-                   time_date_units <- ncatt_get(ncfile, "time", "units")
+                   time_date <- ncvar_get(nc_file, "time")    
+                   time_date_units <- ncatt_get(nc_file, "time", "units")
                    # convert time variable to human-readable format
                    time_unit_str <- strsplit(time_date_units$value, " ")
                    date_str <- strsplit(unlist(time_unit_str)[3], "-")
@@ -129,6 +129,32 @@ make_time_human <- function(ncfile){
 }
 ###
 
+### Function to get year, month, and day from 2014-2018 files
+#' Title
+#'
+#' @param ncfile 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+make_dmy <- function(ncfile){
+            # open file
+            nc_file <- nc_open(ncfile) 
+            # read year, month, day
+            year <- ncvar_get(nc_file, "year") 
+            month <- ncvar_get(nc_file, "month") 
+            day <- ncvar_get(nc_file, "day") 
+            # make dataframe
+            dmy_df <- data.frame(year, month, day)
+            dmy_df$date <- paste(month, day, year, sep = "/")
+            dmy_df$date <- chron(dmy_df$date)
+            # close file
+            nc_close(nc_file)
+            
+            return(dmy_df)
+}
+###
 
 ### Function to create a dataframe of latitudes and longitudes
 #' Title
@@ -177,14 +203,25 @@ slice_2_df <- function(row_n, date_col, slice, ncfile,  latlon_df){
               df1 <- as.data.frame(matrix(ncol = 0, nrow = row_n)) #108 or 132  
               # make date column
               df1$date <- as.character(date_col[[slice]])
+              # make day, month, year columns
+              df1 <- df1 %>% 
+                     mutate(Year = sapply(strsplit(as.character(date), split="/") , function(x) x[3]),
+                            Month = sapply(strsplit(as.character(date), split="/") , function(x) x[1]),
+                            Day = sapply(strsplit(as.character(date), split="/") , function(x) x[2]),
+                            Month = as.factor(Month))  
               # open file
               nc_file <- nc_open(ncfile)
               # get discharge
-              mean_daily_discharge_m3s1 <- ncvar_get(ncfile, "q")
+              mean_daily_discharge_m3s1 <- ncvar_get(nc_file, "q")
               # replace FillValue with NA
               mean_daily_discharge_m3s1[is.nan(mean_daily_discharge_m3s1)] <- NA
               # make data column
-              df1$mean_daily_discharge_m3s1 <- as.vector(mean_daily_discharge_m3s1[,,slice])
+              if(row_n = 365){
+                             df1$mean_daily_discharge_m3s1 <- as.vector(mean_daily_discharge_m3s1[,slice])
+                             }else{
+                             df1$mean_daily_discharge_m3s1 <- as.vector(mean_daily_discharge_m3s1[,,slice])  
+                             }
+              
               # close file
               nc_close(nc_file)
   
@@ -195,25 +232,50 @@ slice_2_df <- function(row_n, date_col, slice, ncfile,  latlon_df){
 }
 ###
 
-# print(nc_kbay) # looked at the "Size" of the 'time' dimension - I used this as the number of slices
-num_slices <- c(1:5722)   # this is the known number of slices in the original array
-# 12785
+### get time and date
+date_f1 <- make_time_human(ncfile = "GOA_RUNOFF_DISCHARGE.ncml.nc")
+date_f2 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012014_08312015.nc")
+date_f3 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012015_08312016.nc")
+date_f4 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012016_08312017.nc")
+date_f5 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012017_08312018.nc")
 
-FWD_list <- lapply(num_slices, slice_2_df, row_n = 108, latlon_df = latlon, date_col = date)  #row_n = 108, latlon_df = latlon
+### get lat and lon
+latlon_f1 <- make_latlon_df(ncfile = "GOA_RUNOFF_DISCHARGE.ncml.nc", row_n = 108)
+latlon_f2 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012014_08312015.nc",
+                            row_n = 14052)
+latlon_f3 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012015_08312016.nc",
+                            row_n = 14052)
+latlon_f4 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012016_08312017.nc",
+                            row_n = 14052)
+latlon_f5 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012017_08312018.nc",
+                            row_n = 14052)
 
-FWD <- bind_rows(FWD_list)
+### get number of slices to use
+# print(nc_kbay) # look at the "Size" of the 'time' dimension - use this as the number of slices
+# the max number here is the known number of slices in the original array
+# num_slices <- c(1:5722)   # original downloaded file from 2017
+# num_slices <- c(1:12785)  # programmatically downloaded file (contains data until 8/31/2014)
+num_slices <- c(1:14052)  # this is the dim of the time ; from the David Hill files for 2014-2018
+
+### get slices of discharge data
+FWD_list_f1 <- lapply(num_slices, slice_2_df, ncfile = "GOA_RUNOFF_DISCHARGE.ncml.nc",
+                      row_n = 108, latlon_df = latlon_f1, date_col = date_f1)  
+FWD_f1 <- bind_rows(FWD_list_f1)
+#
+FWD_list_f2 <- lapply(num_slices, slice_2_df, 
+                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012014_08312015.nc",
+                      row_n = 365, latlon_df = latlon_f2, date_col = date_f2$date)  
+
+
 
 # remove some points that probably don't drain into this site
-FWD_less <- FWD %>% 
+FWD_less <- FWD_f1 %>% 
             filter(!(longitude_deg_east < -151.55 & latitude_deg_north < 59.48),
-                   !(latitude_deg_north > 59.51 & longitude_deg_east > -151.45)) %>%
-            mutate(Year = sapply(strsplit(as.character(date), split="/") , function(x) x[3]),
-                   Month = sapply(strsplit(as.character(date), split="/") , function(x) x[1]),
-                   Day = sapply(strsplit(as.character(date), split="/") , function(x) x[2]),
-                   Month_number = forcats::fct_recode(Month, "01"="Jan", "02"="Feb", "03"="Mar",
-                                                             "04"="Apr", "05"="May", "06"="Jun", 
-                                                             "07"="Jul", "08"="Aug", "09"="Sep", 
-                                                             "10"="Oct", "11"="Nov", "12"="Dec"))
+                   !(latitude_deg_north > 59.51 & longitude_deg_east > -151.45)) #%>%
+            # mutate(Month_number = forcats::fct_recode(Month, "01"="Jan", "02"="Feb", "03"="Mar",
+            #                                                  "04"="Apr", "05"="May", "06"="Jun", 
+            #                                                  "07"="Jul", "08"="Aug", "09"="Sep", 
+            #                                                  "10"="Oct", "11"="Nov", "12"="Dec"))
 
 # check to see the data are approx. correct by plotting the lats and lons
 q <- qplot(data = FWD_less, x = longitude_deg_east, y = latitude_deg_north)
