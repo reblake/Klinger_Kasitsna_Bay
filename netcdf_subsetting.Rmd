@@ -92,6 +92,8 @@ Let's check the geography:
 NOTE: Had to just tweak and then plot, and then tweak and then plot to get the correct indexing.  Never was able to get the correct indexing with the above code. 
 
 ```{r map}
+# had to arrive at final index numbers by trial and error
+# final indexes for y were 353:363, and for x were 314:325 
 query_finale <- glue("{baseurl}?lat[353:1:363][314:1:325],lon[353:1:363][314:1:325],q[0:1:12784][353:1:363][314:1:325],time[0:1:12784]")
 
 test_dat <- nc_open(query_finale)

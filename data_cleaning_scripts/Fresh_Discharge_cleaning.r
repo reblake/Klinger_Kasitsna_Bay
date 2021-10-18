@@ -13,8 +13,6 @@ nc_kbay <- nc_open("GOA_RUNOFF_DISCHARGE.ncml.nc") # uses a static file created 
 # nc_kbay <- nc_open("http://thredds.aoos.org/thredds/dodsC/GOA_RUNOFF_DISCHARGE.ncml") # download directly from OPeNDAP
 # print(nc_kbay) # shows info about the file
 
-
-
 # get latitude
 latitude_deg_north <- ncvar_get(nc_kbay, "lat")
 lat_lname <- ncatt_get(nc_kbay, "lat", "long_name")
