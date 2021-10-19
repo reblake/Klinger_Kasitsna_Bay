@@ -147,8 +147,8 @@ make_dmy <- function(ncfile){
             day <- ncvar_get(nc_file, "day") 
             # make dataframe
             dmy_df <- data.frame(year, month, day)
-            dmy_df$date <- paste(month, day, year, sep = "/")
-            dmy_df$date <- chron(dmy_df$date)
+            dmy_df$dates <- paste(month, day, year, sep = "/")
+            dmy_df$dates <- chron(dmy_df$date, out.format = "m/d/year")
             # close file
             nc_close(nc_file)
             
@@ -200,7 +200,7 @@ make_latlon_df <- function(ncfile, row_n){
 
 slice_2_df <- function(row_n, date_col, slice, ncfile,  latlon_df){
               # make empty dataframe
-              df1 <- as.data.frame(matrix(ncol = 0, nrow = row_n)) #108 or 132  
+              df1 <- as.data.frame(matrix(ncol = 0, nrow = row_n))  
               # make date column
               df1$date <- as.character(date_col[[slice]])
               # make day, month, year columns
@@ -216,10 +216,10 @@ slice_2_df <- function(row_n, date_col, slice, ncfile,  latlon_df){
               # replace FillValue with NA
               mean_daily_discharge_m3s1[is.nan(mean_daily_discharge_m3s1)] <- NA
               # make data column
-              if(row_n = 365){
-                             df1$mean_daily_discharge_m3s1 <- as.vector(mean_daily_discharge_m3s1[,slice])
+              if(ncfile == "GOA_RUNOFF_DISCHARGE.ncml.nc"){
+                             df1$mean_daily_discharge_m3s1 <- as.vector(mean_daily_discharge_m3s1[,,slice])
                              }else{
-                             df1$mean_daily_discharge_m3s1 <- as.vector(mean_daily_discharge_m3s1[,,slice])  
+                             df1$mean_daily_discharge_m3s1 <- as.vector(mean_daily_discharge_m3s1[,slice])  
                              }
               
               # close file
@@ -253,23 +253,42 @@ latlon_f5 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_0
 ### get number of slices to use
 # print(nc_kbay) # look at the "Size" of the 'time' dimension - use this as the number of slices
 # the max number here is the known number of slices in the original array
-# num_slices <- c(1:5722)   # original downloaded file from 2017
+# it also happens to be the number of calendar days represented by the dataset
+# 5722 is the number of days between 1/1/1999 and 8/31/2014 inclusive
+num_slices <- c(1:5722)   # use for processing the original downloaded file from 2017
 # num_slices <- c(1:12785)  # programmatically downloaded file (contains data until 8/31/2014)
-num_slices <- c(1:14052)  # this is the dim of the time ; from the David Hill files for 2014-2018
+num_slices <- c(1:365)  # this is the dim of the time ; use for processing the David Hill files for 2014-2018
 
-### get slices of discharge data
+
+### get slices of discharge data using the `slice_2_df()` function
 FWD_list_f1 <- lapply(num_slices, slice_2_df, ncfile = "GOA_RUNOFF_DISCHARGE.ncml.nc",
                       row_n = 108, latlon_df = latlon_f1, date_col = date_f1)  
 FWD_f1 <- bind_rows(FWD_list_f1)
 #
+# REMEMBER to redefine the num_slices above for these subsequent files!
 FWD_list_f2 <- lapply(num_slices, slice_2_df, 
                       ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012014_08312015.nc",
-                      row_n = 365, latlon_df = latlon_f2, date_col = date_f2$date)  
-
-
+                      row_n = 14052, latlon_df = latlon_f2, date_col = date_f2$dates)  
+FWD_f2 <- bind_rows(FWD_list_f2)
+#
+FWD_list_f3 <- lapply(num_slices, slice_2_df, 
+                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012015_08312016.nc",
+                      row_n = 14052, latlon_df = latlon_f3, date_col = date_f3$dates)  
+FWD_f3 <- bind_rows(FWD_list_f3)
+#
+FWD_list_f4 <- lapply(num_slices, slice_2_df, 
+                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012016_08312017.nc",
+                      row_n = 14052, latlon_df = latlon_f4, date_col = date_f4$dates)  
+FWD_f4 <- bind_rows(FWD_list_f4)
+#
+FWD_list_f5 <- lapply(num_slices, slice_2_df, 
+                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012017_08312018.nc",
+                      row_n = 14052, latlon_df = latlon_f5, date_col = date_f5$dates)  
+FWD_f5 <- bind_rows(FWD_list_f5)
 
 # remove some points that probably don't drain into this site
 FWD_less <- FWD_f1 %>% 
+            bind_rows(FWD_f2) %>% bind_rows(FWD_f3) %>% bind_rows(FWD_f4) %>% bind_rows(FWD_f5) %>% 
             filter(!(longitude_deg_east < -151.55 & latitude_deg_north < 59.48),
                    !(latitude_deg_north > 59.51 & longitude_deg_east > -151.45)) #%>%
             # mutate(Month_number = forcats::fct_recode(Month, "01"="Jan", "02"="Feb", "03"="Mar",
