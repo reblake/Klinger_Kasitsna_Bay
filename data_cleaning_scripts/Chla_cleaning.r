@@ -105,7 +105,7 @@ chla2_NT_clean <- chla2_NT2 %>%
                                 Year = sapply(strsplit(as.character(Date), split="/") , function(x) x[3]),
                                 Month = sapply(strsplit(as.character(Date), split="/") , function(x) x[1])) %>%
                   dplyr::arrange(Year, Month) %>%
-                  dplyr::select(-isSWMP, -CollMethd, -REP, -F_Record, -Date, -DateTimeStamp, -F_CHLA_N, -Station_Code)
+                  dplyr::select(-isSWMP, -CollMethd, -REP, -F_Record, -F_CHLA_N)
 
 
 

@@ -3,27 +3,27 @@ title: "Data Visualization"
 author: "Rachael E. Blake"
 date: "May 1, 2017"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r, include=FALSE, echo=FALSE, results='hide'}
-library(ggplot2) ; library(tidyverse) ; library(gridExtra) ; library(grid)
+library(ggplot2) ; library(tidyverse) ; library(gridExtra) ; library(grid) ; library(here)
 
 ```
 
 ```{r, echo=FALSE, include=FALSE}
 # PDO data
-source("PDO_cleaning.r")
+source(here("data_cleaning_scripts", "PDO_cleaning.r"))
 
 # dataframes are pdo_mon and pdo_ann
 
 pdo_mon_adj <- pdo_mon %>%
-               mutate(Month_number = forcats::fct_recode(Month, "01"="JAN", "02"="FEB", "03"="MAR",
-                                                                "04"="APR", "05"="MAY", "06"="JUN", 
-                                                                "07"="JUL", "08"="AUG", "09"="SEP", 
-                                                                "10"="OCT", "11"="NOV", "12"="DEC"),
-                      Yr_Mn = paste(Year, Month_number, sep="-"),
+               mutate(#Month_number = forcats::fct_recode(Month, "01"="JAN", "02"="FEB", "03"="MAR",
+                      #                                          "04"="APR", "05"="MAY", "06"="JUN", 
+                      #                                          "07"="JUL", "08"="AUG", "09"="SEP", 
+                      #                                          "10"="OCT", "11"="NOV", "12"="DEC"),
+                      Yr_Mn = paste(Year, Month, sep="-"),
                       Sign = ifelse(PDO>0, "A", "B"))
                
 ```
@@ -50,14 +50,16 @@ pdo_plot2 <- ggplot(data=pdo_mon_adj, aes(x=Yr_Mn, y=PDO)) +
 
 ```{r, echo=FALSE, include=FALSE}
 # Freshwater Discharge Hill Model data
-source("Fresh_Discharge_cleaning.r")
-
+# source("./data_cleaning_scripts/Fresh_Discharge_cleaning.r")
 # dataframes are FWD_ann_mn and FWD_mon_mn
+
+fwd_ann <- read_csv(here("data_clean", "FWD_annual_mn_clean.csv"))
+fwd_mon <- read_csv(here("data_clean", "FWD_monthly_mn_clean.csv"))
 
 ```
 
 ```{r, echo=FALSE}
-fwd_plot <- ggplot(data=FWD_ann_mn, aes(x=YEAR, y=(mean_yearly_anomaly*10))) + 
+fwd_plot <- ggplot(data=fwd_ann, aes(x=YEAR, y=(mean_yearly_anomaly*10))) + 
             geom_col(aes(fill=Sign)) + ylab("Yearly Anomaly") + theme_bw() +
             geom_hline(yintercept=0, size=1) + 
             scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
@@ -65,7 +67,7 @@ fwd_plot <- ggplot(data=FWD_ann_mn, aes(x=YEAR, y=(mean_yearly_anomaly*10))) +
                               labels=c("positive runoff", "negative runoff")) 
  
   
-fwd_plot2 <- ggplot(data=FWD_mon_mn, aes(x=Year_Month, y=mean_monthly_anomaly)) + 
+fwd_plot2 <- ggplot(data=fwd_mon, aes(x=Year_Month, y=mean_monthly_anomaly)) + 
              geom_col(aes(fill=Sign)) + xlab("Year") + ylab("Anomaly") + 
              geom_hline(yintercept=0, size=1) +  
              scale_x_discrete(breaks=c("1998-01", "1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
@@ -75,14 +77,14 @@ fwd_plot2 <- ggplot(data=FWD_mon_mn, aes(x=Year_Month, y=mean_monthly_anomaly)) 
                               labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005",
                                        "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013",
                                        "2014","2015", "2016"),
-                              limits=c(levels(FWD_mon_mn$Year_Month)))
+                              limits=c(levels(fwd_mon$Year_Month)))
                              
 
 ```
 
 ```{r, echo=FALSE, include=FALSE}
 # source air temperature cleaning script
-source("AirTemp_cleaning.r")
+source(here("data_cleaning_scripts", "AirTemp_cleaning.r"))
 
 # dataframes in this script are
 # spring_a_temp, summer_a_temp, fall_a_temp, winter_a_temp, ann_a_temp
@@ -95,7 +97,7 @@ source("AirTemp_cleaning.r")
 ann_a_temp$YrMnDy <- as.factor(ann_a_temp$YrMnDy)
 
 ann_a_temp2 <- ann_a_temp %>%
-               dplyr::select(YrMn, Month_Anom, Month_Sign) %>%
+               dplyr::select(YrMn, month_Anom, month_Sign) %>%
                dplyr::distinct()
 
 ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=Month_Anom)) + 
@@ -116,10 +118,11 @@ ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=Month_Anom)) +
 
 ```{r, echo=FALSE, include=FALSE}
 # source air temperature cleaning script
-source("WaterTemp_cleaning.r")
-
+# source("../data_cleaning_scripts/WaterTemp_cleaning.r")
 # dataframes in this script are
 # WTemp_all, WTemp_Yr, WTemp_June, WTemp_Dec
+
+wtemp_june <- read_csv(here("data_clean", "WTemp_June_clean.csv"))
 
 ```
 
@@ -127,7 +130,7 @@ source("WaterTemp_cleaning.r")
 #Invertebrates: Percent Cover Data
 ```{r, include=FALSE, echo=FALSE, results='hide'}
 # source the data cleaning script
-source("Data_Cleaning_K_Bay_ALL.r")
+source(here("data_cleaning_scripts", "Data_Cleaning_K_Bay_ALL.r"))
 
 AllData_clean2 <- AllData_clean %>% 
                   dplyr::select(-FUCUS_NUM_ADULTS, -FUCUS_SPORELINGS_NUM) %>%
