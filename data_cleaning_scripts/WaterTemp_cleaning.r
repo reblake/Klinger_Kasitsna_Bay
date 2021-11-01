@@ -65,11 +65,11 @@ URLS <- list("https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=199901
              "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20140101%2000:00&end_date=20141231%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
              "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20150101%2000:00&end_date=20151231%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
              "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20160101%2000:00&end_date=20161231%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
-             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20170101%2000:00&end_date=20170630%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
-             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20180101%2000:00&end_date=20180630%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
-             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20190101%2000:00&end_date=20190630%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
-             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20200101%2000:00&end_date=20200630%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
-             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20210101%2000:00&end_date=20210630%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv"
+             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20170101%2000:00&end_date=20171231%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
+             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20180101%2000:00&end_date=20181231%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
+             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20190101%2000:00&end_date=20191231%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
+             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20200101%2000:00&end_date=20201231%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv",
+             "https://tidesandcurrents.noaa.gov/api/datagetter?begin_date=20210101%2000:00&end_date=20211231%2023:00&station=9455500&product=water_temperature&datum=mllw&units=metric&time_zone=lst_ldt&interval=h&application=web_services&format=csv"
              )
 
 
@@ -81,7 +81,8 @@ WTemp_all <- bind_rows(WT_df_list) # bind the list of dataframes output by lappl
 blank_months <- data.frame(YrMn = c("2011-01", "2011-02", "2012-01", "2012-02", "2012-03", "2012-04",
                                     "2015-08", "2015-09", "2015-10", "2015-11", "2015-12", "2016-01",
                                     "2016-02", "2016-03", "2016-04", "2016-05", "2016-08", "2016-09",
-                                    "2016-10", "2016-11", "2016-12", "2017-01"),
+                                    "2016-10", "2016-11", "2016-12", "2017-01"),#,
+                                   # "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12"
                            Year = c("2011","2011", "2012", "2012", "2012", "2012", "2015", "2015", "2015",
                                     "2015", "2015", "2016", "2016", "2016", "2016", "2016", "2016",
                                     "2016", "2016", "2016", "2016", "2017"),
@@ -128,7 +129,7 @@ WTemp_Dec <- WTemp_all %>%
              dplyr::select(-Month) %>% 
              dplyr::mutate(WTemp_Dec_Lag = lag(Water_Temp_Dec))
   
-  
+write_csv(WTemp_June, "./data_clean/WTemp_June_clean.csv")  
 
 
 
