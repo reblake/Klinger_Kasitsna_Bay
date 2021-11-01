@@ -52,16 +52,16 @@ library(ncdf4) ; library(chron) ; library(tidyverse) ; library(forcats) ; librar
 
 ###########################
 ### read in the netcdf file 
-nc_kbay <- nc_open("GOA_RUNOFF_DISCHARGE.ncml.nc") # uses a static file created in 2017
+# nc_kbay <- nc_open("GOA_RUNOFF_DISCHARGE.ncml.nc") # uses a static file created in 2017
 # nc_kbay <- nc_open(query_finale) # download directly from OPeNDAP
 # print(nc_kbay) # shows info about the file
 # names(nc_kbay$dim) #display dimensions
 # names(nc_kbay$var) #display variables
 
 # get latitude
-latitude_deg_north <- ncvar_get(nc_kbay, "lat")
-lat_lname <- ncatt_get(nc_kbay, "lat", "long_name")
-lat_units <- ncatt_get(nc_kbay, "lat", "units")
+# latitude_deg_north <- ncvar_get(nc_kbay, "lat")
+# lat_lname <- ncatt_get(nc_kbay, "lat", "long_name")
+# lat_units <- ncatt_get(nc_kbay, "lat", "units")
 
 ### manually do stuff
 # # get latitude
@@ -290,26 +290,31 @@ FWD_f5 <- bind_rows(FWD_list_f5)
 FWD_less <- FWD_f1 %>% 
             bind_rows(FWD_f2) %>% bind_rows(FWD_f3) %>% bind_rows(FWD_f4) %>% bind_rows(FWD_f5) %>% 
             filter(!(longitude_deg_east < -151.55 & latitude_deg_north < 59.48),
-                   !(latitude_deg_north > 59.51 & longitude_deg_east > -151.45)) #%>%
-            # mutate(Month_number = forcats::fct_recode(Month, "01"="Jan", "02"="Feb", "03"="Mar",
-            #                                                  "04"="Apr", "05"="May", "06"="Jun", 
-            #                                                  "07"="Jul", "08"="Aug", "09"="Sep", 
-            #                                                  "10"="Oct", "11"="Nov", "12"="Dec"))
+                   !(latitude_deg_north > 59.51 & longitude_deg_east > -151.45)) %>%
+            mutate(Month_number = forcats::fct_recode(Month, "01"="Jan", "02"="Feb", "03"="Mar",
+                                                             "04"="Apr", "05"="May", "06"="Jun",
+                                                             "07"="Jul", "08"="Aug", "09"="Sep",
+                                                             "10"="Oct", "11"="Nov", "12"="Dec"))
 
 # check to see the data are approx. correct by plotting the lats and lons
 q <- qplot(data = FWD_less, x = longitude_deg_east, y = latitude_deg_north)
 
-# # create dummy dataframe for empty 2015 rows (useful in plotting later)
-# dummy_2015 <- data.frame(Year = c("2014","2014","2014","2014","2015","2015","2015","2015","2015",
-#                                   "2015","2015","2015","2015","2015","2015","2015"),
-#                          Month = c("09","10","11","12","01","02","03","04","05","06","07","08",
-#                                    "09","10","11","12"))
-#                         
-# dummy_2015$Year_Month <- paste(dummy_2015$Year, dummy_2015$Month, sep="-")
-# dummy_2015$mean_monthly_discharge_m3s1 <- 0.0000001
-# dummy_2015$mean_monthly_anomaly <- 0.0000001
-# dummy_2015$Sign <- "B"
-# dummy_2015$Year_Month2 <- factor(dummy_2015$Year_Month)
+# create dummy dataframe for empty 2018 rows (useful in plotting later)
+dummy_2018 <- data.frame(Year = c("2018","2018","2018","2018","2019","2019","2019","2019","2019",
+                                  "2019","2019","2019","2019","2019","2019","2019","2020","2020",
+                                  "2020","2020","2020","2020","2020","2020","2020","2020","2020",
+                                  "2020","2021","2021","2021","2021","2021","2021","2021","2021",
+                                  "2021","2021","2021","2021"),
+                         Month = c("09","10","11","12","01","02","03","04","05","06","07","08",
+                                   "09","10","11","12","01","02","03","04","05","06","07","08",
+                                   "09","10","11","12","01","02","03","04","05","06","07","08",
+                                   "09","10","11","12"))
+
+dummy_2018$Year_Month <- paste(dummy_2018$Year, dummy_2018$Month, sep="-")
+dummy_2018$mean_monthly_discharge_m3s1 <- 0.0000001
+dummy_2018$mean_monthly_anomaly <- 0.0000001
+dummy_2018$Sign <- "B"
+dummy_2018$Year_Month2 <- factor(dummy_2018$Year_Month)
 
 
 # create annual means
@@ -339,8 +344,10 @@ FWD_mon_mn <- FWD_anomaly %>%
               dplyr::select(Year, Month, Year_Month, mean_monthly_discharge_m3s1, mean_monthly_anomaly) %>%
               dplyr::distinct() %>%
               dplyr::mutate(Sign = ifelse(mean_monthly_anomaly>0, "A", "B")) %>%
-              dplyr::bind_rows(dummy_2015) # this adds dummy data for 2015 for plotting purposes
-  
+              dplyr::bind_rows(dummy_2018) # this adds dummy data for 2018 for plotting purposes
+
+write_csv(FWD_ann_mn, "./data_clean/FWD_annual_mn_clean.csv")  
+write_csv(FWD_mon_mn, "./data_clean/FWD_monthly_mn_clean.csv")
 
 
 
