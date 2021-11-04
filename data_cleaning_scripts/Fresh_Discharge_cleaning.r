@@ -53,6 +53,7 @@ library(ncdf4) ; library(chron) ; library(tidyverse) ; library(forcats) ; librar
 ###########################
 ### read in the netcdf file 
 # nc_kbay <- nc_open("GOA_RUNOFF_DISCHARGE.ncml.nc") # uses a static file created in 2017
+# nc_kbay <- nc_open("GOA_FWDischarge_2013_2018/goa_dischargex_09012017_08312018.nc") # uses static file in Google Drive from Seth Danielson
 # nc_kbay <- nc_open(query_finale) # download directly from OPeNDAP
 # print(nc_kbay) # shows info about the file
 # names(nc_kbay$dim) #display dimensions
@@ -212,21 +213,21 @@ slice_2_df <- function(row_n, date_col, slice, ncfile,  latlon_df){
               # open file
               nc_file <- nc_open(ncfile)
               # get discharge
-              mean_daily_discharge_m3s1 <- ncvar_get(nc_file, "q")
+              mean_daily_discharge <- ncvar_get(nc_file, "q")
               # replace FillValue with NA
-              mean_daily_discharge_m3s1[is.nan(mean_daily_discharge_m3s1)] <- NA
+              mean_daily_discharge[is.nan(mean_daily_discharge)] <- NA
               # make data column
               if(ncfile == "GOA_RUNOFF_DISCHARGE.ncml.nc"){
-                             df1$mean_daily_discharge_m3s1 <- as.vector(mean_daily_discharge_m3s1[,,slice])
+                             df1$mean_daily_discharge <- as.vector(mean_daily_discharge[,,slice])
                              }else{
-                             df1$mean_daily_discharge_m3s1 <- as.vector(mean_daily_discharge_m3s1[,slice])  
+                             df1$mean_daily_discharge <- as.vector(mean_daily_discharge[,slice])  
                              }
               
               # close file
               nc_close(nc_file)
   
               lldf1 <- cbind(latlon_df, df1)
-              lldf1 <- dplyr::filter(lldf1, !is.na(mean_daily_discharge_m3s1))
+              lldf1 <- dplyr::filter(lldf1, !is.na(mean_daily_discharge))
   
               return(lldf1)
 }
@@ -263,28 +264,30 @@ num_slices <- c(1:365)  # this is the dim of the time ; use for processing the D
 ### get slices of discharge data using the `slice_2_df()` function
 FWD_list_f1 <- lapply(num_slices, slice_2_df, ncfile = "GOA_RUNOFF_DISCHARGE.ncml.nc",
                       row_n = 108, latlon_df = latlon_f1, date_col = date_f1)  
-FWD_f1 <- bind_rows(FWD_list_f1)
+FWD_f1 <- bind_rows(FWD_list_f1) %>% 
+          # convert FWD_f1 from m3.s-1 to m3.d-1 (meters cubed per second to meters cubed per day)
+          mutate(mean_daily_discharge_m3d1 = mean_daily_discharge*86400)
 #
 # REMEMBER to redefine the num_slices above for these subsequent files!
 FWD_list_f2 <- lapply(num_slices, slice_2_df, 
                       ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012014_08312015.nc",
                       row_n = 14052, latlon_df = latlon_f2, date_col = date_f2$dates)  
-FWD_f2 <- bind_rows(FWD_list_f2)
+FWD_f2 <- bind_rows(FWD_list_f2) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge)
 #
 FWD_list_f3 <- lapply(num_slices, slice_2_df, 
                       ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012015_08312016.nc",
                       row_n = 14052, latlon_df = latlon_f3, date_col = date_f3$dates)  
-FWD_f3 <- bind_rows(FWD_list_f3)
+FWD_f3 <- bind_rows(FWD_list_f3) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge)
 #
 FWD_list_f4 <- lapply(num_slices, slice_2_df, 
                       ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012016_08312017.nc",
                       row_n = 14052, latlon_df = latlon_f4, date_col = date_f4$dates)  
-FWD_f4 <- bind_rows(FWD_list_f4)
+FWD_f4 <- bind_rows(FWD_list_f4) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge)
 #
 FWD_list_f5 <- lapply(num_slices, slice_2_df, 
                       ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012017_08312018.nc",
                       row_n = 14052, latlon_df = latlon_f5, date_col = date_f5$dates)  
-FWD_f5 <- bind_rows(FWD_list_f5)
+FWD_f5 <- bind_rows(FWD_list_f5) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge)
 
 # remove some points that probably don't drain into this site
 FWD_less <- FWD_f1 %>% 
@@ -319,29 +322,29 @@ dummy_2018$Year_Month2 <- factor(dummy_2018$Year_Month)
 
 # create annual means
 FWD_anomaly <- FWD_less %>%
-               dplyr::mutate(mean_overall = mean(mean_daily_discharge_m3s1),
-                             daily_anomaly = mean_daily_discharge_m3s1 - mean_overall)
+               dplyr::mutate(mean_overall = mean(mean_daily_discharge_m3d1),
+                             daily_anomaly = mean_daily_discharge_m3d1 - mean_overall)
 
 FWD_ann_mn <- FWD_anomaly %>%
               dplyr::group_by(Year) %>%
-              dplyr::mutate(mean_yearly_discharge_m3s1 = mean(mean_daily_discharge_m3s1),
-                            SD_yearly_discharge_m3s1 = sd(mean_daily_discharge_m3s1),
-                            SE_yearly_discharge_m3s1 = SD_yearly_discharge_m3s1/sqrt(n()),
+              dplyr::mutate(mean_daily_discharge_m3d1 = mean(mean_daily_discharge_m3d1),
+                            SD_yearly_discharge_m3d1 = sd(mean_daily_discharge_m3d1),
+                            SE_yearly_discharge_m3d1 = SD_yearly_discharge_m3d1/sqrt(n()),
                             mean_yearly_anomaly = mean(daily_anomaly)) %>%
               dplyr::ungroup() %>%
-              dplyr::select(Year, mean_yearly_discharge_m3s1, mean_yearly_anomaly,
-                            SD_yearly_discharge_m3s1,SE_yearly_discharge_m3s1) %>%
+              dplyr::select(Year, mean_daily_discharge_m3d1, mean_yearly_anomaly,
+                            SD_yearly_discharge_m3d1, SE_yearly_discharge_m3d1) %>%
               dplyr::distinct() %>%
               dplyr::mutate(Sign = ifelse(mean_yearly_anomaly>0, "A", "B"))
               
 # create monthly means  
 FWD_mon_mn <- FWD_anomaly %>%
               dplyr::group_by(Year, Month) %>%
-              dplyr::mutate(mean_monthly_discharge_m3s1 = mean(mean_daily_discharge_m3s1),
+              dplyr::mutate(mean_monthly_discharge_m3d1 = mean(mean_daily_discharge_m3d1),
                             mean_monthly_anomaly = mean(daily_anomaly),
                             Year_Month = paste(Year, Month_number, sep="-")) %>%
               dplyr::ungroup() %>%
-              dplyr::select(Year, Month, Year_Month, mean_monthly_discharge_m3s1, mean_monthly_anomaly) %>%
+              dplyr::select(Year, Month, Year_Month, mean_monthly_discharge_m3d1, mean_monthly_anomaly) %>%
               dplyr::distinct() %>%
               dplyr::mutate(Sign = ifelse(mean_monthly_anomaly>0, "A", "B")) %>%
               dplyr::bind_rows(dummy_2018) # this adds dummy data for 2018 for plotting purposes
