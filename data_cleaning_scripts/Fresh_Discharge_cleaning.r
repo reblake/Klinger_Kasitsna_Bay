@@ -7,7 +7,7 @@
 
 ###########################
 ### load necessary packages
-library(ncdf4) ; library(chron) ; library(tidyverse) ; library(forcats) ; library(glue) ; library(forcats)
+library(ncdf4) ; library(chron) ; library(tidyverse) ; library(forcats) ; library(glue)
 
 ###########################
 ### figure out how to pull in a subset of the full modeled data (too large for R)
@@ -314,7 +314,7 @@ dummy_2018 <- data.frame(Year = c("2018","2018","2018","2018","2019","2019","201
                                    "09","10","11","12"))
 
 dummy_2018$Year_Month <- paste(dummy_2018$Year, dummy_2018$Month, sep="-")
-dummy_2018$mean_monthly_discharge_m3s1 <- 0.0000001
+dummy_2018$mean_monthly_discharge_m3d1 <- 0.0000001
 dummy_2018$mean_monthly_anomaly <- 0.0000001
 dummy_2018$Sign <- "B"
 dummy_2018$Year_Month2 <- factor(dummy_2018$Year_Month)
@@ -327,12 +327,12 @@ FWD_anomaly <- FWD_less %>%
 
 FWD_ann_mn <- FWD_anomaly %>%
               dplyr::group_by(Year) %>%
-              dplyr::mutate(mean_daily_discharge_m3d1 = mean(mean_daily_discharge_m3d1),
+              dplyr::mutate(mean_yearly_discharge_m3d1 = mean(mean_daily_discharge_m3d1),
                             SD_yearly_discharge_m3d1 = sd(mean_daily_discharge_m3d1),
                             SE_yearly_discharge_m3d1 = SD_yearly_discharge_m3d1/sqrt(n()),
                             mean_yearly_anomaly = mean(daily_anomaly)) %>%
               dplyr::ungroup() %>%
-              dplyr::select(Year, mean_daily_discharge_m3d1, mean_yearly_anomaly,
+              dplyr::select(Year, mean_yearly_discharge_m3d1, mean_yearly_anomaly,
                             SD_yearly_discharge_m3d1, SE_yearly_discharge_m3d1) %>%
               dplyr::distinct() %>%
               dplyr::mutate(Sign = ifelse(mean_yearly_anomaly>0, "A", "B"))
