@@ -6,7 +6,7 @@
 ################################################################
 
 library(readxl) ; library(tidyverse) ; library(reshape2) ; library(stringr)
-
+library(here)
 
 # read in excel file 
 # this function creates a list of data frames, one for each excel sheet 
@@ -20,7 +20,7 @@ read_excel_allsheets <- function(filename) {
                         return(x)
 }
 
-X_sheets_m <- read_excel_allsheets("ClearedPlots_1999-2019.xlsx")
+X_sheets_m <- read_excel_allsheets(here("ClearedPlots_1999-2019.xlsx"))
 
 # remove the "notes" sheet
 X_sheets_yrs <- X_sheets_m[c(2:22)]  

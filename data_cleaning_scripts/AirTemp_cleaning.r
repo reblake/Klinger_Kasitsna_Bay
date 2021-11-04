@@ -56,11 +56,11 @@ get_lcd <- function(w_station, w_year){
            df <- rnoaa::lcd(station = w_station, year = w_year) # download data
            
            df1 <- df %>% 
-                 rename_with(tolower) %>% # make column names all lowercase
-                 rename(hourlydrybulbtemperatureF = hourlydrybulbtemperature) %>%  # rename column
-                 select(c(station:report_type, hourlydrybulbtemperatureF)) %>%  # select columns that will be useful
-                 mutate(hourlydrybulbtemperatureF = gsub("s", "", hourlydrybulbtemperatureF),
-                        hourlydrybulbtemperatureF = gsub("*", "", hourlydrybulbtemperatureF))
+                  rename_with(tolower) %>% # make column names all lowercase
+                  dplyr::rename(hourlydrybulbtemperatureF = hourlydrybulbtemperature) %>%  # rename column
+                  dplyr::select(c(station:report_type, hourlydrybulbtemperatureF)) %>%  # select columns that will be useful
+                  mutate(hourlydrybulbtemperatureF = gsub("s", "", hourlydrybulbtemperatureF),
+                         hourlydrybulbtemperatureF = gsub("*", "", hourlydrybulbtemperatureF))
 
            return(df1)
            }
@@ -90,16 +90,16 @@ a_temp <- lcd_df %>%
 # making seasonal and annual dataframes
 spring_a_temp <- a_temp %>%
                  dplyr::filter(month %in% c("03", "04", "05")) %>%
-                 dplyr::mutate(Spr_mn_all = mean(hourlydrybulbtemperatureC)) %>%
+                 dplyr::mutate(Spr_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::group_by(year, month, day) %>%
-                 dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC)) %>%
+                 dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
                  dplyr::group_by(year, month) %>%
-                 dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC)) %>%
+                 dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
                  dplyr::group_by(year) %>%
-                 dplyr::mutate(ATemp_yearMn = mean(hourlydrybulbtemperatureC),
-                               ATemp_Spr_min = min(hourlydrybulbtemperatureC)) %>%
+                 dplyr::mutate(ATemp_yearMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE),
+                               ATemp_Spr_min = min(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
                  dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date) %>%
                  dplyr::distinct() %>%
@@ -114,16 +114,16 @@ spring_a_temp <- a_temp %>%
   
 summer_a_temp <- a_temp %>%
                  dplyr::filter(month %in% c("06", "07", "08")) %>%
-                 dplyr::mutate(Sum_mn_all = mean(hourlydrybulbtemperatureC)) %>%
+                 dplyr::mutate(Sum_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::group_by(year, month, day) %>%
-                 dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC)) %>%
+                 dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
                  dplyr::group_by(year, month) %>%
-                 dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC)) %>%
+                 dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
                  dplyr::group_by(year) %>%
-                 dplyr::mutate(ATemp_yearMn = mean(hourlydrybulbtemperatureC),
-                               ATemp_Summ_max = max(hourlydrybulbtemperatureC)) %>%
+                 dplyr::mutate(ATemp_yearMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE),
+                               ATemp_Summ_max = max(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
                  dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date) %>%
                  dplyr::distinct() %>%
@@ -138,12 +138,12 @@ summer_a_temp <- a_temp %>%
   
 fall_a_temp <- a_temp %>%
                dplyr::filter(month %in% c("09", "10", "11")) %>%
-               dplyr::mutate(Fal_mn_all = mean(hourlydrybulbtemperatureC)) %>%
+               dplyr::mutate(Fal_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                dplyr::group_by(year, month, day) %>%
-               dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC)) %>%
+               dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                dplyr::ungroup() %>%
                dplyr::group_by(year, month) %>%
-               dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC)) %>%
+               dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                dplyr::ungroup() %>%
                dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date) %>%
                dplyr::distinct() %>%
@@ -158,12 +158,12 @@ fall_a_temp <- a_temp %>%
 
 winter_a_temp <- a_temp %>%
                  dplyr::filter(month %in% c("12", "01", "02")) %>%
-                 dplyr::mutate(Win_mn_all = mean(hourlydrybulbtemperatureC)) %>%
+                 dplyr::mutate(Win_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::group_by(year, month, day) %>%
-                 dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC)) %>%
+                 dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
                  dplyr::group_by(year, month) %>%
-                 dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC)) %>%
+                 dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
                  dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date) %>%
                  dplyr::distinct() %>%
@@ -177,9 +177,9 @@ winter_a_temp <- a_temp %>%
                  dplyr::ungroup()    
 
 ann_a_temp <- a_temp %>%
-              dplyr::mutate(Ann_mn_all = mean(hourlydrybulbtemperatureC)) %>%
+              dplyr::mutate(Ann_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
               dplyr::group_by(year, month) %>%
-              dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC)) %>%
+              dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
               dplyr::ungroup() %>%
               dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date) %>%
               dplyr::distinct() %>%
@@ -190,10 +190,10 @@ ann_a_temp <- a_temp %>%
               dplyr::arrange(year, month, day)
   
 year_a_temp <- a_temp %>%
-               dplyr::mutate(Ann_mn_all = mean(hourlydrybulbtemperatureC)) %>%
+               dplyr::mutate(Ann_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                dplyr::group_by(year) %>%
-               dplyr::mutate(ATemp_yearMn = mean(hourlydrybulbtemperatureC),
-                             ATemp_yearSD = sd(hourlydrybulbtemperatureC),
+               dplyr::mutate(ATemp_yearMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE),
+                             ATemp_yearSD = sd(hourlydrybulbtemperatureC, na.rm = TRUE),
                              ATemp_yearSE = ATemp_yearSD/sqrt(n())) %>%
                dplyr::ungroup() %>%
                dplyr::select(-time, -day, -month, -hourlydrybulbtemperatureC, -date, -cal_date) %>%

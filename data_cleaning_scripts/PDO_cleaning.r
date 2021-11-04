@@ -39,8 +39,9 @@ pdo_mon <- pdo_df %>%
            rename(time_UTC = time) %>% 
            mutate(Year = sapply(strsplit(as.character(time_UTC), split="-") , function(x) x[1]),
                   Year = as.numeric(Year),
-                  Month = sapply(strsplit(as.character(time_UTC), split="-") , function(x) x[2]),
-                  Month = as.numeric(Month)) %>% 
+                  Month = sapply(strsplit(as.character(time_UTC), split="-") , function(x) x[2])#,
+                 # Month = as.double(Month)
+                  ) %>% 
            filter(Year %in% c(1999:2021)) #%>% # selects years 
 
 
@@ -52,3 +53,4 @@ pdo_ann <- pdo_mon %>%
 
 
 # pdo_df$YEAR <- substr(pdo_df$YEAR, 1, 4) # removes asterisks from years 2002-2015
+
