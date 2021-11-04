@@ -30,7 +30,7 @@ pdo_mon_adj <- pdo_mon %>%
 
 ```{r, echo=FALSE}
 # PDO plots
-pdo_plot <- ggplot(data=pdo_mon, aes(x=YEAR, y=PDO)) + geom_col() + 
+pdo_plot <- ggplot(data=pdo_mon, aes(x=Year, y=PDO)) + geom_col() + 
             geom_hline(yintercept=0, size=1.5) + ylab("PDO Index")
 
   
@@ -38,19 +38,22 @@ pdo_plot <- ggplot(data=pdo_mon, aes(x=YEAR, y=PDO)) + geom_col() +
 pdo_plot2 <- ggplot(data=pdo_mon_adj, aes(x=Yr_Mn, y=PDO)) + 
              geom_col(aes(fill=Sign)) + xlab("Year") +            #, show.legend=FALSE
              geom_hline(yintercept=0, size=1) + ylab("PDO Index") + 
-             scale_x_discrete(breaks=c("1998-01","1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
-                                       "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", "2009-01", 
-                                       "2010-01", "2011-01", "2012-01", "2013-01", "2014-01", "2015-01", 
-                                       "2016-01"),
-                              labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005",
-                                       "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013",
-                                       "2014","2015", "2016"))
+             scale_x_discrete(breaks=c("1998-01",
+                                       "1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
+                                       "2004-01", "2005-01", "2006-01", "2007-01", "2008-01",
+                                       "2009-01", "2010-01", "2011-01", "2012-01", "2013-01",
+                                       "2014-01", "2015-01", "2016-01", "2017-01", "2018-01",
+                                       "2019-01", "2020-01", "2021-01"),
+                              labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", 
+                                       "2005", "2006", "2007", "2008", "2009", "2010", "2011",
+                                       "2012", "2013", "2014", "2015", "2016", "2017", "2018",
+                                       "2019", "2020", "2021"))
 
 ```
 
 ```{r, echo=FALSE, include=FALSE}
 # Freshwater Discharge Hill Model data
-# source("./data_cleaning_scripts/Fresh_Discharge_cleaning.r")
+# source(here("data_cleaning_scripts", "Fresh_Discharge_cleaning.r")
 # dataframes are FWD_ann_mn and FWD_mon_mn
 
 fwd_ann <- read_csv(here("data_clean", "FWD_annual_mn_clean.csv"))
@@ -59,7 +62,7 @@ fwd_mon <- read_csv(here("data_clean", "FWD_monthly_mn_clean.csv"))
 ```
 
 ```{r, echo=FALSE}
-fwd_plot <- ggplot(data=fwd_ann, aes(x=YEAR, y=(mean_yearly_anomaly*10))) + 
+fwd_plot <- ggplot(data=fwd_ann, aes(x=Year, y=(mean_yearly_anomaly*10))) + 
             geom_col(aes(fill=Sign)) + ylab("Yearly Anomaly") + theme_bw() +
             geom_hline(yintercept=0, size=1) + 
             scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
@@ -70,13 +73,15 @@ fwd_plot <- ggplot(data=fwd_ann, aes(x=YEAR, y=(mean_yearly_anomaly*10))) +
 fwd_plot2 <- ggplot(data=fwd_mon, aes(x=Year_Month, y=mean_monthly_anomaly)) + 
              geom_col(aes(fill=Sign)) + xlab("Year") + ylab("Anomaly") + 
              geom_hline(yintercept=0, size=1) +  
-             scale_x_discrete(breaks=c("1998-01", "1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
-                                       "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", 
-                                       "2009-01", "2010-01", "2011-01", "2012-01", "2013-01", 
-                                       "2014-01", "2015-01", "2016-01"),
-                              labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005",
-                                       "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013",
-                                       "2014","2015", "2016"),
+             scale_x_discrete(breaks=c("1998-01", "1999-01", "2000-01", "2001-01", "2002-01",
+                                       "2003-01", "2004-01", "2005-01", "2006-01", "2007-01",
+                                       "2008-01", "2009-01", "2010-01", "2011-01", "2012-01",
+                                       "2013-01", "2014-01", "2015-01", "2016-01", "2017-01",
+                                       "2018-01", "2019-01", "2020-01", "2021-01"),
+                              labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", 
+                                       "2005", "2006", "2007", "2008", "2009", "2010", "2011",
+                                       "2012", "2013", "2014", "2015", "2016", "2017", "2018",
+                                       "2019", "2020", "2021"),
                               limits=c(levels(fwd_mon$Year_Month)))
                              
 
@@ -100,8 +105,8 @@ ann_a_temp2 <- ann_a_temp %>%
                dplyr::select(YrMn, month_Anom, month_Sign) %>%
                dplyr::distinct()
 
-ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=Month_Anom)) + 
-           geom_col(aes(fill=Month_Sign)) + ylab("Anomaly") + xlab("Year") + 
+ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=month_Anom)) + 
+           geom_col(aes(fill=month_Sign)) + ylab("Anomaly") + xlab("Year") + 
            geom_hline(yintercept=0, size=1) + 
            scale_x_discrete(breaks=c("1999-01", "2000-01", "2001-01", "2002-01","2003-01", 
                                      "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", 
@@ -136,9 +141,10 @@ AllData_clean2 <- AllData_clean %>%
                   dplyr::select(-FUCUS_NUM_ADULTS, -FUCUS_SPORELINGS_NUM) %>%
                   dplyr::mutate(MASTO_PAP = str_replace_all(MASTO_PAP, ",",""),
                                 SIPHONARIA = gsub("[*]", "", SIPHONARIA)
-                             ) %>%
+                                ) %>%
                   dplyr::filter(PTEROSIPHONIA != "tr") %>%
-                  dplyr::mutate_at(c(5:57), funs(as.numeric)) # converts select columns
+                  dplyr::rename(`MARGARITIES_SMALL_IRIDESCENT_SNAIL` = `_MARGARITIES_SMALL_IRIDESCENT_SNAIL`) %>% 
+                  dplyr::mutate(across(c(5:57), as.numeric)) # converts select columns
 
 ```
 
@@ -176,9 +182,6 @@ explore_plots <- function(y_var){
                  return(p)
 }
 
-
- 
-
 ```
 
 ```{r, echo=FALSE, fig.height=3.5, fig.width=7}
@@ -189,7 +192,7 @@ explore_plots <- function(y_var){
 # make a plot for each variable
 var_names <- names(AllData_clean2[,c(5:57)]) 
 
-lapply(var_names, function(x) FUN=explore_plots(y_var=x))
+lapply(var_names, explore_plots)
 
 ```
 
@@ -387,10 +390,10 @@ brn <- ggplot(data=brn_sub2, aes(x=YEAR, y=YEAR_Anom)) +
 ```
 
 ```{r, echo=FALSE}
-# plots of air temperature - data only available 2003-2016
+# plots of air temperature 
 
 spr <- myt +
-       geom_point(data=spring_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) + 
+       geom_point(data=spring_a_temp, aes(x=year, y=Num_day_Less_0), size=2) + #geom_point(size=2) + 
        theme_bw() + ylab("# of days air temp < 0 C") +
        labs(title="Spring (Mar, Apr, May) number of cold days") +
        theme(plot.title=element_text(size=10),
@@ -398,7 +401,7 @@ spr <- myt +
              axis.text.x=element_text(angle=30, hjust=1))
 
 sprf <- fuc +
-        geom_point(data=spring_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) + 
+        geom_point(data=spring_a_temp, aes(x=year, y=Num_day_Less_0), size=2) + #geom_point(size=2) + 
         theme_bw() + ylab("# of days air temp < 0 C") +
         labs(title="Spring (Mar, Apr, May) number of cold days") +
         theme(plot.title=element_text(size=10),
@@ -406,7 +409,7 @@ sprf <- fuc +
               axis.text.x=element_text(angle=30, hjust=1))
 
 sprb <- brn +
-        geom_point(data=spring_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) + 
+        geom_point(data=spring_a_temp, aes(x=year, y=Num_day_Less_0), size=2) + #geom_point(size=2) + 
         theme_bw() + ylab("# of days air temp < 0 C") + ylim(-15, 35) +
         labs(title="Spring (Mar, Apr, May) number of cold days") +
         theme(plot.title=element_text(size=10),
@@ -415,7 +418,7 @@ sprb <- brn +
 ###
 
 sum <- myt +
-       geom_point(data=summer_a_temp, aes(x=Year, y=Num_Day_More_15), size=2) + #geom_point(size=2) +
+       geom_point(data=summer_a_temp, aes(x=year, y=Num_day_More_15), size=2) + #geom_point(size=2) +
        theme_bw() + ylab("# of days air temp > 15 C") +
        labs(title="Summer (Jun, Jul, Aug) number of hot days") +
        theme(plot.title=element_text(size=10),
@@ -423,7 +426,7 @@ sum <- myt +
              axis.text.x=element_text(angle=30, hjust=1))
 
 sumf <- fuc +
-        geom_point(data=summer_a_temp, aes(x=Year, y=Num_Day_More_15), size=2) + #geom_point(size=2) +
+        geom_point(data=summer_a_temp, aes(x=year, y=Num_day_More_15), size=2) + #geom_point(size=2) +
         theme_bw() + ylab("# of days air temp > 15 C") +
         labs(title="Summer (Jun, Jul, Aug) number of hot days") +
         theme(plot.title=element_text(size=10),
@@ -431,7 +434,7 @@ sumf <- fuc +
               axis.text.x=element_text(angle=30, hjust=1))
 
 sumb <- brn +
-        geom_point(data=summer_a_temp, aes(x=Year, y=Num_Day_More_15), size=2) + #geom_point(size=2) +
+        geom_point(data=summer_a_temp, aes(x=year, y=Num_day_More_15), size=2) + #geom_point(size=2) +
         theme_bw() + ylab("# of days air temp > 15 C") + ylim(-15, 35) +
         labs(title="Summer (Jun, Jul, Aug) number of hot days") +
         theme(plot.title=element_text(size=10),
@@ -441,7 +444,7 @@ sumb <- brn +
 ###
 
 fal <- myt +
-       geom_point(data=fall_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) +
+       geom_point(data=fall_a_temp, aes(x=year, y=Num_day_Less_0), size=2) + #geom_point(size=2) +
        theme_bw() + ylab("# of days air temp < 0 C") +
        labs(title="Fall (Sep, Oct, Nov) number of cold days") +
        theme(plot.title=element_text(size=10),
@@ -449,7 +452,7 @@ fal <- myt +
              axis.text.x=element_text(angle=30, hjust=1))
 
 falf <- fuc +
-        geom_point(data=fall_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) +
+        geom_point(data=fall_a_temp, aes(x=year, y=Num_day_Less_0), size=2) + #geom_point(size=2) +
         theme_bw() + ylab("# of days air temp < 0 C") +
         labs(title="Fall (Sep, Oct, Nov) number of cold days") +
         theme(plot.title=element_text(size=10),
@@ -457,7 +460,7 @@ falf <- fuc +
               axis.text.x=element_text(angle=30, hjust=1))
 
 falb <- brn +
-        geom_point(data=fall_a_temp, aes(x=Year, y=Num_Day_Less_0), size=2) + #geom_point(size=2) +
+        geom_point(data=fall_a_temp, aes(x=year, y=Num_day_Less_0), size=2) + #geom_point(size=2) +
         theme_bw() + ylab("# of days air temp < 0 C") + ylim(-15, 35) +
         labs(title="Fall (Sep, Oct, Nov) number of cold days") +
         theme(plot.title=element_text(size=10),
@@ -467,7 +470,7 @@ falb <- brn +
 ###
 
 win <- myt +
-       geom_point(data=winter_a_temp, aes(x=Year, y=Num_Day_Less_neg10), size=2) + #geom_point(size=2) +
+       geom_point(data=winter_a_temp, aes(x=year, y=Num_day_Less_neg10), size=2) + #geom_point(size=2) +
        theme_bw() + ylab("# of days air temp < -10 C") +
        labs(title="Winter (Dec, Jan, Feb) number of cold days") +
        theme(plot.title=element_text(size=10),
@@ -475,7 +478,7 @@ win <- myt +
              axis.text.x=element_text(angle=30, hjust=1))
 
 winf <- fuc +
-        geom_point(data=winter_a_temp, aes(x=Year, y=Num_Day_Less_neg10), size=2) + #geom_point(size=2) +
+        geom_point(data=winter_a_temp, aes(x=year, y=Num_day_Less_neg10), size=2) + #geom_point(size=2) +
         theme_bw() + ylab("# of days air temp < -10 C") +
         labs(title="Winter (Dec, Jan, Feb) number of cold days") +
         theme(plot.title=element_text(size=10),
@@ -483,7 +486,7 @@ winf <- fuc +
               axis.text.x=element_text(angle=30, hjust=1))
 
 winb <- brn +
-        geom_point(data=winter_a_temp, aes(x=Year, y=Num_Day_Less_neg10), size=2) + #geom_point(size=2) +
+        geom_point(data=winter_a_temp, aes(x=year, y=Num_day_Less_neg10), size=2) + #geom_point(size=2) +
         theme_bw() + ylab("# of days air temp < -10 C") + ylim(-15, 35) +
         labs(title="Winter (Dec, Jan, Feb) number of cold days") +
         theme(plot.title=element_text(size=10),
@@ -516,8 +519,8 @@ grid.arrange(sprb, falb, sumb, winb)
 ```{r, echo=FALSE}
 # plots of air temperature anomalies
 
-spr2 <- ggplot(data=spring_a_temp, aes(x=YrMnDy, y=Month_Anom)) + 
-        geom_col(aes(fill=Month_Sign)) + ylab("Anomaly") + xlab("Year") + 
+spr2 <- ggplot(data=spring_a_temp, aes(x=YrMnDy, y=month_Anom)) + 
+        geom_col(aes(fill=month_Sign)) + ylab("Anomaly") + xlab("Year") + 
         theme_bw() + geom_hline(yintercept=0, size=1) + 
         labs(title="Spring Air Temp") + 
         theme(legend.position=c(.20, .2), legend.background = element_rect(fill="transparent"),
@@ -533,8 +536,8 @@ spr2 <- ggplot(data=spring_a_temp, aes(x=YrMnDy, y=Month_Anom)) +
                          labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007",
                                   "2008", "2009", "2010", "2011", "2012", "2013", "2014","2015", "2016"))
 
-sum2 <- ggplot(data=summer_a_temp, aes(x=YrMnDy, y=Month_Anom)) + 
-        geom_col(aes(fill=Month_Sign)) + ylab("Anomaly") + xlab("Year") + 
+sum2 <- ggplot(data=summer_a_temp, aes(x=YrMnDy, y=month_Anom)) + 
+        geom_col(aes(fill=month_Sign)) + ylab("Anomaly") + xlab("Year") + 
         theme_bw() + geom_hline(yintercept=0, size=1) + 
         labs(title="Summer Air Temp") + 
         theme(legend.position=c(.2, .2), legend.background = element_rect(fill="transparent"),
@@ -550,8 +553,8 @@ sum2 <- ggplot(data=summer_a_temp, aes(x=YrMnDy, y=Month_Anom)) +
                          labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007",
                                   "2008", "2009", "2010", "2011", "2012", "2013", "2014","2015", "2016"))
 
-fal2 <- ggplot(data=fall_a_temp, aes(x=YrMnDy, y=Month_Anom)) + 
-        geom_col(aes(fill=Month_Sign)) + ylab("Anomaly") + xlab("Year") + 
+fal2 <- ggplot(data=fall_a_temp, aes(x=YrMnDy, y=month_Anom)) + 
+        geom_col(aes(fill=month_Sign)) + ylab("Anomaly") + xlab("Year") + 
         theme_bw() + geom_hline(yintercept=0, size=1) + 
         labs(title="Fall Air Temp") + 
         theme(legend.position=c(.875, .2), legend.background = element_rect(fill="transparent"),
@@ -568,8 +571,8 @@ fal2 <- ggplot(data=fall_a_temp, aes(x=YrMnDy, y=Month_Anom)) +
                                   "2008", "2009", "2010", "2011", "2012", "2013", "2014","2015", "2016"))
 
 
-win2 <- ggplot(data=winter_a_temp, aes(x=YrMnDy, y=Month_Anom)) + 
-        geom_col(aes(fill=Month_Sign)) + ylab("Anomaly") + xlab("Year") + 
+win2 <- ggplot(data=winter_a_temp, aes(x=YrMnDy, y=month_Anom)) + 
+        geom_col(aes(fill=month_Sign)) + ylab("Anomaly") + xlab("Year") + 
         theme_bw() + geom_hline(yintercept=0, size=1) + 
         labs(title="Winter Air Temp") + 
         theme(legend.position=c(.32, .2), legend.background = element_rect(fill="transparent"),
@@ -665,7 +668,7 @@ at_brn
 
 # NMDS Plots
 ```{r, echo=FALSE, include=FALSE}
-source("NMDS_analysis.r")
+source(here("analysis", "NMDS_analysis.r"))
 
 # need to use NMDS output percov_mds$points
 
