@@ -272,22 +272,31 @@ FWD_f1 <- bind_rows(FWD_list_f1) %>%
 FWD_list_f2 <- lapply(num_slices, slice_2_df, 
                       ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012014_08312015.nc",
                       row_n = 14052, latlon_df = latlon_f2, date_col = date_f2$dates)  
-FWD_f2 <- bind_rows(FWD_list_f2) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge)
+FWD_f2 <- bind_rows(FWD_list_f2) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
+          dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
+                        dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
+                
 #
 FWD_list_f3 <- lapply(num_slices, slice_2_df, 
                       ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012015_08312016.nc",
                       row_n = 14052, latlon_df = latlon_f3, date_col = date_f3$dates)  
-FWD_f3 <- bind_rows(FWD_list_f3) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge)
+FWD_f3 <- bind_rows(FWD_list_f3) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
+          dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
+                        dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
 #
 FWD_list_f4 <- lapply(num_slices, slice_2_df, 
                       ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012016_08312017.nc",
                       row_n = 14052, latlon_df = latlon_f4, date_col = date_f4$dates)  
-FWD_f4 <- bind_rows(FWD_list_f4) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge)
+FWD_f4 <- bind_rows(FWD_list_f4) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
+          dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
+                        dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
 #
 FWD_list_f5 <- lapply(num_slices, slice_2_df, 
                       ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012017_08312018.nc",
                       row_n = 14052, latlon_df = latlon_f5, date_col = date_f5$dates)  
-FWD_f5 <- bind_rows(FWD_list_f5) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge)
+FWD_f5 <- bind_rows(FWD_list_f5) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
+          dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
+                        dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
 
 # remove some points that probably don't drain into this site
 FWD_less <- FWD_f1 %>% 
