@@ -20,10 +20,10 @@ read_excel_allsheets <- function(filename) {
                         return(x)
 }
 
-X_sheets_m <- read_excel_allsheets(here("ClearedPlots_1999-2019.xlsx"))
+X_sheets_m <- read_excel_allsheets(here("ClearedPlots_1999-2021.xlsx"))
 
 # remove the "notes" sheet
-X_sheets_yrs <- X_sheets_m[c(2:22)]  
+X_sheets_yrs <- X_sheets_m[c(2:24)]  
 
 # make each data frame long instead of wide
 X_long_all <- lapply(X_sheets_yrs, function(x) as.data.frame(t(x)))
@@ -99,7 +99,7 @@ clean_1999n <- clean_1999 %>%
                                                             536,540,547), "SCRAPE99", "")))) %>%
                setNames(toupper(names(.))) %>% # make column names all upper case
                dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
-               dplyr::mutate_at(c(3:4,7:38), funs(as.numeric)) %>% # converts select columns to numeric
+               dplyr::mutate(across(c(3:4,7:38), as.numeric)) %>% # converts select columns to numeric
                dplyr::mutate(LOTTIIDAE = LOTTIIDAE_JUV + LOTTIA_P_BOREALIS) %>%
                dplyr::select(-LOTTIIDAE_JUV, -LOTTIA_P_BOREALIS) %>%
                tidyr::gather(-QUAD, -TREATMENT, -YEAR, key=TAXA, value=PER_COV_OR_COUNT)
@@ -133,10 +133,10 @@ clean_2000 <- X_long_2000 %>%
               setNames(toupper(names(.))) %>% # make column names all upper case
               dplyr::filter(!(TREATMENT %in% c("avg, sd","avg,sd","AVG,STD"))) %>%
               dplyr::mutate(YEAR = "2000") %>% 
-              dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
-              dplyr::mutate_at(c(4:6,8:36), funs(as.numeric)) %>% # converts select columns to numeric
+              dplyr::mutate(across(where(is.factor), as.character)) %>%  # converts all columns to character
+              dplyr::mutate(across(c(4:6,8:36), as.numeric)) %>% # converts select columns to numeric
               tidyr::gather(-TRIPLET, -QUAD, -TREATMENT, -YEAR, key=TAXA, value=PER_COV_OR_COUNT)
-              
+
 # replace NAs with 0, because Terrie says missing values represent 0s for many columns
 clean_2000[is.na(clean_2000)] <- 0
 
@@ -207,14 +207,19 @@ fix_data3 <- function(df) {
              # make column names
              names(df) <- as.character(unlist(df[1,]))
              df <- df[-1,]
+             df <- as.data.frame(df)
+             
              # remove entirely blank column
              df <- df[!is.na(names(df))]
+             
+             # print(names(df))
              
              df1 <- df %>%
                     tibble::rownames_to_column(var="TRIPLET") %>%   # row names to column 
                     setNames(toupper(names(.))) %>%  # make column names all upper case
-                    dplyr::mutate_if(is.factor, as.character) %>%  # converts all columns to character
-                    tidyr::gather(-TRIPLET, -QUAD, -TREATMENT, key=TAXA, value=PER_COV_OR_COUNT) 
+                    dplyr::mutate(across(where(is.factor), as.character)) %>%  # converts all columns to character
+                    tidyr::gather(-TRIPLET, 
+                                  -QUAD, -TREATMENT, key=TAXA, value=PER_COV_OR_COUNT) 
              
              df2 <- df1 %>%  
                     dplyr::mutate(TRIPLET = gsub("\\.\\.\\..*$", "", TRIPLET), # split off extra numerals from "TRIPLET" column
@@ -260,26 +265,28 @@ fix_data3 <- function(df) {
 }
 
 # make list of just those more uniform dataframes
-X_recent <- X_long_all[c("2019", "2018","2017","2016","2015","2014","2013","2012","2011","2010",
-                         "2009","2008","2007","2006","2005","2004","2003","2002","2001")] 
+X_recent <- X_long_all[c("2021", "2020", "2019", 
+                         "2018", "2017", "2016", "2015", "2014", "2013", 
+                         "2012", "2011", "2010", "2009", "2008", "2007", 
+                         "2006", "2005", "2004", "2003", "2002", "2001")] 
 #12, 09, 08, 03, 01  # these need help in other dimension
 
 # apply fix_data function to list of data frames
-clean_17_01 <- lapply(X_recent, function(x) fix_data3(x))
+clean_recent <- lapply(X_recent, fix_data3)
 
 # fix the 2006 duplicate species column issue 
-clean_17_01$`2006` <- clean_17_01$`2006` %>%
-                      dplyr::filter(!TAXA %in% c("ERECT_CORALLINE","ACROSIPHONIA","CALLITHAMNION")) %>%
-                      dplyr::mutate(TAXA = case_when(TAXA == "ERECT_CORALLINE_" ~ "ERECT_CORALLINE",
-                                                     TAXA == "ACROSIPHONIA_" ~ "ACROSIPHONIA",
-                                                     TAXA == "CALLITHAMNION_PIKEANUM" ~ "CALLITHAMNION",
-                                                     TRUE ~ TAXA))
+clean_recent$`2006` <- clean_recent$`2006` %>%
+                       dplyr::filter(!TAXA %in% c("ERECT_CORALLINE","ACROSIPHONIA","CALLITHAMNION")) %>%
+                       dplyr::mutate(TAXA = case_when(TAXA == "ERECT_CORALLINE_" ~ "ERECT_CORALLINE",
+                                                      TAXA == "ACROSIPHONIA_" ~ "ACROSIPHONIA",
+                                                      TAXA == "CALLITHAMNION_PIKEANUM" ~ "CALLITHAMNION",
+                                                      TRUE ~ TAXA))
 
 # put all data frames into one giant one
-Data_clean <- do.call("rbind", clean_17_01)
+Data_clean <- do.call("rbind", clean_recent)
 
 # make column for Year using data frame name
-Data_clean$YEAR <- rep(names(clean_17_01), sapply(clean_17_01, nrow))
+Data_clean$YEAR <- rep(names(clean_recent), sapply(clean_recent, nrow))
 rownames(Data_clean) <- c()  # removes row names
 
 # NOTE: don't forget to bind in 1999 and 2000!
