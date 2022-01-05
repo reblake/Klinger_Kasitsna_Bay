@@ -54,3 +54,5 @@ pdo_ann <- pdo_mon %>%
 
 # pdo_df$YEAR <- substr(pdo_df$YEAR, 1, 4) # removes asterisks from years 2002-2015
 
+# write_csv(pdo_mon, "./data_clean/PDO_monthly_clean.csv")
+# write_csv(pdo_ann, "./data_clean/PDO_annual_clean.csv")

@@ -11,10 +11,13 @@ library(dplyr) ; library(here)
  
 
 # source the data cleaning script to get the % cover data
-source(here("data_cleaning_scripts", "Data_Cleaning_K_Bay_ALL.r"))     # dataframe is called AllData_clean
+# source(here("data_cleaning_scripts", "Data_Cleaning_K_Bay_ALL.r"))     # dataframe is called AllData_clean
+AllData_clean <- read.csv(here("data_clean", "K_Bay_All_Sp_Yrs_Clean.csv"))
 
 # PDO data
-source(here("data_cleaning_scripts", "PDO_cleaning.r"))      # dataframes are pdo_mon and pdo_ann
+# source(here("data_cleaning_scripts", "PDO_cleaning.r"))      # dataframes are pdo_mon and pdo_ann
+pdo_mon <- read.csv(here("data_clean", "PDO_monthly_clean.csv"))
+pdo_ann <- read.csv(here("data_clean", "PDO_annual_clean.csv"))
 
 # Freshwater discharge data
 # source(here("data_cleaning_scripts", "Fresh_Discharge_cleaning.r"))
@@ -22,11 +25,12 @@ fwd_ann <- read_csv(here("data_clean", "FWD_annual_mn_clean.csv"))
 fwd_mon <- read_csv(here("data_clean", "FWD_monthly_mn_clean.csv"))
 
 # Air temperature data
-source(here("data_cleaning_scripts", "AirTemp_cleaning.r"))
+ann_a_temp <- read.csv(here("data_clean", "air_temp_annual_clean.csv"))
+year_a_temp <- read.csv(here("data_clean", "air_temp_year_clean.csv"))
 
 # Water temperature data
 # source(here("data_clean", "WTemp_June_clean.csv"))
-WTemp_June <-  read_csv(here("./data_clean/WTemp_June_clean.csv"))
+WTemp_June <- read_csv(here("data_clean", "WTemp_June_clean.csv"))
 
 ################################
 # Trying regular NMDS analysis #
@@ -43,10 +47,10 @@ PerCov_PDO <- AllData_clean %>%
               dplyr::select(-TRIPLET, -QUAD, -TREATMENT, -FUCUS_NUM_ADULTS, -FUCUS_SPORELINGS_NUM) %>%
               dplyr::mutate_if(is.character, as.numeric) %>% # converts columns to numeric
               dplyr::group_by(Year) %>%
-              dplyr::summarize_all(funs(mean)) %>%
+              dplyr::summarize(across(.cols = everything(), .fns = mean)) %>%
               dplyr::ungroup() %>%
-              dplyr::mutate(PDO_Sign = ifelse(PDO_anul_mn>0, "A", "B")) %>%
-              dplyr::filter(Year != "2017")
+              dplyr::mutate(PDO_Sign = ifelse(PDO_anul_mn > 0, "A", "B")) #%>%
+              #dplyr::filter(Year != "2017")
 
 
 # subset data into seperate dataframes
@@ -81,24 +85,24 @@ percov_perm <- vegan::adonis(sp_percov~PDO_anul_mn, pdo_treats, perm=1000, metho
 PerCov_Fresh <- PerCov_PDO %>%
                 dplyr::full_join(fwd_ann, by="Year") %>%
                 dplyr::rename(FWD_Sign = Sign) %>%
-               # dplyr::filter(Year != "2015") 
-                dplyr::rename(year = Year)
+                dplyr::rename(year = Year) %>% 
+                dplyr::filter(!(year %in% c("2019", "2020", "2021")))  # filer out year we don't have FWD for
 
 # subset to different dataframes
 sp_percov2 <- PerCov_Fresh %>% 
-              dplyr::filter(year != "2017") %>%
+              #dplyr::filter(year != "2017") %>%
               dplyr::select(FUCUS_PERCOV_TOTAL, BARNACLES, MYTILUS, PTEROSIPHONIA,
                             ODONTHALIA, BARNACLE_SPAT, ENDOCLADIA, FUCUS_SPORELINGS_PERCOV,
                             CLAD_SERICEA, MASTO_PAP, GLOIOPELTIS, ELACHISTA)
 
-fresh_treats <- PerCov_Fresh[,c("year", "mean_yearly_discharge_m3s1", "mean_yearly_anomaly", "FWD_Sign")]
-fresh_treats <- dplyr::filter(fresh_treats, !is.na(mean_yearly_discharge_m3s1))
+fresh_treats <- PerCov_Fresh[,c("year", "mean_yearly_discharge_m3d1", "mean_yearly_anomaly", "FWD_Sign")]
+fresh_treats <- dplyr::filter(fresh_treats, !is.na(mean_yearly_discharge_m3d1))
 
 # do the analysis
 percov_mds2 <- vegan::metaMDS(sp_percov2, distance="bray", k=2, trymax=1000, autotransform=TRUE)
 
 # calculate PERMANOVA 
-percov_perm2 <- vegan::adonis(sp_percov2~mean_yearly_discharge_m3s1, fresh_treats, perm=1000, method="bray")
+#percov_perm2 <- vegan::adonis(sp_percov2~mean_yearly_discharge_m3d1, fresh_treats, perm=1000, method="bray")
 
 ##############
 ### Air Temp
@@ -107,14 +111,14 @@ percov_perm2 <- vegan::adonis(sp_percov2~mean_yearly_discharge_m3s1, fresh_treat
 
 PerCov_ATmp <- PerCov_PDO %>%
                dplyr::rename(year = Year) %>% 
-               dplyr::mutate(across(year, as.character)) %>% 
+               dplyr::mutate(across(year, as.integer)) %>% 
                dplyr::full_join(year_a_temp, by="year") %>%
                dplyr::rename(ATmp_Sign = year_Sign,
-                             ATemp_Year_Anom = year_Anom) %>%
-               dplyr::filter(#year != "2016",
-                             year != "2017"#,
-                             #year > "2002"
-                             )
+                             ATemp_Year_Anom = year_Anom) #%>%
+              # dplyr::filter(#year != "2016",
+              #               year != "2017"#,
+              #               #year > "2002"
+              #               )
 
 # subset to different dataframes
 sp_percov3 <- PerCov_ATmp %>% 
@@ -138,14 +142,14 @@ percov_perm3 <- vegan::adonis(sp_percov3~ATemp_yearMn, atemp_treats, perm=1000, 
 PerCov_all <- PerCov_PDO %>%
               dplyr::full_join(fwd_ann, by="Year") %>%
               dplyr::rename(year = Year) %>% 
-              dplyr::mutate(year = as.character(year)) %>% 
+              dplyr::mutate(year = as.integer(year)) %>% 
               dplyr::full_join(year_a_temp, by="year") %>%
               dplyr::rename(Year = year) %>% 
               dplyr::mutate(Year = as.numeric(Year)) %>% 
               dplyr::full_join(WTemp_June, by="Year") %>%
               dplyr::rename(ATmp_Sign = year_Sign,
                             ATemp_Year_Anom = year_Anom, 
-                            mn_yr_discharge = mean_yearly_discharge_m3s1,
+                            mn_yr_discharge = mean_yearly_discharge_m3d1,
                             FWD_Sign = Sign) %>%
               dplyr::filter(!Year %in% c("2015","2016","2017"))
 
@@ -165,8 +169,8 @@ all_treats <- PerCov_all[,c("Year", "PDO_anul_mn", "PDO_Sign", "mn_yr_discharge"
 percov_mds4 <- vegan::metaMDS(sp_percov4, distance="bray", k=2, trymax=1000, autotransform=TRUE)
 
 # calculate PERMANOVA 
-percov_perm4 <- vegan::adonis(sp_percov4~ATemp_yearMn+mn_yr_discharge,
-                              all_treats, perm=1000, method="bray")
+#percov_perm4 <- vegan::adonis(sp_percov4~ATemp_yearMn+mn_yr_discharge,
+#                              all_treats, perm=1000, method="bray")
 
 ##################
 ### biological NMDS 
@@ -193,14 +197,14 @@ all_treats2 <- AllData_clean %>%
                dplyr::full_join(fwd_ann, by="Year") %>%
                dplyr::full_join(WTemp_June, by="Year") %>%
                dplyr::rename(year = Year) %>% 
-               dplyr::mutate(year = as.character(year)) %>% 
+               dplyr::mutate(year = as.integer(year)) %>% 
                dplyr::full_join(year_a_temp, by="year") %>%
                dplyr::filter(TREATMENT == "CONTROL",
                              !year %in% c("2015","2016","2017")) %>%
                dplyr::rename(FWD_Sign = Sign,
                              ATmp_Sign = year_Sign,
                              ATemp_year_Anom = year_Anom, 
-                             mn_yr_discharge = mean_yearly_discharge_m3s1) %>%
+                             mn_yr_discharge = mean_yearly_discharge_m3d1) %>%
                dplyr::mutate(PDO_Sign = ifelse(PDO_anul_mn>0, "A", "B")) %>%
                dplyr::select(year, QUAD, PDO_anul_mn, PDO_Sign, mn_yr_discharge, mean_yearly_anomaly,
                              FWD_Sign, ATemp_yearMn, ATemp_year_Anom, ATmp_Sign, Water_Temp_June) %>%
@@ -211,7 +215,7 @@ all_treats2 <- AllData_clean %>%
 percov_mds5 <- vegan::metaMDS(sp_percov5, distance="bray", k=2, trymax=1000, autotransform=TRUE)
 
 # calculate PERMANOVA 
-percov_perm5 <- vegan::adonis(sp_percov5~ATemp_yearMn*mn_yr_discharge*Water_Temp_June, all_treats2, perm=1000, method="bray")
+#percov_perm5 <- vegan::adonis(sp_percov5~ATemp_yearMn*mn_yr_discharge*Water_Temp_June, all_treats2, perm=1000, method="bray")
 
 
 

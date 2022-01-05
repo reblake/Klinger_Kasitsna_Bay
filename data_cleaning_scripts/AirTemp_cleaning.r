@@ -78,9 +78,9 @@ a_temp <- lcd_df %>%
           mutate(hourlydrybulbtemperatureF = as.integer(hourlydrybulbtemperatureF),
                  hourlydrybulbtemperatureC = (hourlydrybulbtemperatureF-32)*(5/9), # convert from F to C
                  hourlydrybulbtemperatureC = round(hourlydrybulbtemperatureC, 1)) %>%  # round values
-          mutate(cal_date = sapply(strsplit(as.character(date), split="T") , function(x) x[1]),
-                 cal_date = parse_date_time(cal_date, c('ymd','mdy')), 
-                 time = sapply(strsplit(as.character(date), split="T") , function(x) x[2]),
+          mutate(cal_date = sapply(strsplit(as.character(date), split=" ") , function(x) x[1]),
+                 # cal_date = parse_date_time(cal_date, c('ymd','mdy')), 
+                 time = sapply(strsplit(as.character(date), split=" ") , function(x) x[2]),
                  year = sapply(strsplit(as.character(cal_date), split="-") , function(x) x[1]),
                  month = sapply(strsplit(as.character(cal_date), split="-") , function(x) x[2]), 
                  day = sapply(strsplit(as.character(cal_date), split="-") , function(x) x[3])) %>%
@@ -90,6 +90,7 @@ a_temp <- lcd_df %>%
 # making seasonal and annual dataframes
 spring_a_temp <- a_temp %>%
                  dplyr::filter(month %in% c("03", "04", "05")) %>%
+                 dplyr::select(-hourlydrybulbtemperatureF) %>% 
                  dplyr::mutate(Spr_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::group_by(year, month, day) %>%
                  dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
@@ -114,6 +115,7 @@ spring_a_temp <- a_temp %>%
   
 summer_a_temp <- a_temp %>%
                  dplyr::filter(month %in% c("06", "07", "08")) %>%
+                 dplyr::select(-hourlydrybulbtemperatureF) %>% 
                  dplyr::mutate(Sum_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::group_by(year, month, day) %>%
                  dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
@@ -138,6 +140,7 @@ summer_a_temp <- a_temp %>%
   
 fall_a_temp <- a_temp %>%
                dplyr::filter(month %in% c("09", "10", "11")) %>%
+               dplyr::select(-hourlydrybulbtemperatureF) %>% 
                dplyr::mutate(Fal_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                dplyr::group_by(year, month, day) %>%
                dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
@@ -158,6 +161,7 @@ fall_a_temp <- a_temp %>%
 
 winter_a_temp <- a_temp %>%
                  dplyr::filter(month %in% c("12", "01", "02")) %>%
+                 dplyr::select(-hourlydrybulbtemperatureF) %>% 
                  dplyr::mutate(Win_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::group_by(year, month, day) %>%
                  dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
@@ -177,6 +181,7 @@ winter_a_temp <- a_temp %>%
                  dplyr::ungroup()    
 
 ann_a_temp <- a_temp %>%
+              dplyr::select(-hourlydrybulbtemperatureF) %>% 
               dplyr::mutate(Ann_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
               dplyr::group_by(year, month) %>%
               dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
@@ -190,6 +195,7 @@ ann_a_temp <- a_temp %>%
               dplyr::arrange(year, month, day)
   
 year_a_temp <- a_temp %>%
+               dplyr::select(-hourlydrybulbtemperatureF) %>% 
                dplyr::mutate(Ann_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                dplyr::group_by(year) %>%
                dplyr::mutate(ATemp_yearMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE),
@@ -203,6 +209,10 @@ year_a_temp <- a_temp %>%
                dplyr::select(-Ann_mn_all)
 
 
-
-  
+# write_csv(ann_a_temp, "./data_clean/air_temp_annual_clean.csv")
+# write_csv(spring_a_temp, "./data_clean/air_temp_spring_clean.csv")
+# write_csv(summer_a_temp, "./data_clean/air_temp_summer_clean.csv")
+# write_csv(fall_a_temp, "./data_clean/air_temp_fall_clean.csv")
+# write_csv(winter_a_temp, "./data_clean/air_temp_winter_clean.csv")
+# write_csv(year_a_temp, "./data_clean/air_temp_year_clean.csv")
   

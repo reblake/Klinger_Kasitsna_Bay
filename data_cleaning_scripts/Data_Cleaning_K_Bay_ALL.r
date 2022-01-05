@@ -300,8 +300,7 @@ AllData_clean <- AllData_clean_long %>%
 AllData_clean[is.na(AllData_clean)] <- 0 
              
 
-# write.csv(AllData_clean, file = "K_Bay_All_Sp_Yrs_Clean.csv", row.names=FALSE)
-
+# write_csv(AllData_clean, "./data_clean/K_Bay_All_Sp_Yrs_Clean.csv")
 
 
 
