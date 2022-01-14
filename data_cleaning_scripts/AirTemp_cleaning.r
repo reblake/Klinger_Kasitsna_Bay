@@ -75,6 +75,7 @@ a_temp <- lcd_df %>%
                                                     NA_character_, hourlydrybulbtemperatureF),
                  hourlydrybulbtemperatureF = ifelse(hourlydrybulbtemperatureF == "",
                                                     NA_character_, hourlydrybulbtemperatureF)) %>% 
+          filter(!(report_type %in% c("SOD  ", "SOM  ", "FM-12", "FM-16"))) %>%  # remove these report types
           mutate(hourlydrybulbtemperatureF = as.integer(hourlydrybulbtemperatureF),
                  hourlydrybulbtemperatureC = (hourlydrybulbtemperatureF-32)*(5/9), # convert from F to C
                  hourlydrybulbtemperatureC = round(hourlydrybulbtemperatureC, 1)) %>%  # round values
@@ -102,7 +103,7 @@ spring_a_temp <- a_temp %>%
                  dplyr::mutate(ATemp_yearMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE),
                                ATemp_Spr_min = min(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
-                 dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date) %>%
+                 dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date, -report_type) %>%
                  dplyr::distinct() %>%
                  dplyr::mutate(YrMnDy = paste(year, month, day, sep="-"),
                                day_Anom = ATemp_dayMn - Spr_mn_all,
@@ -127,7 +128,7 @@ summer_a_temp <- a_temp %>%
                  dplyr::mutate(ATemp_yearMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE),
                                ATemp_Summ_max = max(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
-                 dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date) %>%
+                 dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date, -report_type) %>%
                  dplyr::distinct() %>%
                  dplyr::mutate(YrMnDy = paste(year, month, day, sep="-"),
                                day_Anom = ATemp_dayMn - Sum_mn_all,
@@ -148,7 +149,7 @@ fall_a_temp <- a_temp %>%
                dplyr::group_by(year, month) %>%
                dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                dplyr::ungroup() %>%
-               dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date) %>%
+               dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date, -report_type) %>%
                dplyr::distinct() %>%
                dplyr::mutate(YrMnDy = paste(year, month, day, sep="-"),
                              day_Anom = ATemp_dayMn - Fal_mn_all,
@@ -169,7 +170,7 @@ winter_a_temp <- a_temp %>%
                  dplyr::group_by(year, month) %>%
                  dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
-                 dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date) %>%
+                 dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date, -report_type) %>%
                  dplyr::distinct() %>%
                  dplyr::mutate(YrMnDy = paste(year, month, day, sep="-"),
                                day_Anom = ATemp_dayMn - Win_mn_all,
@@ -186,7 +187,7 @@ ann_a_temp <- a_temp %>%
               dplyr::group_by(year, month) %>%
               dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
               dplyr::ungroup() %>%
-              dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date) %>%
+              dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date, -report_type) %>%
               dplyr::distinct() %>%
               dplyr::mutate(YrMnDy = paste(year, month, day, sep="-"),
                             YrMn = paste(year, month, sep="-"),
@@ -202,7 +203,8 @@ year_a_temp <- a_temp %>%
                              ATemp_yearSD = sd(hourlydrybulbtemperatureC, na.rm = TRUE),
                              ATemp_yearSE = ATemp_yearSD/sqrt(n())) %>%
                dplyr::ungroup() %>%
-               dplyr::select(-time, -day, -month, -hourlydrybulbtemperatureC, -date, -cal_date) %>%
+               dplyr::select(-time, -day, -month, -hourlydrybulbtemperatureC, -date, 
+                             -cal_date, -report_type) %>%
                dplyr::distinct() %>%
                dplyr::mutate(year_Anom = ATemp_yearMn - Ann_mn_all,
                              year_Sign = ifelse(year_Anom>0, "A", "B")) %>%

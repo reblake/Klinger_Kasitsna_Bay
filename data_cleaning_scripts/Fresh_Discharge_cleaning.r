@@ -358,8 +358,8 @@ FWD_mon_mn <- FWD_anomaly %>%
               dplyr::mutate(Sign = ifelse(mean_monthly_anomaly>0, "A", "B")) %>%
               dplyr::bind_rows(dummy_2018) # this adds dummy data for 2018 for plotting purposes
 
-write_csv(FWD_ann_mn, "./data_clean/FWD_annual_mn_clean.csv")  
-write_csv(FWD_mon_mn, "./data_clean/FWD_monthly_mn_clean.csv")
+# write_csv(FWD_ann_mn, "./data_clean/FWD_annual_mn_clean.csv")  
+# write_csv(FWD_mon_mn, "./data_clean/FWD_monthly_mn_clean.csv")
 
 
 

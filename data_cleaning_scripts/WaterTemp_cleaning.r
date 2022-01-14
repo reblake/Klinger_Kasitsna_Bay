@@ -129,7 +129,7 @@ WTemp_Dec <- WTemp_all %>%
              dplyr::select(-Month) %>% 
              dplyr::mutate(WTemp_Dec_Lag = lag(Water_Temp_Dec))
   
-write_csv(WTemp_June, "./data_clean/WTemp_June_clean.csv")  
+# write_csv(WTemp_June, "./data_clean/WTemp_June_clean.csv")  
 
 
 
