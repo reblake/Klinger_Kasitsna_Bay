@@ -102,7 +102,7 @@ fresh_treats <- dplyr::filter(fresh_treats, !is.na(mean_yearly_discharge_m3d1))
 percov_mds2 <- vegan::metaMDS(sp_percov2, distance="bray", k=2, trymax=1000, autotransform=TRUE)
 
 # calculate PERMANOVA 
-#percov_perm2 <- vegan::adonis(sp_percov2~mean_yearly_discharge_m3d1, fresh_treats, perm=1000, method="bray")
+percov_perm2 <- vegan::adonis(sp_percov2~mean_yearly_discharge_m3d1, fresh_treats, perm=1000, method="bray")
 
 ##############
 ### Air Temp
@@ -151,7 +151,7 @@ PerCov_all <- PerCov_PDO %>%
                             ATemp_Year_Anom = year_Anom, 
                             mn_yr_discharge = mean_yearly_discharge_m3d1,
                             FWD_Sign = Sign) %>%
-              dplyr::filter(!Year %in% c("2015","2016","2017"))
+              dplyr::filter(!Year %in% c("2019","2020","2021")) # filter out incomplete FWD years
 
 # subset to different dataframes
 sp_percov4 <- PerCov_all %>% 
@@ -169,8 +169,8 @@ all_treats <- PerCov_all[,c("Year", "PDO_anul_mn", "PDO_Sign", "mn_yr_discharge"
 percov_mds4 <- vegan::metaMDS(sp_percov4, distance="bray", k=2, trymax=1000, autotransform=TRUE)
 
 # calculate PERMANOVA 
-#percov_perm4 <- vegan::adonis(sp_percov4~ATemp_yearMn+mn_yr_discharge,
-#                              all_treats, perm=1000, method="bray")
+percov_perm4 <- vegan::adonis(sp_percov4~ATemp_yearMn+mn_yr_discharge,
+                              all_treats, perm=1000, method="bray")
 
 ##################
 ### biological NMDS 
@@ -179,12 +179,12 @@ percov_mds4 <- vegan::metaMDS(sp_percov4, distance="bray", k=2, trymax=1000, aut
 # subset data into seperate dataframes
 sp_percov5 <- AllData_clean %>% 
               dplyr::rename(Year = YEAR) %>%
-              dplyr::filter(TREATMENT == "CONTROL",
-                            !Year %in% c("2015","2016","2017")) %>%
+              dplyr::filter(TREATMENT == "CONTROL" ,
+                            !Year %in% c("2019","2020","2021")) %>%
               dplyr::select(-TRIPLET, -TREATMENT, -FUCUS_NUM_ADULTS, -FUCUS_SPORELINGS_NUM) %>%
-              dplyr::mutate_at(c(3:58), funs(as.numeric)) %>% # converts select columns to numeric
+              dplyr::mutate(across(.cols = c(3:58), .fns = as.numeric)) %>% # converts select columns to numeric
               dplyr::group_by(Year, QUAD) %>%
-              dplyr::summarize_all(funs(mean)) %>%
+              dplyr::summarize(across(.cols = everything(), .fns = mean)) %>%
               dplyr::ungroup() %>%
               dplyr::select(FUCUS_PERCOV_TOTAL, BARNACLES, MYTILUS, PTEROSIPHONIA,
                             BARNACLE_SPAT, FUCUS_SPORELINGS_PERCOV, 
@@ -200,7 +200,7 @@ all_treats2 <- AllData_clean %>%
                dplyr::mutate(year = as.integer(year)) %>% 
                dplyr::full_join(year_a_temp, by="year") %>%
                dplyr::filter(TREATMENT == "CONTROL",
-                             !year %in% c("2015","2016","2017")) %>%
+                             !year %in% c("2019","2020","2021")) %>%
                dplyr::rename(FWD_Sign = Sign,
                              ATmp_Sign = year_Sign,
                              ATemp_year_Anom = year_Anom, 
@@ -215,7 +215,7 @@ all_treats2 <- AllData_clean %>%
 percov_mds5 <- vegan::metaMDS(sp_percov5, distance="bray", k=2, trymax=1000, autotransform=TRUE)
 
 # calculate PERMANOVA 
-#percov_perm5 <- vegan::adonis(sp_percov5~ATemp_yearMn*mn_yr_discharge*Water_Temp_June, all_treats2, perm=1000, method="bray")
+percov_perm5 <- vegan::adonis(sp_percov5~ATemp_yearMn*mn_yr_discharge*Water_Temp_June, all_treats2, perm=1000, method="bray")
 
 
 
