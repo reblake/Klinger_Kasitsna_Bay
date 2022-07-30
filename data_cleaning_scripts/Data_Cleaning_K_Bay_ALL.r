@@ -14,7 +14,7 @@ library(here)
 read_excel_allsheets <- function(filename) {
                         sheets <- readxl::excel_sheets(filename)
                         x <- lapply(sheets, function(X) 
-                                    readxl::read_excel(filename, sheet=X, skip=1,
+                                    readxl::read_excel(filename, sheet = X, skip = 1,
                                                        col_types = "text"))
                         names(x) <- sheets
                         
@@ -38,7 +38,7 @@ X_long_all <- lapply(X_sheets_yrs, function(x) as.data.frame(t(x)))
 #' @export
 #'
 #' @examples
-fix_data3 <- function(df) {
+fix_data3 <- function(df){
              # make column names
              names(df) <- as.character(unlist(df[1,]))
              df <- df[-1,]
@@ -50,11 +50,11 @@ fix_data3 <- function(df) {
              # print(names(df))
              
              df1 <- df %>%
-                    tibble::rownames_to_column(var="TRIPLET") %>%   # row names to column 
+                    tibble::rownames_to_column(var = "TRIPLET") %>%   # row names to column 
                     setNames(toupper(names(.))) %>%  # make column names all upper case
                     dplyr::mutate(across(where(is.factor), as.character)) %>%  # converts all columns to character
                     tidyr::gather(-TRIPLET, 
-                                  -QUAD, -TREATMENT, key=TAXA, value=PER_COV_OR_COUNT) 
+                                  -QUAD, -TREATMENT, key = TAXA, value = PER_COV_OR_COUNT) 
              
              df2 <- df1 %>%  
                     dplyr::mutate(TRIPLET = gsub("\\.\\.\\..*$", "", TRIPLET), # split off extra numerals from "TRIPLET" column
@@ -125,37 +125,60 @@ clean_recent$`2006` <- clean_recent$`2006` %>%
                                                       TAXA == "CALLITHAMNION_PIKEANUM" ~ "CALLITHAMNION",
                                                       TRUE ~ TAXA))
 
-
+# look at the taxa in each year
 # names_all <- lapply(clean_recent, function(x) unique(x[,2]))
 # names_all_df <- as.data.frame(do.call(cbind, names_all))
 # alpha <- names_all_df %>% summarize(across(everything(), sort))
-# alpha %>% select(where(~any(grepl("(MYELOPHYCUS MELANOSIPHON |MELANOSIPHON MYELOPHYCUS)", .))))
-# alpha %>% select(where(~any(grepl("(MYELOPHYCUS MELANOSIPHON |MELANOSIPHON MYELOPHYCUS)", .))))
+# which(names_all_df == "CLADOPHORA", arr.ind = TRUE)
+
+# inspect each year for odd things to make sure we don't have notes, etc where data should be!
+inspect <- function(df){
+           # print(names(df))
+           q_test <- unique(df$QUAD)
+           print(q_test)
+           t_test <- unique(df$TAXA)
+           print(t_test)
+           is.numeric(df$PER_COV_OR_COUNT)
+           n_test <- nchar(df$PER_COV_OR_COUNT)
+           print(unique(n_test))
+           }
+lapply(clean_recent, inspect)
 
 
 # take the sum within each quadrat for grouping taxa that are similar
-sum_taxa <- function(df) {
+sum_taxa <- function(df){
             df3 <- df %>%   
                    # spread dataframe so I can work with it
-                   tidyr::spread(key=TAXA, value=PER_COV_OR_COUNT) %>% 
+                   tidyr::spread(key = TAXA, value = PER_COV_OR_COUNT) %>% 
                    mutate(across(everything(), as.numeric)) %>% 
                    rowwise(QUAD) %>% 
                    mutate(ULVA_ENTERO_SUM = sum(c(ULVA, ENTEROMORPHA)), # sum taxa together
-                          PTERO_POLY_SUM = sum(c(PTEROSIPHONIA, POLYSIPHONIA))
-                          ) %>% 
-                   ungroup() %>%
-                   tidyr::gather(-TRIPLET, 
-                                  -QUAD, key=TAXA, value=PER_COV_OR_COUNT) 
+                          PTERO_POLY_SUM = sum(c(PTEROSIPHONIA, POLYSIPHONIA))) %>% 
+                   ungroup() %>% 
+                   select(-ULVA, -ENTEROMORPHA, -PTEROSIPHONIA, -POLYSIPHONIA)
+            
+            if("MELANOSIPHON" %in% names(df3)){
+               df4 <- df3 %>% 
+                      mutate(MYEL_OR_MELANO = MELANOSIPHON) %>% 
+                      select(-MELANOSIPHON)
+            }else{
+               df4 <- df3 %>% 
+                      mutate(MYEL_OR_MELANO = MYELOPHYCUS) %>% 
+                      select(-MYELOPHYCUS)
+            }
+
+            df5 <- df4 %>% 
+                   tidyr::gather(-QUAD, key = TAXA, value = PER_COV_OR_COUNT) 
                     
-            return()       
+            return(df5)       
+            
             }
 
 # need to iterate over every dataframe in the list for these groupings
+sum_recent <- lapply(clean_recent, sum_taxa)
 
+# 2016 one error; 2003 one error to resolve
 
-
-                         CLAD_CLADC_CLADS_SUM = sum(c(CLAD_SERICEA, ))
-                         MYEL_MELANO_SUM = sum()
 
 
 
@@ -172,7 +195,7 @@ rownames(Data_clean) <- c()  # removes row names
 
 # spread all giant dataframe back to each species having a column
 AllData_clean <- Data_clean %>%
-                 tidyr::spread(key=TAXA, value=PER_COV_OR_COUNT)
+                 tidyr::spread(key = TAXA, value = PER_COV_OR_COUNT)
 
 # replace NAs with 0, because Terrie says missing values represent 0s for certain categories
 AllData_clean[is.na(AllData_clean)] <- 0 
