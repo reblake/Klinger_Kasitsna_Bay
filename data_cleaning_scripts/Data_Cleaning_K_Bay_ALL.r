@@ -177,17 +177,11 @@ sum_taxa <- function(df){
 # need to iterate over every dataframe in the list for these groupings
 sum_recent <- lapply(clean_recent, sum_taxa)
 
-# 2016 one error; 2003 one error to resolve
-
-
-
-
-
 # put all data frames into one giant one
-Data_clean <- do.call("rbind", clean_recent)
+Data_clean <- do.call("rbind", sum_recent)
 
 # make column for Year using data frame name
-Data_clean$YEAR <- rep(names(clean_recent), sapply(clean_recent, nrow))
+Data_clean$YEAR <- rep(names(sum_recent), sapply(sum_recent, nrow))
 rownames(Data_clean) <- c()  # removes row names
 
 # NOTE: don't forget to bind in 1999 and 2000!
@@ -201,7 +195,7 @@ AllData_clean <- Data_clean %>%
 AllData_clean[is.na(AllData_clean)] <- 0 
              
 
-# write_csv(AllData_clean, "./data_clean/K_Bay_All_Sp_Yrs_Clean.csv")
+# write_csv(AllData_clean, here("./data_clean/K_Bay_All_Sp_Yrs_Clean.csv"))
 
 
 #######################################################################
