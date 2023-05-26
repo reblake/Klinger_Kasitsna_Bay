@@ -7,99 +7,125 @@ output:
 
 
 ```{r, echo=FALSE, message=FALSE, include=FALSE}
-library(psych) ; library(gridExtra)
+library(tidyverse) ; library(psych) ; library(gridExtra) ; library(here)
 
 ```
 
 ```{r , echo=FALSE, message=FALSE}
 # get the Chla data
 
-chlaWQ <- read.csv("chla2_WQ_clean.csv", stringsAsFactors=FALSE,
-                   header=TRUE, row.names=NULL, strip.white=TRUE)
+chl <- read.csv(here("./data_clean/chl_all_monthly_clean.csv"), stringsAsFactors = FALSE,
+                header = TRUE, row.names = NULL, strip.white = TRUE)
 
+chl_monthly <- chl %>% 
+               select(Year, Month, Chl_Month_Mn)
 
-chlaNT <- read.csv("chla2_NT_clean.csv", stringsAsFactors=FALSE,
-                   header=TRUE, row.names=NULL, strip.white=TRUE)
 
 ```
 
 ```{r, echo=FALSE, message=FALSE, include=FALSE}
 # get the water temp data
-source("WaterTemp_cleaning.r") 
+w_temp <- read.csv(here("./data_clean/WTemp_all_clean.csv"), stringsAsFactors = FALSE,
+                   header = TRUE, row.names = NULL, strip.white = TRUE)
 
-WTemp_monthly <- WTemp_all %>%
-                 dplyr::select(-Water_Temp_Yearly) %>%
-                 dplyr::mutate_at(c(1,2), funs(as.integer)) # converts select columns
+WTemp_monthly <- w_temp %>%
+                 select(Year, Month, Water_Temp_Monthly, Month_Sign) %>% 
+                 filter(!Water_Temp_Monthly == 999.000000)
 
 ```
 
 ```{r, echo=FALSE, message=FALSE, include=FALSE}
 # get the air temp data
-source("AirTemp_cleaning.r")
+a_temp <- read.csv(here("./data_clean/air_temp_annual_clean.csv"), stringsAsFactors = FALSE,
+                   header = TRUE, row.names = NULL, strip.white = TRUE)
 
-Atemp_monthly <- ann_a_temp %>%
-                 dplyr::select(-Day, -YrMnDy, -YrMn, -Month_Sign, -Month_Anom, -Ann_mn_all) %>%
-                 dplyr::distinct() %>%
-                 dplyr::mutate_at(c(1,2), funs(as.integer)) # converts select columns
+Atemp_monthly <- a_temp %>%
+                 select(year, month, ATemp_monthMn) %>%
+                 rename(Year = year, Month = month) %>% 
+                 distinct() 
                  
 
 ```
 
 ```{r, echo=FALSE, message=FALSE, include=FALSE}
-# get the freshwater data
-source("Fresh_Discharge_cleaning.r")
+# get the freshwater discharge data
+FWD_mon_mn <- read.csv(here("./data_clean/FWD_monthly_mn_clean.csv"), stringsAsFactors = FALSE,
+                       header = TRUE, row.names = NULL, strip.white = TRUE)
 
 FWD_monthly <- FWD_mon_mn %>%
-               dplyr::select(-Year_Month, -Year_Month2, -Sign, -mean_monthly_anomaly) %>%
-               dplyr::mutate(Month = str_replace_all(Month, "Jan", "01"),
-                             Month = str_replace_all(Month, "Feb", "02"),
-                             Month = str_replace_all(Month, "Mar", "03"),
-                             Month = str_replace_all(Month, "Apr", "04"),
-                             Month = str_replace_all(Month, "May", "05"),
-                             Month = str_replace_all(Month, "Jun", "06"),
-                             Month = str_replace_all(Month, "Jul", "07"),
-                             Month = str_replace_all(Month, "Aug", "08"),
-                             Month = str_replace_all(Month, "Sep", "09"),
-                             Month = str_replace_all(Month, "Oct", "10"),
-                             Month = str_replace_all(Month, "Nov", "11"),
-                             Month = str_replace_all(Month, "Dec", "12")) %>%
-               dplyr::mutate_at(c(1,2), funs(as.integer)) # converts select columns
+               select(-Year_Month, -Year_Month2, -Sign, -mean_monthly_anomaly) %>%
+               mutate(Month = str_replace_all(Month, "Jan", "01"),
+                      Month = str_replace_all(Month, "Feb", "02"),
+                      Month = str_replace_all(Month, "Mar", "03"),
+                      Month = str_replace_all(Month, "Apr", "04"),
+                      Month = str_replace_all(Month, "May", "05"),
+                      Month = str_replace_all(Month, "Jun", "06"),
+                      Month = str_replace_all(Month, "Jul", "07"),
+                      Month = str_replace_all(Month, "Aug", "08"),
+                      Month = str_replace_all(Month, "Sep", "09"),
+                      Month = str_replace_all(Month, "Oct", "10"),
+                      Month = str_replace_all(Month, "Nov", "11"),
+                      Month = str_replace_all(Month, "Dec", "12")) %>%
+               mutate(across(c(1,2), as.integer)) # converts select columns
 
 ```
 
+
+```{r, echo=FALSE}
+# plot timeline of chl variable
+
+every_nth = function(n) {
+  return(function(x) {x[c(TRUE, rep(FALSE, n - 1))]})
+}
+
+
+line_plot <- chl_monthly %>% 
+             mutate(Month = str_pad(Month, width = 2, side = "left", pad = "0")) %>% 
+             mutate(Yr_Month = paste0(Year, "_", Month)) %>% 
+             ggplot() + theme_bw() +
+             geom_line(aes(x = Yr_Month, y = Chl_Month_Mn), group = 1) +
+             theme(axis.text.x = element_text(angle = 45, vjust=1, hjust=1)) + 
+             scale_x_discrete(breaks = every_nth(n = 6))
+             
+
+line_plot
+
+```
+
+
 ```{r, echo=FALSE, message=FALSE, include=FALSE}
 
-PerCov_CHL_WQ <- Atemp_monthly%>%
-                 dplyr::full_join(WTemp_monthly, by=c("Year", "Month")) %>%  # join other data
-                 dplyr::filter(Year %in% c("2007", "2008", "2011", "2012", "2013", 
-                                           "2014", "2015")) %>%
-                 dplyr::full_join(FWD_monthly, by=c("Year", "Month")) %>%  # join other data
-                 dplyr::filter(Year %in% c("2007", "2008", "2011", "2012", "2013", 
-                                           "2014", "2015"),
+PerCov_CHL_WQ <- Atemp_monthly %>%
+                 full_join(WTemp_monthly, by = c("Year", "Month")) %>%  # join other data
+                 # filter(Year %in% c("2007", "2008", "2011", "2012", "2013", 
+                 #                    "2014", "2015")) %>%
+                 full_join(FWD_monthly, by = c("Year", "Month")) %>%  # join other data
+                 filter(#Year %in% c("2007", "2008", "2011", "2012", "2013", 
+                         #          "2014", "2015"),
                                !is.na(Water_Temp_Monthly),
-                               mean_monthly_discharge_m3s1 != 0.000000100) %>%
-                 dplyr::arrange(Year, Month) %>%
-                 dplyr::full_join(chlaWQ , by=c("Year", "Month")) %>%  # join other data
-                 dplyr::filter(Year %in% c("2007", "2008", "2011", "2012", "2013", 
-                                           "2014"),
-                               !is.na(ChlFluor_Month_Mn),
-                               !is.na(Water_Temp_Monthly)) %>%
-                 dplyr::mutate(ChlaFluor_Month_LOG = log(ChlFluor_Month_Mn))
+                               mean_monthly_discharge_m3d1 != 0.000000100) %>%
+                 arrange(Year, Month) %>%
+                 full_join(chl_monthly , by = c("Year", "Month")) %>%  # join other data
+                 filter(Year %in% c(2002:2020),
+                        !is.na(Chl_Month_Mn),
+                        !is.na(Water_Temp_Monthly)
+                        ) %>%
+                 mutate(Chl_Month_LOG = log(Chl_Month_Mn))
 
 ```
 
 ```{r, echo=FALSE}
 
-pairs.panels(PerCov_CHL_WQ[,c(3:7)], smooth=F, density=T, ellipses=F, lm=T, 
-             digits=3, scale=T)
+pairs.panels(PerCov_CHL_WQ[,c(3, 4, 6, 7)], smooth = F, density = T, ellipses = F, lm = T, 
+             digits = 3, scale = T)
 
 
 ```
 
 ```{r, echo=FALSE, message=FALSE}
-lmfit_cat <- lm(ChlaFluor_Month_LOG~ATemp_MonthMn, data=PerCov_CHL_WQ)  # lm() fit 
+lmfit_cat <- lm(Chl_Month_LOG ~ ATemp_monthMn, data = PerCov_CHL_WQ)  # lm() fit 
 
-cor_plotA <- ggplot(data=PerCov_CHL_WQ, aes(x=ATemp_MonthMn, y=ChlaFluor_Month_LOG)) + 
+cor_plotA <- ggplot(data=PerCov_CHL_WQ, aes(x=ATemp_monthMn, y=Chl_Month_LOG)) + 
              geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
              labs(title=paste("Adj R^2 =",signif(summary(lmfit_cat)$adj.r.squared, 4),
                                #"Intercept =",signif(lmfit_cat$coef[[1]],5 ),
@@ -108,9 +134,9 @@ cor_plotA <- ggplot(data=PerCov_CHL_WQ, aes(x=ATemp_MonthMn, y=ChlaFluor_Month_L
             
 
 
-lmfit_cwt <- lm(ChlaFluor_Month_LOG~Water_Temp_Monthly, data=PerCov_CHL_WQ)  # lm() fit 
+lmfit_cwt <- lm(Chl_Month_LOG ~ Water_Temp_Monthly, data = PerCov_CHL_WQ)  # lm() fit 
 
-cor_plotB <- ggplot(data=PerCov_CHL_WQ, aes(x=Water_Temp_Monthly, y=ChlaFluor_Month_LOG)) + 
+cor_plotB <- ggplot(data=PerCov_CHL_WQ, aes(x=Water_Temp_Monthly, y=Chl_Month_LOG)) + 
              geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
              labs(title=paste("Adj R^2 =",signif(summary(lmfit_cwt)$adj.r.squared, 4),
                                #"Intercept =",signif(lmfit_cwt$coef[[1]],5 ),
@@ -119,9 +145,9 @@ cor_plotB <- ggplot(data=PerCov_CHL_WQ, aes(x=Water_Temp_Monthly, y=ChlaFluor_Mo
             
 
 
-lmfit_cfw <- lm(ChlaFluor_Month_LOG~mean_monthly_discharge_m3s1, data=PerCov_CHL_WQ)  # lm() fit 
+lmfit_cfw <- lm(Chl_Month_LOG ~ mean_monthly_discharge_m3d1, data = PerCov_CHL_WQ)  # lm() fit 
 
-cor_plotC <- ggplot(data=PerCov_CHL_WQ, aes(x=mean_monthly_discharge_m3s1, y=ChlaFluor_Month_LOG)) + 
+cor_plotC <- ggplot(data=PerCov_CHL_WQ, aes(x=mean_monthly_discharge_m3d1, y=Chl_Month_LOG)) + 
              geom_point(size=4) + stat_smooth(method="lm", col="pink") + theme_bw() +
              labs(title=paste("Adj R^2 =",signif(summary(lmfit_cfw)$adj.r.squared, 4),
                                #"Intercept =",signif(lmfit_cfw$coef[[1]],5 ),
@@ -135,12 +161,12 @@ cor_plotC <- ggplot(data=PerCov_CHL_WQ, aes(x=mean_monthly_discharge_m3s1, y=Chl
 
 ```{r, echo=FALSE, fig.height=7, fig.width=8}
 # arranging above plots
-grid.arrange(cor_plotA, cor_plotB, cor_plotC, nrow=2)
+grid.arrange(cor_plotA, cor_plotB, cor_plotC, nrow = 2)
 
 ```
 
 ```{r, echo=FALSE, fig.height=7, fig.width=8}
-PerCov_CHL_WQ_sub <- dplyr::select(PerCov_CHL_WQ, -Year, -Month)
+PerCov_CHL_WQ_sub <- dplyr::select(PerCov_CHL_WQ, -Year, -Month, -Month_Sign)
 
 WQ_pca <- prcomp(PerCov_CHL_WQ_sub, scale. = T)
 
