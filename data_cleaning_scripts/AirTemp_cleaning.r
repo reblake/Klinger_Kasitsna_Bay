@@ -3,6 +3,7 @@
 #####  Air Temperature data cleaning script            #####
 #####  by Rachael E. Blake                             #####
 #####  9 June 2017                                     #####
+#####  Updated July 2022                               #####
 ############################################################
 
 ## load packages 
@@ -47,10 +48,16 @@ library(rnoaa)
 # New approach is to use the R package `rnoaa`, which uses the 
 # NOAA API (docs here: https://www.ncdc.noaa.gov/cdo-web/webservices/v2)
 # NOTE: The temperature values are in degrees F, so will have to be converted to C in the R code below.   
+# 
+# NOTE As of May 12, 2023, this message appears when loading the rnoaa package.
+# > library(rnoaa)
+# The rnoaa package will soon be retired and archived because the underlying APIs have changed dramatically. 
+# The package currently works but does not pull the most recent data in all cases. A noaaWeather package is 
+# planned as a replacement but the functions will not be interchangeable.
 
 stations <- "70341025507"
 
-years <- c(1999:2021)
+years <- c(2002:2022)
 
 get_lcd <- function(w_station, w_year){
            df <- rnoaa::lcd(station = w_station, year = w_year) # download data

@@ -239,6 +239,9 @@ date_f2 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012014_
 date_f3 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012015_08312016.nc")
 date_f4 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012016_08312017.nc")
 date_f5 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012017_08312018.nc")
+date_f6 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012018_08312019.nc")
+date_f7 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012019_08312020.nc")
+date_f8 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012020_08312021.nc")
 
 ### get lat and lon
 latlon_f1 <- make_latlon_df(ncfile = "GOA_RUNOFF_DISCHARGE.ncml.nc", row_n = 108)
@@ -250,6 +253,12 @@ latlon_f4 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_0
                             row_n = 14052)
 latlon_f5 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012017_08312018.nc",
                             row_n = 14052)
+latlon_f6 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012018_08312019.nc",
+                            row_n = 14052)
+latlon_f7 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012019_08312020.nc",
+                            row_n = 14052)
+latlon_f8 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012020_08312021.nc",
+                            row_n = 14052)
 
 ### get number of slices to use
 # print(nc_kbay) # look at the "Size" of the 'time' dimension - use this as the number of slices
@@ -258,7 +267,7 @@ latlon_f5 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_0
 # 5722 is the number of days between 1/1/1999 and 8/31/2014 inclusive
 num_slices <- c(1:5722)   # use for processing the original downloaded file from 2017
 # num_slices <- c(1:12785)  # programmatically downloaded file (contains data until 8/31/2014)
-num_slices <- c(1:365)  # this is the dim of the time ; use for processing the David Hill files for 2014-2018
+num_slices <- c(1:365)  # this is the dim of the time ; use for processing the David Hill files for 2014-2021
 
 
 ### get slices of discharge data using the `slice_2_df()` function
@@ -297,10 +306,32 @@ FWD_list_f5 <- lapply(num_slices, slice_2_df,
 FWD_f5 <- bind_rows(FWD_list_f5) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
           dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
                         dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
+#
+FWD_list_f6 <- lapply(num_slices, slice_2_df, 
+                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012018_08312019.nc",
+                      row_n = 14052, latlon_df = latlon_f6, date_col = date_f6$dates)  
+FWD_f6 <- bind_rows(FWD_list_f6) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
+          dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
+                        dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
+#
+FWD_list_f7 <- lapply(num_slices, slice_2_df, 
+                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012019_08312020.nc",
+                      row_n = 14052, latlon_df = latlon_f7, date_col = date_f7$dates)  
+FWD_f7 <- bind_rows(FWD_list_f7) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
+          dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
+                        dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
+#
+FWD_list_f8 <- lapply(num_slices, slice_2_df, 
+                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012020_08312021.nc",
+                      row_n = 14052, latlon_df = latlon_f8, date_col = date_f8$dates)  
+FWD_f8 <- bind_rows(FWD_list_f8) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
+          dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
+                        dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
 
 # remove some points that probably don't drain into this site
 FWD_less <- FWD_f1 %>% 
             bind_rows(FWD_f2) %>% bind_rows(FWD_f3) %>% bind_rows(FWD_f4) %>% bind_rows(FWD_f5) %>% 
+            bind_rows(FWD_f6) %>% bind_rows(FWD_f7) %>% bind_rows(FWD_f8) %>% 
             filter(!(longitude_deg_east < -151.55 & latitude_deg_north < 59.48),
                    !(latitude_deg_north > 59.51 & longitude_deg_east > -151.45)) %>%
             mutate(Month_number = forcats::fct_recode(Month, "01"="Jan", "02"="Feb", "03"="Mar",
@@ -311,22 +342,24 @@ FWD_less <- FWD_f1 %>%
 # check to see the data are approx. correct by plotting the lats and lons
 q <- qplot(data = FWD_less, x = longitude_deg_east, y = latitude_deg_north)
 
-# create dummy dataframe for empty 2018 rows (useful in plotting later)
-dummy_2018 <- data.frame(Year = c("2018","2018","2018","2018","2019","2019","2019","2019","2019",
-                                  "2019","2019","2019","2019","2019","2019","2019","2020","2020",
-                                  "2020","2020","2020","2020","2020","2020","2020","2020","2020",
-                                  "2020","2021","2021","2021","2021","2021","2021","2021","2021",
-                                  "2021","2021","2021","2021"),
-                         Month = c("09","10","11","12","01","02","03","04","05","06","07","08",
-                                   "09","10","11","12","01","02","03","04","05","06","07","08",
+# create dummy dataframe for empty 2022 rows (useful in plotting later)
+dummy_2022 <- data.frame(Year = c(#"2018","2018","2018","2018","2019","2019","2019","2019","2019",
+                                  #"2019","2019","2019","2019","2019","2019","2019","2020","2020",
+                                  #"2020","2020","2020","2020","2020","2020","2020","2020","2020",
+                                  #"2020","2021","2021","2021","2021","2021","2021","2021","2021",
+                                  "2021","2021","2021","2021","2022","2022","2022","2022","2022",
+                                  "2022","2022","2022","2022","2022","2022","2022"),
+                         Month = c(#"09","10","11","12","01","02","03","04","05","06","07","08",
+                                   #"09","10","11","12","01","02","03","04","05","06","07","08",
+                                   #"09","10","11","12","01","02","03","04","05","06","07","08",
                                    "09","10","11","12","01","02","03","04","05","06","07","08",
                                    "09","10","11","12"))
 
-dummy_2018$Year_Month <- paste(dummy_2018$Year, dummy_2018$Month, sep="-")
-dummy_2018$mean_monthly_discharge_m3d1 <- 0.0000001
-dummy_2018$mean_monthly_anomaly <- 0.0000001
-dummy_2018$Sign <- "B"
-dummy_2018$Year_Month2 <- factor(dummy_2018$Year_Month)
+dummy_2022$Year_Month <- paste(dummy_2022$Year, dummy_2022$Month, sep="-")
+dummy_2022$mean_monthly_discharge_m3d1 <- 0.0000001
+dummy_2022$mean_monthly_anomaly <- 0.0000001
+dummy_2022$Sign <- "B"
+dummy_2022$Year_Month2 <- factor(dummy_2022$Year_Month)
 
 
 # create annual means
@@ -356,7 +389,7 @@ FWD_mon_mn <- FWD_anomaly %>%
               dplyr::select(Year, Month, Year_Month, mean_monthly_discharge_m3d1, mean_monthly_anomaly) %>%
               dplyr::distinct() %>%
               dplyr::mutate(Sign = ifelse(mean_monthly_anomaly>0, "A", "B")) %>%
-              dplyr::bind_rows(dummy_2018) # this adds dummy data for 2018 for plotting purposes
+              dplyr::bind_rows(dummy_2022) # this adds dummy data for 2022 for plotting purposes
 
 # write_csv(FWD_ann_mn, "./data_clean/FWD_annual_mn_clean.csv")  
 # write_csv(FWD_mon_mn, "./data_clean/FWD_monthly_mn_clean.csv")

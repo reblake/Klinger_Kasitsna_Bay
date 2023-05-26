@@ -42,7 +42,7 @@ pdo_mon <- pdo_df %>%
                   Month = sapply(strsplit(as.character(time_UTC), split="-") , function(x) x[2])#,
                  # Month = as.double(Month)
                   ) %>% 
-           filter(Year %in% c(1999:2021)) #%>% # selects years 
+           filter(Year %in% c(2002:2022)) #%>% # selects years 
 
 
 #
