@@ -28,28 +28,28 @@ pdo_mon_adj <- pdo_mon %>%
                #                                                  "07"="JUL", "08"="AUG", 
                #                                                  "09"="SEP", "10"="OCT",
                #                                                  "11"="NOV", "12"="DEC"),
-                      Yr_Mn = paste(Year, Month, sep="-"),
-                      Sign = ifelse(PDO>0, "A", "B"))
+                      Yr_Mn = paste(Year, Month, sep = "-"),
+                      Sign = ifelse(PDO > 0, "A", "B"))
                
 ```
 
 ```{r, echo=FALSE}
 # PDO plots
-pdo_plot <- ggplot(data=pdo_mon, aes(x=Year, y=PDO)) + geom_col() + 
-            geom_hline(yintercept=0, size=1.5) + ylab("PDO Index")
+pdo_plot <- ggplot(data = pdo_mon, aes(x = Year, y = PDO)) + geom_col() + 
+            geom_hline(yintercept = 0, size = 1.5) + ylab("PDO Index")
 
   
 #
-pdo_plot2 <- ggplot(data=pdo_mon_adj, aes(x=Yr_Mn, y=PDO)) + 
-             geom_col(aes(fill=Sign), show.legend=FALSE) + xlab("Year") +            #
-             geom_hline(yintercept=0, size=1) + ylab("PDO Index") + 
-             scale_x_discrete(breaks=c("1998-01",
+pdo_plot2 <- ggplot(data = pdo_mon_adj, aes(x = Yr_Mn, y = PDO)) + 
+             geom_col(aes(fill = Sign), show.legend = FALSE) + xlab("Year") +            #
+             geom_hline(yintercept = 0, size = 1) + ylab("PDO Index") + 
+             scale_x_discrete(breaks = c("1998-01",
                                        "1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
                                        "2004-01", "2005-01", "2006-01", "2007-01", "2008-01",
                                        "2009-01", "2010-01", "2011-01", "2012-01", "2013-01",
                                        "2014-01", "2015-01", "2016-01", "2017-01", "2018-01",
                                        "2019-01", "2020-01", "2021-01"),
-                              labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", 
+                              labels = c("1998", "1999", "2000", "2001", "2002", "2003", "2004", 
                                        "2005", "2006", "2007", "2008", "2009", "2010", "2011",
                                        "2012", "2013", "2014", "2015", "2016", "2017", "2018",
                                        "2019", "2020", "2021"))
@@ -67,27 +67,27 @@ fwd_mon <- read_csv(here("data_clean", "FWD_monthly_mn_clean.csv"))
 ```
 
 ```{r, echo=FALSE}
-fwd_plot <- ggplot(data=fwd_ann, aes(x=Year, y=(mean_yearly_anomaly*10))) + 
-            geom_col(aes(fill=Sign)) + ylab("Yearly Anomaly") + theme_bw() +
-            geom_hline(yintercept=0, size=1) + 
-            scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
-                              name="",
-                              labels=c("positive runoff", "negative runoff")) 
+fwd_plot <- ggplot(data = fwd_ann, aes(x = Year, y = (mean_yearly_anomaly*10))) + 
+            geom_col(aes(fill = Sign)) + ylab("Yearly Anomaly") + theme_bw() +
+            geom_hline(yintercept = 0, size = 1) + 
+            scale_fill_manual(values = c("A"="#f88379", "B"="#00BFC4"),
+                              name = "",
+                              labels = c("positive runoff", "negative runoff")) 
  
   
-fwd_plot2 <- ggplot(data=fwd_mon, aes(x=Year_Month, y=mean_monthly_anomaly)) + 
-             geom_col(aes(fill=Sign)) + xlab("Year") + ylab("Anomaly") + 
-             geom_hline(yintercept=0, size=1) +  
-             scale_x_discrete(breaks=c("1998-01", "1999-01", "2000-01", "2001-01", "2002-01",
+fwd_plot2 <- ggplot(data = fwd_mon, aes(x = Year_Month, y = mean_monthly_anomaly)) + 
+             geom_col(aes(fill = Sign)) + xlab("Year") + ylab("Anomaly") + 
+             geom_hline(yintercept = 0, size = 1) +  
+             scale_x_discrete(breaks = c("1998-01", "1999-01", "2000-01", "2001-01", "2002-01",
                                        "2003-01", "2004-01", "2005-01", "2006-01", "2007-01",
                                        "2008-01", "2009-01", "2010-01", "2011-01", "2012-01",
                                        "2013-01", "2014-01", "2015-01", "2016-01", "2017-01",
                                        "2018-01", "2019-01", "2020-01", "2021-01"),
-                              labels=c("1998", "1999", "2000", "2001", "2002", "2003", "2004", 
+                              labels = c("1998", "1999", "2000", "2001", "2002", "2003", "2004", 
                                        "2005", "2006", "2007", "2008", "2009", "2010", "2011",
                                        "2012", "2013", "2014", "2015", "2016", "2017", "2018",
                                        "2019", "2020", "2021"),
-                              limits=c(levels(fwd_mon$Year_Month)))
+                              limits = c(levels(fwd_mon$Year_Month)))
                              
 
 ```
@@ -116,19 +116,19 @@ ann_a_temp2 <- ann_a_temp %>%
                dplyr::select(YrMn, month_Anom, month_Sign) %>%
                dplyr::distinct()
 
-ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=month_Anom)) + 
-           geom_col(aes(fill=month_Sign)) + ylab("Anomaly") + xlab("Year") + 
-           geom_hline(yintercept=0, size=1) + 
-           scale_x_discrete(breaks=c("1999-01", "2000-01", "2001-01", "2002-01","2003-01", 
-                                     "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", 
-                                     "2009-01", "2010-01", "2011-01", "2012-01", "2013-01", 
-                                     "2014-01", "2015-01", "2016-01", "2017-01",
-                                     "2018-01", "2019-01", "2020-01", "2021-01"),
-                            labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005", 
-                                     "2006", "2007", "2008", "2009", "2010", "2011", "2012", 
-                                     "2013", "2014","2015", "2016", "2017", "2018",
-                                     "2019", "2020", "2021"),
-                            limits=c(levels(ann_a_temp$YrMn)))
+ann_air <- ggplot(data = ann_a_temp2, aes(x = YrMn, y = month_Anom)) + 
+           geom_col(aes(fill = month_Sign)) + ylab("Anomaly") + xlab("Year") + 
+           geom_hline(yintercept = 0, size = 1) + 
+           scale_x_discrete(breaks = c("1999-01", "2000-01", "2001-01", "2002-01","2003-01", 
+                                       "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", 
+                                       "2009-01", "2010-01", "2011-01", "2012-01", "2013-01", 
+                                       "2014-01", "2015-01", "2016-01", "2017-01",
+                                       "2018-01", "2019-01", "2020-01", "2021-01"),
+                            labels = c("1999", "2000", "2001", "2002", "2003", "2004", "2005", 
+                                       "2006", "2007", "2008", "2009", "2010", "2011", "2012", 
+                                       "2013", "2014","2015", "2016", "2017", "2018",
+                                       "2019", "2020", "2021"),
+                            limits = c(levels(ann_a_temp$YrMn)))
 
 
 
@@ -142,20 +142,20 @@ ann_air <- ggplot(data=ann_a_temp2, aes(x=YrMn, y=month_Anom)) +
 
 wtemp_june <- read_csv(here("data_clean", "WTemp_June_clean.csv"))
 
-june_wtemp_plot <- ggplot(data=wtemp_june, aes(x=as.character(Year), y=Water_Temp_June)) + 
+june_wtemp_plot <- ggplot(data = wtemp_june, aes(x = as.character(Year), y = Water_Temp_June)) + 
                    geom_col() + theme_bw() +
                    ylab("June Water Temperature") + xlab("Year") + 
-                   geom_hline(yintercept=0, size=1) + 
-                   scale_x_discrete(breaks=c("1999", "2000", "2001", "2002", "2003", 
-                                             "2004", "2005", "2006", "2007", "2008", 
-                                             "2009", "2010", "2011", "2012", "2013", 
-                                             "2014", "2015", "2016", "2017", "2018",
-                                             "2019", "2020", "2021"),
-                                    labels=c("1999", "2000", "2001", "2002", "2003", "2004",
-                                             "2005", "2006", "2007", "2008", "2009", "2010",
-                                             "2011", "2012", "2013", "2014", "2015", "2016",
-                                             "2017", "2018", "2019", "2020", "2021"),
-                                    limits=c(levels(ann_a_temp$YrMn)))
+                   geom_hline(yintercept = 0, size = 1) + 
+                   scale_x_discrete(breaks = c("1999", "2000", "2001", "2002", "2003", 
+                                               "2004", "2005", "2006", "2007", "2008", 
+                                               "2009", "2010", "2011", "2012", "2013", 
+                                               "2014", "2015", "2016", "2017", "2018",
+                                               "2019", "2020", "2021"),
+                                    labels = c("1999", "2000", "2001", "2002", "2003", "2004",
+                                               "2005", "2006", "2007", "2008", "2009", "2010",
+                                               "2011", "2012", "2013", "2014", "2015", "2016",
+                                               "2017", "2018", "2019", "2020", "2021"),
+                                    limits = c(levels(ann_a_temp$YrMn)))
 
 
 ```
@@ -171,13 +171,13 @@ AllData_clean <- read_csv(here("data_clean", "K_Bay_All_Sp_Yrs_Clean.csv"))
 
 
 AllData_clean2 <- AllData_clean %>% 
-                  dplyr::select(-FUCUS_NUM_ADULTS, -FUCUS_SPORELINGS_NUM) %>%
-                  dplyr::mutate(MASTO_PAP = str_replace_all(MASTO_PAP, ",",""),
-                                SIPHONARIA = gsub("[*]", "", SIPHONARIA)
-                                ) %>%
-                  dplyr::filter(PTEROSIPHONIA != "tr") %>%
-                  dplyr::rename(`MARGARITIES_SMALL_IRIDESCENT_SNAIL` = `_MARGARITIES_SMALL_IRIDESCENT_SNAIL`) %>% 
-                  dplyr::mutate(across(c(5:19), as.numeric)) %>%  # converts select columns
+                  #dplyr::select(-FUCUS_NUM_ADULTS, -FUCUS_SPORELINGS_NUM) %>%
+                  mutate(MASTO_PAP = str_replace_all(MASTO_PAP, ",",""),
+                         SIPHONARIA = gsub("[*]", "", SIPHONARIA)) %>%
+                  mutate(across(c(37, 49), as.numeric)) %>% # converts select columns
+                  #dplyr::filter(PTEROSIPHONIA != "tr") %>%
+                  #dplyr::rename(`MARGARITIES_SMALL_IRIDESCENT_SNAIL` = `_MARGARITIES_SMALL_IRIDESCENT_SNAIL`) %>% 
+                  #dplyr::mutate(across(c(5:19), as.numeric)) %>%  # converts select columns
                   arrange(YEAR)
   
 ```
@@ -186,49 +186,61 @@ AllData_clean2 <- AllData_clean %>%
 
 
 PerCov_long <- AllData_clean2 %>%
-               gather(TAXA, PER_COV_OR_COUNT, -YEAR, -TRIPLET, -QUAD, -TREATMENT)
+               gather(TAXA, PER_COV_OR_COUNT, -YEAR, -QUAD#, -TRIPLET, -TREATMENT
+                      )
 
 PerCov_anom <- PerCov_long %>%
-               dplyr::select(-TRIPLET, -QUAD) %>%
-               dplyr::filter(TREATMENT == "CONTROL") %>%
-               dplyr::mutate(across(c(4), as.numeric)) %>% # converts select columns
-               dplyr::group_by(TAXA) %>%
-               dplyr::mutate(TAXA_Mean = mean(PER_COV_OR_COUNT),
-                             ANOMALY = PER_COV_OR_COUNT-TAXA_Mean) %>%
-               dplyr::ungroup() %>%
-               dplyr::group_by(TAXA, YEAR) %>%
-               dplyr::mutate(YEAR_Mean = mean(PER_COV_OR_COUNT),
-                             YEAR_Anom = mean(YEAR_Mean-TAXA_Mean),
+               select(-QUAD, #-TRIPLET 
+                             ) %>%
+               #filter(TREATMENT == "CONTROL") %>%
+               mutate(across(c(3), as.numeric)) %>% # converts select columns
+               group_by(TAXA) %>%
+               mutate(TAXA_Mean = mean(PER_COV_OR_COUNT),
+                      ANOMALY = PER_COV_OR_COUNT - TAXA_Mean) %>%
+               ungroup() %>%
+               group_by(TAXA, YEAR) %>%
+               mutate(YEAR_Mean = mean(PER_COV_OR_COUNT),
+                             YEAR_Anom = mean(YEAR_Mean - TAXA_Mean),
                              YEAR_Anom_Scale = YEAR_Anom/100,
                              YEAR_Anom_Scale2 = YEAR_Anom/10) %>%
-               dplyr::ungroup() %>%
-               dplyr::arrange(YEAR, TREATMENT, TAXA)
+               ungroup() %>%
+               arrange(YEAR, TAXA#, TREATMENT
+                       )
 
 ```
 
 ```{r, echo=FALSE}
+#' Title
+#'
+#' @param y_var 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 explore_plots <- function(y_var){
                  y_var <- rlang::sym(y_var) # turn to symbol   
                      
-                 p <- ggplot(data=AllData_clean2, aes(x=as.factor(YEAR), y=!!y_var,
-                                                      fill=TREATMENT)) +
+                 p <- ggplot(data = AllData_clean2, aes(x = as.factor(YEAR), y = !!y_var#, fill = TREATMENT
+                                                        )) +
                       geom_boxplot() + xlab("YEAR") +
                       theme(legend.position = "top", 
                             legend.title = element_blank(),
-                            axis.text.x = element_text(size=8),
-                            axis.text.y = element_text(size=10)) +
-                      scale_fill_manual(breaks=c("CONTROL","SCRAPE99","SCRAPE00"),
-                                        labels=c("Control","Scrape 1999","Scrape 2000"),
-                                        values=c("#76eec6","#63b8ff","#ff6a6a"))
+                            axis.text.x = element_text(size = 8),
+                            axis.text.y = element_text(size = 10)) #+
+                      # scale_fill_manual(breaks=c("CONTROL","SCRAPE99","SCRAPE00"),
+                      #                   labels=c("Control","Scrape 1999","Scrape 2000"),
+                      #                   values=c("#76eec6","#63b8ff","#ff6a6a"))
                  return(p)
 }
 
  # code to make one plot, replicated above in function; used for testing and troublshooting
- # ggplot(data=AllData_clean2, aes(x=as.factor(YEAR), y=MYTILUS, fill=TREATMENT )) +
- # geom_boxplot()+ theme(legend.position="top", legend.title=element_blank()) +
- #                      scale_fill_manual(breaks=c("CONTROL","SCRAPE99","SCRAPE00"),
- #                                        labels=c("Control","Scrape 1999","Scrape 2000"),
- #                                        values=c("#76eec6","#63b8ff","#ff6a6a"))
+ # ggplot(data = AllData_clean2, aes(x = as.factor(YEAR), y = MASTO_PAP#, fill=TREATMENT 
+ #                                   )) +
+ #        geom_boxplot() + theme(legend.position = "top", legend.title = element_blank()) #+
+ #        # scale_fill_manual(breaks=c("CONTROL","SCRAPE99","SCRAPE00"),
+ #        #                            labels=c("Control","Scrape 1999","Scrape 2000"),
+ #        #                            values=c("#76eec6","#63b8ff","#ff6a6a"))
 
 ```
 
@@ -237,10 +249,19 @@ explore_plots <- function(y_var){
 # ft <- explore_plots(FUCUS_PERCOV_TOTAL)
 # ft
 
-# make vector of variables
-var_names <- names(AllData_clean2[,c(5:57)]) 
+# all taxa
+# AllData_clean2[,c(3:52)]
+# 
+# examine more
+# var_names <- names(AllData_clean2[,c(6, 11, 29, 37, 49)])
 
-# explore_plots(var_names[42])
+# taxa of interest based on abundance - numbers of column numbers
+# c(8, 10, 16, 18, 22, 30, 31, 34, 39, 41, 42, 48, 51)
+
+# make vector of variables
+var_names <- names(AllData_clean2[,c(8, 10, 16, 18, 22, 30, 31, 34, 37, 39, 41, 42, 48, 49, 51)]) 
+
+# explore_plots(var_names[4])
 
 # make a plot for each variable
 lapply(var_names, explore_plots)
@@ -263,7 +284,7 @@ anom_fucu <- ggplot(data=PerCov_anom[PerCov_anom$TAXA == "FUCUS_PERCOV_TOTAL",])
 # combined PDO and mussel anomaly plot
 anom_pdo_muss <- pdo_plot2 + 
                  geom_col(data=PerCov_anom[PerCov_anom$TAXA == "MYTILUS",], 
-                          aes(x=as.factor(YEAR),y=YEAR_Anom_Scale, color="#696366"), width=2) +   
+                          aes(x=as.factor(YEAR),y=YEAR_Anom_Scale, color = "#696366"), width=2) +   
                  ylab("PDO Index") + theme_bw() + ylim(-4,4) +
                  scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                                    name="",
@@ -328,18 +349,19 @@ anom_pdo_barn
 ## Freshwater discharge plotted with mussel, fucus, and barnacle anomalies
 ```{r, echo=FALSE, warning=FALSE, fig.height=5, fig.width=8}
 # combined freshwater discharge and invert plots
-myt_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "MYTILUS",c(2,9,10)])
-myt_sub <- dplyr::mutate(myt_sub, YEAR_Mon = paste(YEAR,"-06", sep=""))
-myt_sub$YEAR <- as.factor(myt_sub$YEAR)
-myt_sub <- dplyr::mutate(myt_sub, YEAR_Anom_Scale3 = YEAR_Anom_Scale2 * 10000)
+myt_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "MYTILUS",c(1,2,8,9)])
+myt_sub2 <- myt_sub %>% 
+            mutate(YEAR_Mon = paste(YEAR,"-06", sep = "")) %>% 
+            mutate(across(c(1), as.factor)) %>% # converts select columns
+            mutate(myt_sub, YEAR_Anom_Scale3 = YEAR_Anom_Scale2 * 10000)
 
 fwdplot_myt <- fwd_plot2 + 
-               geom_col(data=myt_sub, 
-                        aes(x=YEAR_Mon, y=YEAR_Anom_Scale3, color="#696366"), width=2) +       
+               geom_col(data = myt_sub2, 
+                        aes(x = YEAR_Mon, y = YEAR_Anom_Scale3, color = "#696366"), width = 2) +       
                ylab("Freshwater Anomaly") + xlab("Year") + theme_bw() + # ylim(-0.45,0.45) + 
                scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
-                                 name="",
-                                 labels=c("positive runoff", "negative runoff")) +
+                                 name = "",
+                                 labels = c("positive runoff", "negative runoff")) +
                scale_color_manual(values="#595959", name="", labels="Mytilus % cover (scaled)") +
                theme(panel.grid.major=element_blank(),
                      panel.grid.minor=element_blank(),
@@ -353,18 +375,18 @@ fwdplot_myt <- fwd_plot2 +
 fwdplot_myt
 
 ###
-fuc_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "FUCUS_PERCOV_TOTAL",c(2,9,10)])
-fuc_sub <- dplyr::mutate(fuc_sub, YEAR_Mon = paste(YEAR,"-06", sep=""))
+fuc_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "FUCUS_PERCOV_TOTAL",c(1,2,8,9)])
+fuc_sub <- dplyr::mutate(fuc_sub, YEAR_Mon = paste(YEAR,"-06", sep = ""))
 fuc_sub$YEAR <- as.factor(fuc_sub$YEAR)
 fuc_sub <- dplyr::mutate(fuc_sub, YEAR_Anom_Scale3 = YEAR_Anom_Scale2 * 10000)
 
 fwdplot_fuc <- fwd_plot2 + 
-               geom_col(data=fuc_sub, 
-                        aes(x=YEAR_Mon, y=YEAR_Anom_Scale3, color="#696366"), width=2) +      
+               geom_col(data = fuc_sub, 
+                        aes(x = YEAR_Mon, y = YEAR_Anom_Scale3, color = "#696366"), width = 2) +      
                ylab("Freshwater Anomaly") + xlab("Year") + theme_bw() + # ylim(-0.45,0.45) + 
-               scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
-                                 name="",
-                                 labels=c("positive runoff", "negative runoff")) +
+               scale_fill_manual(values = c("A"="#f88379", "B"="#00BFC4"),
+                                 name = "",
+                                 labels = c("positive runoff", "negative runoff")) +
                scale_color_manual(values="#595959", name="", labels="Fucus % cover (scaled)") +
                theme(panel.grid.major=element_blank(),
                      panel.grid.minor=element_blank(),
@@ -378,7 +400,7 @@ fwdplot_fuc <- fwd_plot2 +
 fwdplot_fuc
 
 ###
-brn_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "BARNACLES",c(2,9,10)])
+brn_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "BARNACLES",c(1,2,8,9)])
 brn_sub <- dplyr::mutate(brn_sub, YEAR_Mon = paste(YEAR,"-06", sep=""))
 brn_sub$YEAR <- as.factor(brn_sub$YEAR)
 brn_sub <- dplyr::mutate(brn_sub, YEAR_Anom_Scale3 = YEAR_Anom_Scale2 * 10000)
@@ -403,7 +425,7 @@ fwdplot_brn <- fwd_plot2 +
 fwdplot_brn
 
 ###
-scu_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "L.SCUTULATA",c(2,9,10)])
+scu_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "L.SCUTULATA",c(1,2,8,9)])
 scu_sub <- dplyr::mutate(scu_sub, YEAR_Mon = paste(YEAR,"-06", sep=""))
 scu_sub$YEAR <- as.factor(scu_sub$YEAR)
 scu_sub <- dplyr::mutate(scu_sub, YEAR_Anom_Scale3 = YEAR_Anom_Scale2 * 10000)
@@ -429,7 +451,7 @@ fwdplot_scu <- fwd_plot2 +
 fwdplot_scu
 
 ###
-sit_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "L.SITKANA",c(2,9,10)])
+sit_sub <- unique(PerCov_anom[PerCov_anom$TAXA == "L.SITKANA",c(1,2,8,9)])
 sit_sub <- dplyr::mutate(sit_sub, YEAR_Mon = paste(YEAR,"-06", sep=""))
 sit_sub$YEAR <- as.factor(sit_sub$YEAR)
 sit_sub <- dplyr::mutate(sit_sub, YEAR_Anom_Scale3 = YEAR_Anom_Scale2 * 1000)
