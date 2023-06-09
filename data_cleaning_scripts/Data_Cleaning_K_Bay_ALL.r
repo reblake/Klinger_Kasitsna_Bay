@@ -11,6 +11,14 @@ library(here)
 
 # read in excel file 
 # this function creates a list of data frames, one for each excel sheet 
+#' Title
+#'
+#' @param filename 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 read_excel_allsheets <- function(filename) {
                         sheets <- readxl::excel_sheets(filename)
                         x <- lapply(sheets, function(X) 
@@ -132,6 +140,14 @@ clean_recent$`2006` <- clean_recent$`2006` %>%
 # which(names_all_df == "CLADOPHORA", arr.ind = TRUE)
 
 # inspect each year for odd things to make sure we don't have notes, etc where data should be!
+#' Title
+#'
+#' @param df 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 inspect <- function(df){
            # print(names(df))
            q_test <- unique(df$QUAD)
@@ -142,10 +158,19 @@ inspect <- function(df){
            n_test <- nchar(df$PER_COV_OR_COUNT)
            print(unique(n_test))
            }
+
 lapply(clean_recent, inspect)
 
 
 # take the sum within each quadrat for grouping taxa that are similar
+#' Title
+#'
+#' @param df 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 sum_taxa <- function(df){
             df3 <- df %>%   
                    # spread dataframe so I can work with it
