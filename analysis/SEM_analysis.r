@@ -3,72 +3,102 @@
 #####  Structural Equation Modeling script                  #####
 #####  by Rachael E. Blake                                  #####
 #####  22 June 2017                                         #####
+#####  Updated 25 Aug 2023                                  #####
 #################################################################
 
 # load packages
-library(lavaan) ; library(plyr) ; library(dplyr) ; library(car) ; library(ggm) ; library(semPlot)  
-library(semTools) ; library(psych) ; library(stats) 
+library(lavaan) ; library(tidyverse) ; library(car) ; library(ggm) ; library(semPlot)  
+library(semTools) ; library(psych) ; library(stats) ; library(here)
 
 
-# source the data cleaning script to get the % cover data
-source("Data_Cleaning_K_Bay_ALL.r")     # dataframe is called AllData_clean
+###################################################################################
+###### Start here if you need to re-build the input dataframe                ######
+###################################################################################
+
+# load the % cover species data
+AllData_clean <- read_csv(here("data_clean", "K_Bay_All_Sp_Yrs_Clean.csv"))
 
 # Freshwater discharge data
-source("Fresh_Discharge_cleaning.r")
+fwd_ann <- read_csv(here("data_clean", "FWD_annual_mn_clean.csv"))
+fwd_mon <- read_csv(here("data_clean", "FWD_monthly_mn_clean.csv"))
 
 # Air temperature data
-source("AirTemp_cleaning.r")
+year_a_temp <- read.csv(here("data_clean", "air_temp_year_clean.csv"))
+ann_a_temp <- read.csv(here("data_clean", "air_temp_annual_clean.csv"))
+spring_a_temp <- read.csv(here("data_clean", "air_temp_spring_clean.csv"))
+summer_a_temp <- read.csv(here("data_clean", "air_temp_summer_clean.csv"))
+fall_a_temp <- read.csv(here("data_clean", "air_temp_fall_clean.csv"))
+winter_a_temp <- read.csv(here("data_clean", "air_temp_winter_clean.csv"))
 
 # Water temperature data
-source("WaterTemp_cleaning.r")   # WTemp_Yr, WTemp_June, WTemp_Dec
-
+# WTemp_Yr, WTemp_June, WTemp_Dec
+wtemp_all <- read_csv(here("data_clean", "WTemp_all_clean.csv"))   
+wtemp_year <- read_csv(here("data_clean", "WTemp_year_clean.csv")) 
+wtemp_june <- read_csv(here("data_clean", "WTemp_June_clean.csv")) 
+wtemp_dec <- read_csv(here("data_clean", "WTemp_Dec_clean.csv"))   
 
 
 # add in the environmental data
 
 spr <- spring_a_temp %>%
-       dplyr::select(Year, ATemp_YearMn, Num_Day_Less_0, ATemp_Spr_min) %>% 
+       dplyr::select(year, ATemp_yearMn, Num_day_Less_0, ATemp_Spr_min) %>% 
+       dplyr::rename(ATemp_Spr_Mn = ATemp_yearMn,
+                     Spr_Days_Less_0 = Num_day_Less_0) %>% 
        dplyr::distinct()
 
 sum <- summer_a_temp %>%
-       dplyr::select(Year, ATemp_YearMn, Num_Day_More_15, ATemp_Summ_max) %>% 
+       dplyr::select(year, ATemp_yearMn, Num_day_More_15, ATemp_Summ_max) %>% 
+       dplyr::rename(ATemp_Sum_Mn = ATemp_yearMn,
+                     Summ_Days_More_15 = Num_day_More_15) %>% 
        dplyr::distinct()
+
+yratemp <- year_a_temp %>%
+           dplyr::select(year, ATemp_yearMn, ATemp_yearSD) 
+
+fwdann <- fwd_ann %>% 
+          filter(!(Year %in% c(1999, 2000, 2001)))
+
+wtj <- wtemp_june %>% 
+       dplyr::rename(Water_Temp_June_SD = Water_Temp_Monthly_SD,
+                     Water_Temp_June_SE = Water_Temp_Monthly_SE)
+
+wtd <- wtemp_dec %>% 
+       dplyr::rename(Water_Temp_Dec_SD = Water_Temp_Monthly_SD,
+                     Water_Temp_Dec_SE = Water_Temp_Monthly_SE)
 
 
 PerCov_FWT <- AllData_clean %>%
-              dplyr::select(-MYELOPHYCUS, -HALOSACCION, -COLPOMENIA, 
+              dplyr::select(-QUAD, -HALOSACCION, -COLPOMENIA, 
                             -CRUSTOSE_CORALLINE, -CALLITHAMNION, -ERECT_CORALLINE, 
                             -ACROSIPHONIA, -NEORHODOMELA, -PALMARIA) %>%
               dplyr::rename(Year = YEAR) %>%
-              dplyr::filter(TREATMENT == "CONTROL") %>%
-              dplyr::mutate_at(vars(TRIPLET), funs(as.numeric)) %>%
-              dplyr::arrange(Year, TRIPLET) %>%
-              dplyr::full_join(FWD_ann_mn, by="Year") %>%  # join in the freshwater data
-              dplyr::full_join(year_a_temp, by="Year") %>%  # join in the air temp data
-              dplyr::rename(ATmp_Sign = Year_Sign,
-                            ATemp_Year_Anom = Year_Anom, 
-                            ATemp_YearlyMn = ATemp_YearMn,
-                            mn_yr_discharge = mean_yearly_discharge_m3s1,
+              dplyr::arrange(Year) %>%
+              dplyr::full_join(fwdann, by = "Year") %>%  # join in the freshwater data
+              dplyr::rename(year = Year) %>%
+              dplyr::full_join(yratemp, by = "year") %>%  # join in the air temp data
+              dplyr::rename(mn_yr_discharge = mean_yearly_discharge_m3d1,
                             FWD_Sign = Sign) %>%
-              dplyr::full_join(spr, by="Year") %>%  # join in the spring air temp data
-              dplyr::rename(ATemp_SpringMn = ATemp_YearMn, 
-                            Spr_Days_Less_0 = Num_Day_Less_0) %>%
-              dplyr::full_join(sum, by="Year") %>%  # join in the summer air temp data
-              dplyr::rename(ATemp_SummerMn = ATemp_YearMn, 
-                            Summ_Days_More_15 = Num_Day_More_15) %>%
-              dplyr::full_join(WTemp_Yr, by="Year") %>%  # join in the annual water temp data
-              dplyr::full_join(WTemp_June, by="Year") %>%  # join in the June water temp data
-              dplyr::full_join(WTemp_Dec, by="Year") %>%  # join in the December water temp data
+              dplyr::full_join(spr, by = "year") %>%  # join in the spring air temp data
+              dplyr::full_join(sum, by = "year") %>%  # join in the summer air temp data
+              dplyr::rename(Year = year) %>%
+              dplyr::full_join(wtemp_year, by = "Year") %>%  # join in the annual water temp data
+              dplyr::full_join(wtj, by = "Year") %>%  # join in the June water temp data
+              dplyr::full_join(wtd, by = "Year") %>%  # join in the December water temp data
               dplyr::arrange(Year)
 
 # write.csv(PerCov_FWT, file = "K_Bay_All_Data_SEM.csv", row.names=FALSE)
+ 
+###################################################################################
+###### Start here if running the SEM but not re-building the input dataframe ######
+###################################################################################
 
-##NOTE: We are missing Freshwater data 2015-2017, Dec water temp 2015, and lag Dec temp creates NA in 1999
+PerCov_FWT <- read_csv("K_Bay_All_Data_SEM.csv")
+
+
 # without any NAs
 PerCov_FWT_NA <- PerCov_FWT %>%
-                 dplyr::filter(!Year %in% c(2015, 2016, 2017)) %>%
                  dplyr::select(-WTemp_Dec_Lag) %>%
-                 dplyr::mutate_at(c(5:20,22,24:50), funs(as.numeric)) %>% # converts select columns to numeric
+                 # dplyr::mutate_at(c(5:20,22,24:50), funs(as.numeric)) %>% # converts select columns to numeric
                  dplyr::group_by() %>%
                  dplyr::mutate(L.SITKANA_scaled = L.SITKANA/10,
                                LOTTIIDAE_scaled = LOTTIIDAE/10,
@@ -80,111 +110,111 @@ PerCov_FWT_NA <- PerCov_FWT %>%
 
 #########
 # Looking at correlations
-pairs.panels(PerCov_FWT[,c(7,8,22,24,28,29,33,37,40,51,54,57:65)], smooth=F, density=T, ellipses=F, lm=T, 
-             digits=3, scale=T)
+pairs.panels(PerCov_FWT_NA[,c(2:22)], smooth = F, density = T, 
+             ellipses = F, lm = T, digits = 3, scale = T)
 
-pairs.panels(PerCov_FWT[,c(51,54,57:65)], smooth=F, density=T, ellipses=F, lm=T, 
-             digits=3, scale=T)
+pairs.panels(PerCov_FWT_NA[,c(44, 49, 51, 57, 58, 65:67)], smooth = F, density = T, ellipses = F, lm = T, 
+             digits = 3, scale = T)
 
-pairs.panels(PerCov_FWT[,c(7,8,22,24,28,29,33,37,40)], smooth=F, density=T, ellipses=F, lm=T, 
-             digits=3, scale=T)
+pairs.panels(PerCov_FWT_NA[,c(44, 49, 51:58, 62)], smooth = F, density = T, ellipses = F, 
+             lm = T, digits = 3, scale = T)
 
 
 #########
 ## SEM ##
 #########
 
-sem1_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES + MYTILUS + Water_Temp_Yearly
-               MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Water_Temp_Yearly
+sem1_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES + MYTILUS + Water_Temp_Yearly
+               MYTILUS ~ ATemp_yearMn + mn_yr_discharge + Water_Temp_Yearly
                BARNACLES ~ mn_yr_discharge 
                '
 
-sem1 <- sem(sem1_model, data=PerCov_FWT_NA, estimator="MLM")  # using a robust ML estimator due to some non-normality
+sem1 <- sem(sem1_model, data = PerCov_FWT_NA, estimator = "MLM")  # using a robust ML estimator due to some non-normality
 
 AIC(sem1)
 fitMeasures(sem1, "pvalue")
-summary(sem1, rsquare=T, standardized=T)
+summary(sem1, rsquare = T, standardized = T)
 parameterEstimates(sem1)
-residuals(sem1) ; residuals(sem1, type="cor")
+residuals(sem1) ; residuals(sem1, type = "cor")
 
 semPaths(sem1, "std")                    
  
 #
 
-sem1a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES  + Water_Temp_Yearly
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + FUCUS_PERCOV_TOTAL + Water_Temp_Yearly
+sem1a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES  + Water_Temp_Yearly
+                MYTILUS ~ ATemp_yearMn + mn_yr_discharge + FUCUS_PERCOV_TOTAL + Water_Temp_Yearly
                 BARNACLES ~ mn_yr_discharge
                 '
 
-sem1a <- sem(sem1a_model, data=PerCov_FWT_NA, estimator="MLM")
+sem1a <- sem(sem1a_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem1a)
 fitMeasures(sem1a, "pvalue")
-summary(sem1a, rsquare=T, standardized=T)
-residuals(sem1a) ; residuals(sem1a, type="cor")
+summary(sem1a, rsquare = T, standardized = T)
+residuals(sem1a) ; residuals(sem1a, type = "cor")
 
 semPaths(sem1a, "std")
 
 #
 
-sem1b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES  + Water_Temp_Yearly
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
+sem1b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES  + Water_Temp_Yearly
+                MYTILUS ~ ATemp_yearMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
                 BARNACLES ~ mn_yr_discharge'
 
-sem1b <- sem(sem1b_model, data=PerCov_FWT_NA, estimator="MLM")
+sem1b <- sem(sem1b_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem1b)
 fitMeasures(sem1b, "pvalue")
-summary(sem1b, rsquare=T, standardized=T)
-residuals(sem1b) ; residuals(sem1b, type="cor")
+summary(sem1b, rsquare = T, standardized = T)
+residuals(sem1b) ; residuals(sem1b, type = "cor")
 
 semPaths(sem1b, "std")
 
 #
 
-sem1c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES + Water_Temp_Yearly
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
-                BARNACLES ~ mn_yr_discharge + ATemp_YearlyMn'
+sem1c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES + Water_Temp_Yearly
+                MYTILUS ~ ATemp_yearMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
+                BARNACLES ~ mn_yr_discharge + ATemp_yearMn'
 
-sem1c <- sem(sem1c_model, data=PerCov_FWT_NA, estimator="MLM")
+sem1c <- sem(sem1c_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem1c)
 fitMeasures(sem1c, "pvalue")
-summary(sem1c, rsquare=T, standardized=T)
-residuals(sem1c) ; residuals(sem1c, type="cor")
+summary(sem1c, rsquare = T, standardized = T)
+residuals(sem1c) ; residuals(sem1c, type = "cor")
 
 semPaths(sem1c, "std")
 
 #
 
-sem1d_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + BARNACLES + mn_yr_discharge + Water_Temp_Yearly
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
+sem1d_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES + mn_yr_discharge + Water_Temp_Yearly
+                MYTILUS ~ ATemp_yearMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
                 BARNACLES ~ mn_yr_discharge'
 
-sem1d <- sem(sem1d_model, data=PerCov_FWT_NA, estimator="MLM")
+sem1d <- sem(sem1d_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem1d)
 fitMeasures(sem1d, "pvalue")
-summary(sem1d, rsquare=T, standardized=T)
-residuals(sem1d) ; residuals(sem1d, type="cor")
+summary(sem1d, rsquare = T, standardized = T)
+residuals(sem1d) ; residuals(sem1d, type = "cor")
 
 
 semPaths(sem1d, "std")
 
 #
 
-sem1e_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn 
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + BARNACLES
+sem1e_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn 
+                MYTILUS ~ ATemp_yearMn + mn_yr_discharge + BARNACLES
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL 
                 '#+ Water_Temp_Yearly   + Water_Temp_Yearly
            
-sem1e <- sem(sem1e_model, data=PerCov_FWT_NA, estimator="MLM")
+sem1e <- sem(sem1e_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem1e)
 fitMeasures(sem1e, "pvalue")
-summary(sem1e, rsquare=T, standardized=T)
-residuals(sem1e) ; residuals(sem1e, type="cor")
-modificationIndices(sem1e, standardized=F)
+summary(sem1e, rsquare = T, standardized = T)
+residuals(sem1e) ; residuals(sem1e, type = "cor")
+modificationIndices(sem1e, standardized = F)
 parameterEstimates(sem1e)
 
 semPaths(sem1e, "std")
@@ -195,93 +225,93 @@ AIC(sem1, sem1a, sem1b, sem1c, sem1d, sem1e)
 
 #####
 
-sem2_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Spr_Days_Less_0 + Summ_Days_More_15
-               MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
+sem2_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + Spr_Days_Less_0 + Summ_Days_More_15
+               MYTILUS ~ ATemp_yearMn + mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + BARNACLES
                BARNACLES ~ mn_yr_discharge + Spr_Days_Less_0 + Summ_Days_More_15 + FUCUS_PERCOV_TOTAL
                '
 
-sem2 <- sem(sem2_model, data=PerCov_FWT_NA, estimator="MLM")
+sem2 <- sem(sem2_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem2)
 fitMeasures(sem2, "pvalue")
-summary(sem2, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem2) ; residuals(sem2, type="cor")
-modificationIndices(sem2, standardized=F)
+summary(sem2, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem2) ; residuals(sem2, type = "cor")
+modificationIndices(sem2, standardized = F)
 
 semPaths(sem2, "std")  
 
 #
 
-sem2a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Summ_Days_More_15 + BARNACLES
-                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + ATemp_YearlyMn
+sem2a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + Summ_Days_More_15 + mn_yr_discharge
+                MYTILUS ~ ATemp_yearMn + mn_yr_discharge + Summ_Days_More_15 + BARNACLES
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + ATemp_yearMn
                 '
 
-sem2a <- sem(sem2a_model, data=PerCov_FWT_NA, estimator="MLM")
+sem2a <- sem(sem2a_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem2a)
 fitMeasures(sem2a, "pvalue")
-summary(sem2a, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem2a) ; residuals(sem2a, type="cor")
-modificationIndices(sem2a, standardized=F)
+summary(sem2a, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem2a) ; residuals(sem2a, type = "cor")
+modificationIndices(sem2a, standardized = F)
 parameterEstimates(sem2a)
 
 semPaths(sem2a, "std")  
 
 #
 
-sem2b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + Water_Temp_Dec
-                MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Summ_Days_More_15 + BARNACLES + Water_Temp_June
-                BARNACLES ~ mn_yr_discharge + ATemp_YearlyMn + FUCUS_PERCOV_TOTAL + Water_Temp_Dec
+sem2b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + Summ_Days_More_15 + mn_yr_discharge + Water_Temp_Dec
+                MYTILUS ~ ATemp_yearMn + mn_yr_discharge + Summ_Days_More_15 + BARNACLES + Water_Temp_June
+                BARNACLES ~ mn_yr_discharge + ATemp_yearMn + FUCUS_PERCOV_TOTAL + Water_Temp_Dec
                 '
 
-sem2b <- sem(sem2b_model, data=PerCov_FWT_NA, estimator="MLM")
+sem2b <- sem(sem2b_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem2b)
 fitMeasures(sem2b, "pvalue")
-summary(sem2b, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem2b) ; residuals(sem2b, type="cor")
-modificationIndices(sem2b, standardized=F)
+summary(sem2b, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem2b) ; residuals(sem2b, type = "cor")
+modificationIndices(sem2b, standardized = F)
 
 semPaths(sem2b, "std")  
 
 #                     
 
-sem2c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + Water_Temp_June
+sem2c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + Summ_Days_More_15 + Water_Temp_June
                 MYTILUS ~ mn_yr_discharge + Summ_Days_More_15 + BARNACLES + Water_Temp_June + Water_Temp_Dec
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + Water_Temp_June + Summ_Days_More_15
                 '
 
-sem2c <- sem(sem2c_model, data=PerCov_FWT_NA, estimator="MLM")
+sem2c <- sem(sem2c_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem2c)
 fitMeasures(sem2c, "pvalue")
-summary(sem2c, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem2c) ; residuals(sem2c, type="cor")
-modificationIndices(sem2c, standardized=F)
+summary(sem2c, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem2c) ; residuals(sem2c, type = "cor")
+modificationIndices(sem2c, standardized = F)
 
 semPaths(sem2c, "std")  
 
 #                         
  
-sem2d_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 
+sem2d_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + Summ_Days_More_15 
                 MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + Summ_Days_More_15 
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL 
                 '
 
-sem2d <- sem(sem2d_model, data=PerCov_FWT_NA, estimator="MLM")
+sem2d <- sem(sem2d_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem2d)
 fitMeasures(sem2d, "pvalue")
-summary(sem2d, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem2d) ; residuals(sem2d, type="cor")
-modificationIndices(sem2d, standardized=F)
+summary(sem2d, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem2d) ; residuals(sem2d, type = "cor")
+modificationIndices(sem2d, standardized = F)
 
 semPaths(sem2d, "std")  
 
 #  this is model 2d but with maximum summer temps instead of number of days above 15C for summer
  
-sem2e_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + ATemp_Summ_max 
+sem2e_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + ATemp_Summ_max 
                 MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max 
                 BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL 
                 '
@@ -317,11 +347,11 @@ semPaths(semb, "std")
 
 ###### Incorporating BARNACLES & Fucus into the second model
 
-semb2_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + ATemp_Summ_max 
+semb2_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + ATemp_Summ_max 
                 MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max 
                 BARNACLES ~ FUCUS_PERCOV_TOTAL + BARNACLE_SPAT + mn_yr_discharge 
-                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + ATemp_YearlyMn + ATemp_Summ_max 
-                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL + mn_yr_discharge + ATemp_YearlyMn + ATemp_Summ_max 
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + ATemp_yearMn + ATemp_Summ_max 
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL + mn_yr_discharge + ATemp_yearMn + ATemp_Summ_max 
                 '
 
 semb2 <- sem(semb2_model, data=PerCov_FWT_NA, estimator="MLM")

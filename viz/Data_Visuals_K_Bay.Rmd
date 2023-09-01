@@ -3,8 +3,8 @@ title: "Data Visualization"
 author: "Rachael E. Blake"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r, include=FALSE, echo=FALSE, results='hide'}
@@ -36,23 +36,23 @@ pdo_mon_adj <- pdo_mon %>%
 ```{r, echo=FALSE}
 # PDO plots
 pdo_plot <- ggplot(data = pdo_mon, aes(x = Year, y = PDO)) + geom_col() + 
-            geom_hline(yintercept = 0, size = 1.5) + ylab("PDO Index")
+            geom_hline(yintercept = 0, linewidth = 1.5) + ylab("PDO Index")
 
   
 #
 pdo_plot2 <- ggplot(data = pdo_mon_adj, aes(x = Yr_Mn, y = PDO)) + 
              geom_col(aes(fill = Sign), show.legend = FALSE) + xlab("Year") +            #
-             geom_hline(yintercept = 0, size = 1) + ylab("PDO Index") + 
+             geom_hline(yintercept = 0, linewidth = 1) + ylab("PDO Index") + 
              scale_x_discrete(breaks = c("1998-01",
                                        "1999-01", "2000-01", "2001-01", "2002-01", "2003-01",
                                        "2004-01", "2005-01", "2006-01", "2007-01", "2008-01",
                                        "2009-01", "2010-01", "2011-01", "2012-01", "2013-01",
                                        "2014-01", "2015-01", "2016-01", "2017-01", "2018-01",
-                                       "2019-01", "2020-01", "2021-01"),
+                                       "2019-01", "2020-01", "2021-01", "2022-01"),
                               labels = c("1998", "1999", "2000", "2001", "2002", "2003", "2004", 
                                        "2005", "2006", "2007", "2008", "2009", "2010", "2011",
                                        "2012", "2013", "2014", "2015", "2016", "2017", "2018",
-                                       "2019", "2020", "2021"))
+                                       "2019", "2020", "2021", "2022"))
 
 ```
 
@@ -69,7 +69,7 @@ fwd_mon <- read_csv(here("data_clean", "FWD_monthly_mn_clean.csv"))
 ```{r, echo=FALSE}
 fwd_plot <- ggplot(data = fwd_ann, aes(x = Year, y = (mean_yearly_anomaly*10))) + 
             geom_col(aes(fill = Sign)) + ylab("Yearly Anomaly") + theme_bw() +
-            geom_hline(yintercept = 0, size = 1) + 
+            geom_hline(yintercept = 0, linewidth = 1) + 
             scale_fill_manual(values = c("A"="#f88379", "B"="#00BFC4"),
                               name = "",
                               labels = c("positive runoff", "negative runoff")) 
@@ -77,16 +77,16 @@ fwd_plot <- ggplot(data = fwd_ann, aes(x = Year, y = (mean_yearly_anomaly*10))) 
   
 fwd_plot2 <- ggplot(data = fwd_mon, aes(x = Year_Month, y = mean_monthly_anomaly)) + 
              geom_col(aes(fill = Sign)) + xlab("Year") + ylab("Anomaly") + 
-             geom_hline(yintercept = 0, size = 1) +  
+             geom_hline(yintercept = 0, linewidth = 1) +  
              scale_x_discrete(breaks = c("1998-01", "1999-01", "2000-01", "2001-01", "2002-01",
                                        "2003-01", "2004-01", "2005-01", "2006-01", "2007-01",
                                        "2008-01", "2009-01", "2010-01", "2011-01", "2012-01",
                                        "2013-01", "2014-01", "2015-01", "2016-01", "2017-01",
-                                       "2018-01", "2019-01", "2020-01", "2021-01"),
+                                       "2018-01", "2019-01", "2020-01", "2021-01", "2022-01"),
                               labels = c("1998", "1999", "2000", "2001", "2002", "2003", "2004", 
                                        "2005", "2006", "2007", "2008", "2009", "2010", "2011",
                                        "2012", "2013", "2014", "2015", "2016", "2017", "2018",
-                                       "2019", "2020", "2021"),
+                                       "2019", "2020", "2021", "2022"),
                               limits = c(levels(fwd_mon$Year_Month)))
                              
 
@@ -118,16 +118,16 @@ ann_a_temp2 <- ann_a_temp %>%
 
 ann_air <- ggplot(data = ann_a_temp2, aes(x = YrMn, y = month_Anom)) + 
            geom_col(aes(fill = month_Sign)) + ylab("Anomaly") + xlab("Year") + 
-           geom_hline(yintercept = 0, size = 1) + 
+           geom_hline(yintercept = 0, linewidth = 1) + 
            scale_x_discrete(breaks = c("1999-01", "2000-01", "2001-01", "2002-01","2003-01", 
                                        "2004-01", "2005-01", "2006-01", "2007-01", "2008-01", 
                                        "2009-01", "2010-01", "2011-01", "2012-01", "2013-01", 
-                                       "2014-01", "2015-01", "2016-01", "2017-01",
-                                       "2018-01", "2019-01", "2020-01", "2021-01"),
+                                       "2014-01", "2015-01", "2016-01", "2017-01", "2018-01", 
+                                       "2019-01", "2020-01", "2021-01", "2022-01"),
                             labels = c("1999", "2000", "2001", "2002", "2003", "2004", "2005", 
                                        "2006", "2007", "2008", "2009", "2010", "2011", "2012", 
-                                       "2013", "2014","2015", "2016", "2017", "2018",
-                                       "2019", "2020", "2021"),
+                                       "2013", "2014","2015", "2016", "2017", "2018", "2019",
+                                       "2020", "2021", "2022"),
                             limits = c(levels(ann_a_temp$YrMn)))
 
 
@@ -145,16 +145,16 @@ wtemp_june <- read_csv(here("data_clean", "WTemp_June_clean.csv"))
 june_wtemp_plot <- ggplot(data = wtemp_june, aes(x = as.character(Year), y = Water_Temp_June)) + 
                    geom_col() + theme_bw() +
                    ylab("June Water Temperature") + xlab("Year") + 
-                   geom_hline(yintercept = 0, size = 1) + 
+                   geom_hline(yintercept = 0, linewidth = 1) + 
                    scale_x_discrete(breaks = c("1999", "2000", "2001", "2002", "2003", 
                                                "2004", "2005", "2006", "2007", "2008", 
                                                "2009", "2010", "2011", "2012", "2013", 
                                                "2014", "2015", "2016", "2017", "2018",
-                                               "2019", "2020", "2021"),
+                                               "2019", "2020", "2021", "2022"),
                                     labels = c("1999", "2000", "2001", "2002", "2003", "2004",
                                                "2005", "2006", "2007", "2008", "2009", "2010",
                                                "2011", "2012", "2013", "2014", "2015", "2016",
-                                               "2017", "2018", "2019", "2020", "2021"),
+                                               "2017", "2018", "2019", "2020", "2021", "2022"),
                                     limits = c(levels(ann_a_temp$YrMn)))
 
 
@@ -266,6 +266,7 @@ var_names <- names(AllData_clean2[,c(8, 10, 16, 18, 22, 30, 31, 34, 37, 39, 41, 
 # make a plot for each variable
 lapply(var_names, explore_plots)
 
+
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
@@ -283,14 +284,14 @@ anom_fucu <- ggplot(data=PerCov_anom[PerCov_anom$TAXA == "FUCUS_PERCOV_TOTAL",])
 ```{r, echo=FALSE, warning=FALSE, fig.height=5, fig.width=8}
 # combined PDO and mussel anomaly plot
 anom_pdo_muss <- pdo_plot2 + 
-                 geom_col(data=PerCov_anom[PerCov_anom$TAXA == "MYTILUS",], 
-                          aes(x=as.factor(YEAR),y=YEAR_Anom_Scale, color = "#696366"), width=2) +   
+                 geom_col(data = PerCov_anom[PerCov_anom$TAXA == "MYTILUS",], 
+                          aes(x = as.factor(YEAR),y = YEAR_Anom_Scale, color = "#696366"), width = 2) +   
                  ylab("PDO Index") + theme_bw() + ylim(-4,4) +
-                 scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
-                                   name="",
-                                   labels=c("positive PDO", "negative PDO")) +
-                 scale_color_manual(values="#595959", name="", 
-                                    labels="MYTILUS % cover anomaly") + 
+                 scale_fill_manual(values = c("A"="#f88379", "B"="#00BFC4"),
+                                   name = "",
+                                   labels = c("positive PDO", "negative PDO")) +
+                 scale_color_manual(values = "#595959", name = "", 
+                                    labels = "MYTILUS % cover anomaly") + 
                  theme(panel.grid.major=element_blank(),
                        panel.grid.minor=element_blank(),
                        panel.border=element_blank(),
@@ -371,7 +372,7 @@ fwdplot_myt <- fwd_plot2 +
                      axis.text.y = element_text(size=10),
                      axis.text.x = element_text(size=8),
                      axis.title = element_text(size=16),
-                     axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
+                     axis.line = element_line(colour = 'black', linewidth=0.5, linetype='solid'))
 fwdplot_myt
 
 ###
@@ -396,7 +397,7 @@ fwdplot_fuc <- fwd_plot2 +
                      axis.text.y = element_text(size=10),
                      axis.text.x = element_text(size=8),
                      axis.title = element_text(size=16),
-                     axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
+                     axis.line = element_line(colour = 'black', linewidth=0.5, linetype='solid'))
 fwdplot_fuc
 
 ###
@@ -421,7 +422,7 @@ fwdplot_brn <- fwd_plot2 +
                      axis.text.y = element_text(size=10),
                      axis.text.x = element_text(size=8),
                      axis.title = element_text(size=16),
-                     axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
+                     axis.line = element_line(colour = 'black', linewidth=0.5, linetype='solid'))
 fwdplot_brn
 
 ###
@@ -447,7 +448,7 @@ fwdplot_scu <- fwd_plot2 +
                      axis.text.y = element_text(size=10),
                      axis.text.x = element_text(size=8),
                      axis.title = element_text(size=16),
-                     axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
+                     axis.line = element_line(colour = 'black', linewidth=0.5, linetype='solid'))
 fwdplot_scu
 
 ###
@@ -473,7 +474,7 @@ fwdplot_sit <- fwd_plot2 +
                      axis.text.y = element_text(size=10),
                      axis.text.x = element_text(size=8),
                      axis.title = element_text(size=16),
-                     axis.line = element_line(colour = 'black', size=0.5, linetype='solid'))
+                     axis.line = element_line(colour = 'black', linewidth=0.5, linetype='solid'))
 fwdplot_sit
 
 ```
@@ -531,23 +532,23 @@ sit_sub2$YEAR <- as.factor(sit_sub2$YEAR)
 # plots of invert percent cover for over-plotting below
 myt <- ggplot(data=myt_sub2, aes(x=YEAR, y=YEAR_Anom)) + 
        geom_col(width=0.25, alpha=0.5) + theme_bw() + 
-       geom_hline(yintercept=0, size=0.5)
+       geom_hline(yintercept=0, linewidth=0.5)
 
 fuc <- ggplot(data=fuc_sub2, aes(x=YEAR, y=YEAR_Anom)) + 
        geom_col(width=0.25, alpha=0.5) + theme_bw() + 
-       geom_hline(yintercept=0, size=0.5)
+       geom_hline(yintercept=0, linewidth=0.5)
 
 brn <- ggplot(data=brn_sub2, aes(x=YEAR, y=YEAR_Anom)) + 
        geom_col(width=0.25, alpha=0.5) + theme_bw() + 
-       geom_hline(yintercept=0, size=0.5)
+       geom_hline(yintercept=0, linewidth=0.5)
 
 scu <- ggplot(data=scu_sub2, aes(x=YEAR, y=YEAR_Anom)) + 
        geom_col(width=0.25, alpha=0.5) + theme_bw() + 
-       geom_hline(yintercept=0, size=0.5)
+       geom_hline(yintercept=0, linewidth=0.5)
 
 sit <- ggplot(data=sit_sub2, aes(x=YEAR, y=YEAR_Anom)) + 
        geom_col(width=0.25, alpha=0.5) + theme_bw() + 
-       geom_hline(yintercept=0, size=0.5)
+       geom_hline(yintercept=0, linewidth=0.5)
 
 ```
 
@@ -683,7 +684,7 @@ grid.arrange(sprb, falb, sumb, winb)
 
 spr2 <- ggplot(data=spring_a_temp, aes(x=YrMnDy, y=month_Anom)) + 
         geom_col(aes(fill=month_Sign)) + ylab("Anomaly") + xlab("Year") + 
-        theme_bw() + geom_hline(yintercept=0, size=1) + 
+        theme_bw() + geom_hline(yintercept=0, linewidth=1) + 
         labs(title="Spring Air Temp") + 
         theme(legend.position=c(.20, .2), 
               legend.background = element_rect(fill="transparent"),
@@ -693,20 +694,22 @@ spr2 <- ggplot(data=spring_a_temp, aes(x=YrMnDy, y=month_Anom)) +
         scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                           name="",
                           labels=c("positive temp", "negative temp")) +
-        scale_x_discrete(breaks=c("1999-03-01", "2000-03-01", "2001-03-01", "2002-03-01",
+        scale_x_discrete(breaks=c(#"1999-03-01", "2000-03-01", "2001-03-01", 
+                                  "2002-03-01",
                                   "2003-03-01", "2004-03-01", "2005-03-01", "2006-03-01",
                                   "2007-03-01", "2008-03-01", "2009-03-01", "2010-03-01",
                                   "2011-03-01", "2012-03-01", "2013-03-01", "2014-03-01",
                                   "2015-03-01", "2016-03-01", "2017-03-01", "2018-03-01",
-                                  "2019-03-01", "2020-03-01", "2021-03-01"),
-                         labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005", 
+                                  "2019-03-01", "2020-03-01", "2021-03-01", "2022-03-01"),
+                         labels=c(#"1999", "2000", "2001", 
+                                  "2002", "2003", "2004", "2005", 
                                   "2006", "2007", "2008", "2009", "2010", "2011", "2012", 
                                   "2013", "2014", "2015", "2016", "2017", "2018", "2019", 
-                                  "2020", "2021"))
+                                  "2020", "2021", "2022"))
 
 sum2 <- ggplot(data=summer_a_temp, aes(x=YrMnDy, y=month_Anom)) + 
         geom_col(aes(fill=month_Sign)) + ylab("Anomaly") + xlab("Year") + 
-        theme_bw() + geom_hline(yintercept=0, size=1) + 
+        theme_bw() + geom_hline(yintercept=0, linewidth=1) + 
         labs(title="Summer Air Temp") + 
         theme(legend.position=c(.2, .2), 
               legend.background = element_rect(fill="transparent"),
@@ -716,20 +719,22 @@ sum2 <- ggplot(data=summer_a_temp, aes(x=YrMnDy, y=month_Anom)) +
         scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                           name="",
                           labels=c("positive temp", "negative temp")) +
-        scale_x_discrete(breaks=c("1999-06-01", "2000-06-01", "2001-06-01", "2002-06-01",
+        scale_x_discrete(breaks=c(#"1999-06-01", "2000-06-01", "2001-06-01", 
+                                  "2002-06-01",
                                   "2003-06-01", "2004-06-01", "2005-06-01", "2006-06-01",
                                   "2007-06-01", "2008-06-01", "2009-06-01", "2010-06-01",
                                   "2011-06-01", "2012-06-01", "2013-06-01", "2014-06-01",
                                   "2015-06-01", "2016-06-01", "2017-06-01", "2018-06-01",
-                                  "2019-06-01", "2020-06-01", "2021-06-01"),
-                         labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005", 
+                                  "2019-06-01", "2020-06-01", "2021-06-01", "2022-06-01"),
+                         labels=c(#"1999", "2000", "2001", 
+                                  "2002", "2003", "2004", "2005", 
                                   "2006", "2007", "2008", "2009", "2010", "2011", "2012", 
                                   "2013", "2014", "2015", "2016", "2017", "2018", "2019", 
-                                  "2020", "2021"))
+                                  "2020", "2021", "2022"))
 
 fal2 <- ggplot(data=fall_a_temp, aes(x=YrMnDy, y=month_Anom)) + 
         geom_col(aes(fill=month_Sign)) + ylab("Anomaly") + xlab("Year") + 
-        theme_bw() + geom_hline(yintercept=0, size=1) + 
+        theme_bw() + geom_hline(yintercept=0, linewidth=1) + 
         labs(title="Fall Air Temp") + 
         theme(legend.position=c(.775, .2), 
               legend.background = element_rect(fill="transparent"),
@@ -739,21 +744,23 @@ fal2 <- ggplot(data=fall_a_temp, aes(x=YrMnDy, y=month_Anom)) +
         scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                           name="",
                           labels=c("positive temp", "negative temp")) +
-        scale_x_discrete(breaks=c("1999-09-01", "2000-09-01", "2001-09-01", "2002-09-01",
+        scale_x_discrete(breaks=c(#"1999-09-01", "2000-09-01", "2001-09-01", 
+                                  "2002-09-01",
                                   "2003-09-01", "2004-09-01", "2005-09-01", "2006-09-01",
                                   "2007-09-01", "2008-09-01", "2009-09-01", "2010-09-01",
                                   "2011-09-01", "2012-09-01", "2013-09-01", "2014-09-01",
                                   "2015-09-01", "2016-09-01", "2017-09-01", "2018-09-01",
-                                  "2019-09-01", "2020-09-01", "2021-09-01"),
-                         labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005", 
+                                  "2019-09-01", "2020-09-01", "2021-09-01", "2022-09-01"),
+                         labels=c(#"1999", "2000", "2001", 
+                                  "2002", "2003", "2004", "2005", 
                                   "2006", "2007", "2008", "2009", "2010", "2011", "2012",
                                   "2013", "2014","2015", "2016", "2017", "2018", "2019", 
-                                  "2020", "2021"))
+                                  "2020", "2021", "2022"))
 
 
 win2 <- ggplot(data=winter_a_temp, aes(x=YrMnDy, y=month_Anom)) + 
         geom_col(aes(fill=month_Sign)) + ylab("Anomaly") + xlab("Year") + 
-        theme_bw() + geom_hline(yintercept=0, size=1) + 
+        theme_bw() + geom_hline(yintercept=0, linewidth=1) + 
         labs(title="Winter Air Temp") + 
         theme(legend.position=c(.32, .2), 
               legend.background = element_rect(fill="transparent"),
@@ -763,16 +770,18 @@ win2 <- ggplot(data=winter_a_temp, aes(x=YrMnDy, y=month_Anom)) +
         scale_fill_manual(values=c("A"="#f88379", "B"="#00BFC4"),
                           name="",
                           labels=c("positive temp", "negative temp")) +
-        scale_x_discrete(breaks=c("1999-12-01", "2000-12-01", "2001-12-01", "2002-12-01",
+        scale_x_discrete(breaks=c(#"1999-12-01", "2000-12-01", "2001-12-01", 
+                                  "2002-12-01",
                                   "2003-12-01", "2004-12-01", "2005-12-01", "2006-12-01",
                                   "2007-12-01", "2008-12-01", "2009-12-01", "2010-12-01",
                                   "2011-12-01", "2012-12-01", "2013-12-01", "2014-12-01",
                                   "2015-12-01", "2016-12-01", "2017-03-01", "2018-03-01",
-                                  "2019-03-01", "2020-03-01", "2021-03-01"),
-                         labels=c("1999", "2000", "2001", "2002", "2003", "2004", "2005",
+                                  "2019-03-01", "2020-03-01", "2021-03-01", "2022-03-01"),
+                         labels=c(#"1999", "2000", "2001", 
+                                  "2002", "2003", "2004", "2005",
                                   "2006", "2007", "2008", "2009", "2010", "2011", "2012", 
                                   "2013", "2014", "2015", "2016", "2017", "2018", "2019", 
-                                  "2020", "2021"))
+                                  "2020", "2021", "2022"))
 
 
 ```
@@ -857,9 +866,22 @@ at_brn
 
 # NMDS Plots
 ```{r, echo=FALSE, include=FALSE}
-source(here("analysis", "NMDS_analysis.r"))
+ source(here("./analysis/NMDS_analysis.r"))
 
 # need to use NMDS output percov_mds$points
+# NMDS output
+percov_mds <- readRDS(here("./data_clean/percov_mds.rds"))
+percov_mds2 <- readRDS(here("./data_clean/percov_mds2.rds"))
+percov_mds3 <- readRDS(here("./data_clean/percov_mds3.rds"))
+percov_mds4 <- readRDS(here("./data_clean/percov_mds4.rds"))
+percov_mds5 <- readRDS(here("./data_clean/percov_mds5.rds"))
+
+# Permanova output
+percov_perm <- readRDS(here("./data_clean/percov_perm.rds"))
+percov_perm2 <- readRDS(here("./data_clean/percov_perm2.rds")) 
+percov_perm3 <- readRDS(here("./data_clean/percov_perm3.rds"))
+percov_perm4 <- readRDS(here("./data_clean/percov_perm4.rds"))
+percov_perm5 <- readRDS(here("./data_clean/percov_perm5.rds"))
 
 ```
 
@@ -1044,8 +1066,8 @@ sp_vecs <- cbind(sp_vecs, Species = rownames(sp_vecs))
 ```{r, echo=FALSE,  fig.height=5, fig.width=7}
 ord8 <- ggplot(data=NMDS_ord5, aes(x=NMDS1, y=NMDS2)) +
         geom_point(size=4, aes(color=QUAD)) + theme_bw() + 
-        geom_segment(data=sp_vecs, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey", size=1.25,
-                     arrow=arrow(length=unit(0.35, "cm"))) +
+        geom_segment(data=sp_vecs, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey", 
+                     lidewidth = 1.25, arrow=arrow(length=unit(0.35, "cm"))) +
         geom_text(data=sp_vecs, aes(x=MDS1, y=MDS2, label=Species), size=4) +
         theme(panel.grid.major=element_blank(),
               panel.grid.minor=element_blank())
@@ -1054,8 +1076,8 @@ ord8
 # now the plot
 ord9 <- ggplot(data=NMDS_ord5, aes(x=NMDS1, y=NMDS2)) +
         geom_point(size=4, aes(color=YEAR)) + theme_bw() + 
-        geom_segment(data=sp_vecs, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey", size=1.25,
-                     arrow=arrow(length=unit(0.35, "cm"))) +
+        geom_segment(data=sp_vecs, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey", 
+                     linewidth = 1.25, arrow=arrow(length=unit(0.35, "cm"))) +
         geom_text(data=sp_vecs, aes(x=MDS1, y=MDS2, label=Species), size=4) +
         theme(panel.grid.major=element_blank(),
               panel.grid.minor=element_blank())
@@ -1077,8 +1099,8 @@ sp_vecs2 <- cbind(sp_vecs2, Species = rownames(sp_vecs2))
 # now the plot
 ord10 <- ggplot(data=NMDS_ord5, aes(x=NMDS1, y=NMDS2)) +
          geom_point(size=4, aes(color=YEAR)) + theme_bw() + 
-         geom_segment(data=sp_vecs2, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey", size=1.25,
-                      arrow=arrow(length=unit(0.35, "cm"))) +
+         geom_segment(data=sp_vecs2, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey",
+                      linewidth = 1.25, arrow=arrow(length=unit(0.35, "cm"))) +
          geom_text(data=sp_vecs2, aes(x=MDS1, y=MDS2, label=Species), size=4) +
          theme(panel.grid.major=element_blank(),
                panel.grid.minor=element_blank())
@@ -1088,8 +1110,8 @@ ord10
 # now the plot
 ord11 <- ggplot(data=NMDS_ord5, aes(x=NMDS1, y=NMDS2)) +
          geom_point(size=4, aes(color=PDOSign)) + theme_bw() + 
-         geom_segment(data=sp_vecs, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey", size=1.25,
-                     arrow=arrow(length=unit(0.35, "cm"))) +
+         geom_segment(data=sp_vecs, aes(x=0, xend=MDS1, y=0, yend=MDS2), color="grey", 
+                      linewidth = 1.25, arrow=arrow(length=unit(0.35, "cm"))) +
         geom_text(data=sp_vecs, aes(x=MDS1, y=MDS2, label=Species), size=4) +
          theme(panel.grid.major=element_blank(),
                panel.grid.minor=element_blank())

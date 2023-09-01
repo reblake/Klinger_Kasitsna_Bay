@@ -235,29 +235,32 @@ slice_2_df <- function(row_n, date_col, slice, ncfile,  latlon_df){
 
 ### get time and date
 date_f1 <- make_time_human(ncfile = "GOA_RUNOFF_DISCHARGE.ncml.nc")
-date_f2 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012014_08312015.nc")
-date_f3 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012015_08312016.nc")
-date_f4 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012016_08312017.nc")
-date_f5 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012017_08312018.nc")
-date_f6 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012018_08312019.nc")
-date_f7 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012019_08312020.nc")
-date_f8 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012020_08312021.nc")
+date_f2 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012014_08312015.nc")
+date_f3 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012015_08312016.nc")
+date_f4 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012016_08312017.nc")
+date_f5 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012017_08312018.nc")
+date_f6 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012018_08312019.nc")
+date_f7 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012019_08312020.nc")
+date_f8 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012020_08312021.nc")
+date_f9 <- make_dmy(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012021_08312022.nc")
 
 ### get lat and lon
 latlon_f1 <- make_latlon_df(ncfile = "GOA_RUNOFF_DISCHARGE.ncml.nc", row_n = 108)
-latlon_f2 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012014_08312015.nc",
+latlon_f2 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012014_08312015.nc",
                             row_n = 14052)
-latlon_f3 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012015_08312016.nc",
+latlon_f3 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012015_08312016.nc",
                             row_n = 14052)
-latlon_f4 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012016_08312017.nc",
+latlon_f4 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012016_08312017.nc",
                             row_n = 14052)
-latlon_f5 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012017_08312018.nc",
+latlon_f5 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012017_08312018.nc",
                             row_n = 14052)
-latlon_f6 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012018_08312019.nc",
+latlon_f6 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012018_08312019.nc",
                             row_n = 14052)
-latlon_f7 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012019_08312020.nc",
+latlon_f7 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012019_08312020.nc",
                             row_n = 14052)
-latlon_f8 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012020_08312021.nc",
+latlon_f8 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012020_08312021.nc",
+                            row_n = 14052)
+latlon_f9 <- make_latlon_df(ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012021_08312022.nc",
                             row_n = 14052)
 
 ### get number of slices to use
@@ -279,7 +282,7 @@ FWD_f1 <- bind_rows(FWD_list_f1) %>%
 #
 # REMEMBER to redefine the num_slices above for these subsequent files!
 FWD_list_f2 <- lapply(num_slices, slice_2_df, 
-                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012014_08312015.nc",
+                      ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012014_08312015.nc",
                       row_n = 14052, latlon_df = latlon_f2, date_col = date_f2$dates)  
 FWD_f2 <- bind_rows(FWD_list_f2) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
           dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
@@ -287,51 +290,58 @@ FWD_f2 <- bind_rows(FWD_list_f2) %>% dplyr::rename(mean_daily_discharge_m3d1 = m
                 
 #
 FWD_list_f3 <- lapply(num_slices, slice_2_df, 
-                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012015_08312016.nc",
+                      ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012015_08312016.nc",
                       row_n = 14052, latlon_df = latlon_f3, date_col = date_f3$dates)  
 FWD_f3 <- bind_rows(FWD_list_f3) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
           dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
                         dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
 #
 FWD_list_f4 <- lapply(num_slices, slice_2_df, 
-                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012016_08312017.nc",
+                      ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012016_08312017.nc",
                       row_n = 14052, latlon_df = latlon_f4, date_col = date_f4$dates)  
 FWD_f4 <- bind_rows(FWD_list_f4) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
           dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
                         dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
 #
 FWD_list_f5 <- lapply(num_slices, slice_2_df, 
-                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012017_08312018.nc",
+                      ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012017_08312018.nc",
                       row_n = 14052, latlon_df = latlon_f5, date_col = date_f5$dates)  
 FWD_f5 <- bind_rows(FWD_list_f5) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
           dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
                         dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
 #
 FWD_list_f6 <- lapply(num_slices, slice_2_df, 
-                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012018_08312019.nc",
+                      ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012018_08312019.nc",
                       row_n = 14052, latlon_df = latlon_f6, date_col = date_f6$dates)  
 FWD_f6 <- bind_rows(FWD_list_f6) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
           dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
                         dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
 #
 FWD_list_f7 <- lapply(num_slices, slice_2_df, 
-                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012019_08312020.nc",
+                      ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012019_08312020.nc",
                       row_n = 14052, latlon_df = latlon_f7, date_col = date_f7$dates)  
 FWD_f7 <- bind_rows(FWD_list_f7) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
           dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
                         dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
 #
 FWD_list_f8 <- lapply(num_slices, slice_2_df, 
-                      ncfile = "GOA_FWDischarge_2013_2018/goa_dischargex_09012020_08312021.nc",
+                      ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012020_08312021.nc",
                       row_n = 14052, latlon_df = latlon_f8, date_col = date_f8$dates)  
 FWD_f8 <- bind_rows(FWD_list_f8) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
           dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
-                        dplyr::between(longitude_deg_east, -151.6191, -151.4190)) 
+                        dplyr::between(longitude_deg_east, -151.6191, -151.4190))
+#
+FWD_list_f9 <- lapply(num_slices, slice_2_df, 
+                      ncfile = "GOA_FWDischarge_2013_2022/goa_dischargex_09012021_08312022.nc",
+                      row_n = 14052, latlon_df = latlon_f9, date_col = date_f9$dates)  
+FWD_f9 <- bind_rows(FWD_list_f9) %>% dplyr::rename(mean_daily_discharge_m3d1 = mean_daily_discharge) %>% 
+          dplyr::filter(dplyr::between(latitude_deg_north, 59.45683, 59.52969),
+                        dplyr::between(longitude_deg_east, -151.6191, -151.4190))
 
 # remove some points that probably don't drain into this site
 FWD_less <- FWD_f1 %>% 
             bind_rows(FWD_f2) %>% bind_rows(FWD_f3) %>% bind_rows(FWD_f4) %>% bind_rows(FWD_f5) %>% 
-            bind_rows(FWD_f6) %>% bind_rows(FWD_f7) %>% bind_rows(FWD_f8) %>% 
+            bind_rows(FWD_f6) %>% bind_rows(FWD_f7) %>% bind_rows(FWD_f8) %>% bind_rows(FWD_f9) %>% 
             filter(!(longitude_deg_east < -151.55 & latitude_deg_north < 59.48),
                    !(latitude_deg_north > 59.51 & longitude_deg_east > -151.45)) %>%
             mutate(Month_number = forcats::fct_recode(Month, "01"="Jan", "02"="Feb", "03"="Mar",
@@ -347,12 +357,13 @@ dummy_2022 <- data.frame(Year = c(#"2018","2018","2018","2018","2019","2019","20
                                   #"2019","2019","2019","2019","2019","2019","2019","2020","2020",
                                   #"2020","2020","2020","2020","2020","2020","2020","2020","2020",
                                   #"2020","2021","2021","2021","2021","2021","2021","2021","2021",
-                                  "2021","2021","2021","2021","2022","2022","2022","2022","2022",
-                                  "2022","2022","2022","2022","2022","2022","2022"),
+                                  #"2021","2021","2021","2021","2022","2022","2022","2022","2022",
+                                  #"2022","2022","2022",
+                                  "2022","2022","2022","2022"),
                          Month = c(#"09","10","11","12","01","02","03","04","05","06","07","08",
                                    #"09","10","11","12","01","02","03","04","05","06","07","08",
                                    #"09","10","11","12","01","02","03","04","05","06","07","08",
-                                   "09","10","11","12","01","02","03","04","05","06","07","08",
+                                   #"09","10","11","12","01","02","03","04","05","06","07","08",
                                    "09","10","11","12"))
 
 dummy_2022$Year_Month <- paste(dummy_2022$Year, dummy_2022$Month, sep="-")
