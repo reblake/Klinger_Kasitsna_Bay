@@ -101,6 +101,7 @@ PerCov_FWT_NA <- PerCov_FWT %>%
                  # dplyr::mutate_at(c(5:20,22,24:50), funs(as.numeric)) %>% # converts select columns to numeric
                  dplyr::group_by() %>%
                  dplyr::mutate(L.SITKANA_scaled = L.SITKANA/10,
+                               L.SCUTULATA_scaled = L.SCUTULATA/10,
                                LOTTIIDAE_scaled = LOTTIIDAE/10,
                                FUCUS_PERCOV_TOTAL_scaled = FUCUS_PERCOV_TOTAL/10) %>%
                  dplyr::ungroup()
@@ -110,7 +111,10 @@ PerCov_FWT_NA <- PerCov_FWT %>%
 
 #########
 # Looking at correlations
-pairs.panels(PerCov_FWT_NA[,c(2:22)], smooth = F, density = T, 
+pairs.panels(PerCov_FWT_NA[,c(6, 7, 11, 13, 16, 23, 24, 27, 30, 32, 33, 34, 39, 40, 42)], smooth = F, density = T, 
+             ellipses = F, lm = T, digits = 3, scale = T)
+
+pairs.panels(PerCov_FWT_NA[,c(34, 39)], smooth = F, density = T, 
              ellipses = F, lm = T, digits = 3, scale = T)
 
 pairs.panels(PerCov_FWT_NA[,c(44, 49, 51, 57, 58, 65:67)], smooth = F, density = T, ellipses = F, lm = T, 
@@ -119,6 +123,8 @@ pairs.panels(PerCov_FWT_NA[,c(44, 49, 51, 57, 58, 65:67)], smooth = F, density =
 pairs.panels(PerCov_FWT_NA[,c(44, 49, 51:58, 62)], smooth = F, density = T, ellipses = F, 
              lm = T, digits = 3, scale = T)
 
+pairs.panels(PerCov_FWT_NA[,c(23, 24)], smooth = F, density = T, ellipses = F, 
+             lm = T, digits = 3, scale = T)
 
 #########
 ## SEM ##
@@ -126,46 +132,47 @@ pairs.panels(PerCov_FWT_NA[,c(44, 49, 51:58, 62)], smooth = F, density = T, elli
 
 sem1_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES + MYTILUS + Water_Temp_Yearly
                MYTILUS ~ ATemp_yearMn + mn_yr_discharge + Water_Temp_Yearly
-               BARNACLES ~ mn_yr_discharge 
+               BARNACLES ~ mn_yr_discharge + Water_Temp_Yearly
                '
 
 sem1 <- sem(sem1_model, data = PerCov_FWT_NA, estimator = "MLM")  # using a robust ML estimator due to some non-normality
 
 AIC(sem1)
 fitMeasures(sem1, "pvalue")
-summary(sem1, rsquare = T, standardized = T)
+summary(sem1, rsquare = T, standardized = T, fit.measures = T)
 parameterEstimates(sem1)
-residuals(sem1) ; residuals(sem1, type = "cor")
+residuals(sem1) ; residuals(sem1, type = "cor") 
+inspect(sem1, what = "cor.all")
 
 semPaths(sem1, "std")                    
  
 #
 
-sem1a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES  + Water_Temp_Yearly
+sem1a_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES + Water_Temp_Yearly
                 MYTILUS ~ ATemp_yearMn + mn_yr_discharge + FUCUS_PERCOV_TOTAL + Water_Temp_Yearly
-                BARNACLES ~ mn_yr_discharge
+                BARNACLES ~ mn_yr_discharge + Water_Temp_Yearly
                 '
 
 sem1a <- sem(sem1a_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem1a)
 fitMeasures(sem1a, "pvalue")
-summary(sem1a, rsquare = T, standardized = T)
+summary(sem1a, rsquare = T, standardized = T, fit.measures = T)
 residuals(sem1a) ; residuals(sem1a, type = "cor")
 
 semPaths(sem1a, "std")
 
 #
 
-sem1b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES  + Water_Temp_Yearly
+sem1b_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES + Water_Temp_Yearly
                 MYTILUS ~ ATemp_yearMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
-                BARNACLES ~ mn_yr_discharge'
+                BARNACLES ~ mn_yr_discharge + Water_Temp_Yearly'
 
 sem1b <- sem(sem1b_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem1b)
 fitMeasures(sem1b, "pvalue")
-summary(sem1b, rsquare = T, standardized = T)
+summary(sem1b, rsquare = T, standardized = T, fit.measures = T)
 residuals(sem1b) ; residuals(sem1b, type = "cor")
 
 semPaths(sem1b, "std")
@@ -174,13 +181,13 @@ semPaths(sem1b, "std")
 
 sem1c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES + Water_Temp_Yearly
                 MYTILUS ~ ATemp_yearMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
-                BARNACLES ~ mn_yr_discharge + ATemp_yearMn'
+                BARNACLES ~ mn_yr_discharge + ATemp_yearMn + Water_Temp_Yearly'
 
 sem1c <- sem(sem1c_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem1c)
 fitMeasures(sem1c, "pvalue")
-summary(sem1c, rsquare = T, standardized = T)
+summary(sem1c, rsquare = T, standardized = T, fit.measures = T)
 residuals(sem1c) ; residuals(sem1c, type = "cor")
 
 semPaths(sem1c, "std")
@@ -189,13 +196,13 @@ semPaths(sem1c, "std")
 
 sem1d_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + BARNACLES + mn_yr_discharge + Water_Temp_Yearly
                 MYTILUS ~ ATemp_yearMn + mn_yr_discharge + BARNACLES + Water_Temp_Yearly
-                BARNACLES ~ mn_yr_discharge'
+                BARNACLES ~ mn_yr_discharge + Water_Temp_Yearly'
 
 sem1d <- sem(sem1d_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem1d)
 fitMeasures(sem1d, "pvalue")
-summary(sem1d, rsquare = T, standardized = T)
+summary(sem1d, rsquare = T, standardized = T, fit.measures = T)
 residuals(sem1d) ; residuals(sem1d, type = "cor")
 
 
@@ -212,7 +219,7 @@ sem1e <- sem(sem1e_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem1e)
 fitMeasures(sem1e, "pvalue")
-summary(sem1e, rsquare = T, standardized = T)
+summary(sem1e, rsquare = T, standardized = T, fit.measures = T)
 residuals(sem1e) ; residuals(sem1e, type = "cor")
 modificationIndices(sem1e, standardized = F)
 parameterEstimates(sem1e)
@@ -279,7 +286,7 @@ semPaths(sem2b, "std")
 
 sem2c_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + Summ_Days_More_15 + Water_Temp_June
                 MYTILUS ~ mn_yr_discharge + Summ_Days_More_15 + BARNACLES + Water_Temp_June + Water_Temp_Dec
-                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + Water_Temp_June + Summ_Days_More_15
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + Water_Temp_June + Summ_Days_More_15 + Water_Temp_Dec
                 '
 
 sem2c <- sem(sem2c_model, data = PerCov_FWT_NA, estimator = "MLM")
@@ -313,18 +320,20 @@ semPaths(sem2d, "std")
  
 sem2e_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + ATemp_Summ_max 
                 MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max 
-                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL 
+                BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + ATemp_Summ_max 
                 '
 
-sem2e <- sem(sem2e_model, data=PerCov_FWT_NA, estimator="MLM")
+sem2e <- sem(sem2e_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem2e)
 fitMeasures(sem2e, "pvalue")
-summary(sem2e, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem2e) ; residuals(sem2e, type="cor")
-modificationIndices(sem2e, standardized=F)
+summary(sem2e, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem2e) ; residuals(sem2e, type = "cor")
+modificationIndices(sem2e, standardized = F)
 
 semPaths(sem2e, "std")  
+
+AIC(sem2, sem2a, sem2b, sem2c, sem2d, sem2e)
 
 ###### BARNACLES & Fucus only model
 
@@ -332,13 +341,13 @@ semb_model <- 'FUCUS_SPORELINGS_PERCOV ~ BARNACLES
                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL
                BARNACLES ~ FUCUS_PERCOV_TOTAL + BARNACLE_SPAT
               '
-semb <- sem(semb_model, data=PerCov_FWT_NA, estimator="MLM")
+semb <- sem(semb_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(semb)
 fitMeasures(semb, "pvalue")
-summary(semb, rsquare=T, standardized=T, fit.measures=T)
-residuals(semb) ; residuals(semb, type="cor")
-modificationIndices(semb, standardized=F)
+summary(semb, rsquare = T, standardized = T, fit.measures = T)
+residuals(semb) ; residuals(semb, type = "cor")
+modificationIndices(semb, standardized = F)
 parameterEstimates(semb)
 inspect(semb, "sample") ; fitted(semb) 
 
@@ -349,18 +358,18 @@ semPaths(semb, "std")
 
 semb2_model <- 'FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + ATemp_Summ_max 
                 MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max 
-                BARNACLES ~ FUCUS_PERCOV_TOTAL + BARNACLE_SPAT + mn_yr_discharge 
+                BARNACLES ~ FUCUS_PERCOV_TOTAL + BARNACLE_SPAT + mn_yr_discharge + ATemp_Summ_max 
                 FUCUS_SPORELINGS_PERCOV ~ BARNACLES + ATemp_yearMn + ATemp_Summ_max 
                 BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL + mn_yr_discharge + ATemp_yearMn + ATemp_Summ_max 
                 '
 
-semb2 <- sem(semb2_model, data=PerCov_FWT_NA, estimator="MLM")
+semb2 <- sem(semb2_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(semb2)
 fitMeasures(semb2, "pvalue")
-summary(semb2, rsquare=T, standardized=T, fit.measures=T)
-residuals(semb2) ; residuals(semb2, type="cor")
-modificationIndices(semb2, standardized=F)
+summary(semb2, rsquare = T, standardized = T, fit.measures = T)
+residuals(semb2) ; residuals(semb2, type = "cor")
+modificationIndices(semb2, standardized = F)
 parameterEstimates(semb2)
 inspect(semb2, "sample") ; fitted(semb2) 
 
@@ -369,7 +378,7 @@ semPaths(semb2, "std")
 
 ######              #################################################################
 
-# vif = variance inflaction factor 
+# vif = variance inflation factor 
 # tolerance = 1/vif
 
 # As a rule of thumb, a variable whose VIF values is greater than 10 may merit
@@ -380,56 +389,56 @@ semPaths(semb2, "std")
 
 # Barnacle Spat
 BSVIF <- vif(lm(BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL + MYTILUS + mn_yr_discharge + 
-                 ATemp_YearlyMn + Summ_Days_More_15 + Spr_Days_Less_0, data=PerCov_FWT)) # VIF
+                 ATemp_yearMn + Summ_Days_More_15 + Spr_Days_Less_0, data = PerCov_FWT)) # VIF
 BSTol <- 1/BSVIF  # this is the tolerance
 
 # MYTILUS
-MYVIF <- vif(lm(MYTILUS ~ ATemp_YearlyMn + mn_yr_discharge + Spr_Days_Less_0 + 
-                Summ_Days_More_15 + BARNACLES, data=PerCov_FWT)) # VIF
+MYVIF <- vif(lm(MYTILUS ~ ATemp_yearMn + mn_yr_discharge + Spr_Days_Less_0 + 
+                Summ_Days_More_15 + BARNACLES, data = PerCov_FWT)) # VIF
 MYTol <- 1/MYVIF  # this is the tolerance
 
 # FUCUS_PERCOV_TOTAL
-FTVIF <- vif(lm(FUCUS_PERCOV_TOTAL ~ ATemp_YearlyMn + Summ_Days_More_15 + mn_yr_discharge + 
-                MYTILUS + FUCUS_SPORELINGS_PERCOV, data=PerCov_FWT)) # VIF
+FTVIF <- vif(lm(FUCUS_PERCOV_TOTAL ~ ATemp_yearMn + Summ_Days_More_15 + mn_yr_discharge + 
+                MYTILUS + FUCUS_SPORELINGS_PERCOV, data = PerCov_FWT)) # VIF
 FTTol <- 1/FTVIF  # this is the tolerance
 
 # BARNACLES
 BAVIF <- vif(lm(BARNACLES ~ mn_yr_discharge + FUCUS_PERCOV_TOTAL + Spr_Days_Less_0 + Summ_Days_More_15 +
-                ATemp_YearlyMn + BARNACLE_SPAT, data=PerCov_FWT)) # VIF
+                ATemp_yearMn + BARNACLE_SPAT, data = PerCov_FWT)) # VIF
 BATol <- 1/BAVIF  # this is the tolerance
 
 # FUCUS_SPORELINGS_PERCOV
 FSVIF <- vif(lm(FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + Spr_Days_Less_0 + Summ_Days_More_15 + 
-                ATemp_YearlyMn, data=PerCov_FWT)) # VIF
+                ATemp_yearMn, data = PerCov_FWT)) # VIF
 FSTol <- 1/FSVIF  # this is the tolerance
 
 # air temps
-ATVIF <- vif(lm(ATemp_YearlyMn ~ Spr_Days_Less_0 + Summ_Days_More_15, data=PerCov_FWT)) # VIF
+ATVIF <- vif(lm(ATemp_yearMn ~ Spr_Days_Less_0 + Summ_Days_More_15, data = PerCov_FWT)) # VIF
 ATTol <- 1/ATVIF  # this is the tolerance
 
-STVIF <- vif(lm(ATemp_YearlyMn ~ ATemp_Spr_min + ATemp_Summ_max, data=PerCov_FWT)) # VIF
+STVIF <- vif(lm(ATemp_yearMn ~ ATemp_Spr_min + ATemp_Summ_max, data = PerCov_FWT)) # VIF
 STTol <- 1/STVIF  # this is the tolerance
 
 
 
 #####             #################################################################
 
-sem3_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + ATemp_Summ_max + L.SITKANA_scaled + LOTTIIDAE_scaled + ELACHISTA + PTEROSIPHONIA
-               MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max 
-               BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + BARNACLE_SPAT + mn_yr_discharge 
-               FUCUS_SPORELINGS_PERCOV ~ BARNACLES + ATemp_YearlyMn + ATemp_Summ_max  
-               BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn + ATemp_Summ_max 
+sem3_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + ATemp_Summ_max + L.SITKANA_scaled + LOTTIIDAE_scaled + ELACHISTA + PTERO_POLY_SUM
+               MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max + LOTTIIDAE_scaled
+               BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + BARNACLE_SPAT + mn_yr_discharge + L.SITKANA_scaled + LOTTIIDAE_scaled + ATemp_Summ_max
+               FUCUS_SPORELINGS_PERCOV ~ BARNACLES + ATemp_yearMn + ATemp_Summ_max  
+               BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_yearMn + ATemp_Summ_max 
                ELACHISTA ~ L.SITKANA_scaled
-               PTEROSIPHONIA ~ MYTILUS 
+               PTERO_POLY_SUM ~ MYTILUS + BARNACLES + mn_yr_discharge + L.SITKANA_scaled
                '
 
-sem3 <- sem(sem3_model, data=PerCov_FWT_NA, estimator="MLM")
+sem3 <- sem(sem3_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem3)
 fitMeasures(sem3, "pvalue")
-summary(sem3, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem3) ; residuals(sem3, type="cor")
-modificationIndices(sem3, standardized=F)
+summary(sem3, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem3) ; residuals(sem3, type = "cor")
+modificationIndices(sem3, standardized = F)
 parameterEstimates(sem3)
 inspect(sem3, "sample") ; fitted(sem3) 
 
@@ -437,22 +446,22 @@ semPaths(sem3, "std")
 
 #
 
-sem3a_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + ATemp_Summ_max + L.SITKANA_scaled + LOTTIIDAE_scaled + ELACHISTA
-                MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max
-                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTEROSIPHONIA + L.SITKANA_scaled
-                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + L.SITKANA_scaled + PTEROSIPHONIA + LOTTIIDAE_scaled 
-                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn 
-                ELACHISTA ~ L.SITKANA_scaled + PTEROSIPHONIA 
-                PTEROSIPHONIA ~ MYTILUS + L.SITKANA_scaled + mn_yr_discharge
+sem3a_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + ATemp_Summ_max + L.SITKANA_scaled + LOTTIIDAE_scaled + ELACHISTA
+                MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max + LOTTIIDAE_scaled + BARNACLE_SPAT
+                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTERO_POLY_SUM + L.SITKANA_scaled + ATemp_Summ_max + LOTTIIDAE_scaled
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + L.SITKANA_scaled + PTERO_POLY_SUM + LOTTIIDAE_scaled 
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_yearMn + ATemp_Summ_max
+                ELACHISTA ~ L.SITKANA_scaled + PTERO_POLY_SUM 
+                PTERO_POLY_SUM ~ MYTILUS + L.SITKANA_scaled + mn_yr_discharge
                '
 
-sem3a <- sem(sem3a_model, data=PerCov_FWT_NA, estimator="MLM")
+sem3a <- sem(sem3a_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem3a)
 fitMeasures(sem3a, "pvalue")
-summary(sem3a, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem3a) ; residuals(sem3a, type="cor")
-modificationIndices(sem3a, standardized=F)
+summary(sem3a, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem3a) ; residuals(sem3a, type = "cor")
+modificationIndices(sem3a, standardized = F)
 parameterEstimates(sem3a)
 inspect(sem3a, "sample") ; fitted(sem3a) 
 
@@ -460,21 +469,21 @@ semPaths(sem3a, "std")
 
 # 
 
-sem3b_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + LOTTIIDAE_scaled + ELACHISTA
-                MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max + PTEROSIPHONIA
-                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTEROSIPHONIA + L.SITKANA_scaled
-                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + PTEROSIPHONIA
-                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn 
-                PTEROSIPHONIA ~ L.SITKANA_scaled 
+sem3b_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + LOTTIIDAE_scaled + ELACHISTA
+                MYTILUS ~ mn_yr_discharge + BARNACLES + Water_Temp_June + ATemp_Summ_max + PTERO_POLY_SUM + LOTTIIDAE_scaled + ELACHISTA
+                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTERO_POLY_SUM + L.SITKANA_scaled + LOTTIIDAE_scaled + ATemp_Summ_max
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + PTERO_POLY_SUM + MYTILUS
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_yearMn + ATemp_Summ_max
+                PTERO_POLY_SUM ~ L.SITKANA_scaled 
                '
 
-sem3b <- sem(sem3b_model, data=PerCov_FWT_NA, estimator="MLM")
+sem3b <- sem(sem3b_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem3b)
 fitMeasures(sem3b, "pvalue")
-summary(sem3b, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem3b) ; residuals(sem3b, type="cor")
-modificationIndices(sem3b, standardized=F)
+summary(sem3b, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem3b) ; residuals(sem3b, type = "cor")
+modificationIndices(sem3b, standardized = F)
 parameterEstimates(sem3b)
 inspect(sem3b, "sample") ; fitted(sem3b) 
 
@@ -482,22 +491,22 @@ semPaths(sem3b, "std")
 
 #
 
-sem3c_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + LOTTIIDAE_scaled
-                MYTILUS ~ mn_yr_discharge + Water_Temp_June + ATemp_Summ_max + PTEROSIPHONIA + L.SITKANA_scaled
-                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTEROSIPHONIA + L.SITKANA_scaled + LOTTIIDAE_scaled
-                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + ATemp_YearlyMn + LOTTIIDAE_scaled
-                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn + ATemp_Summ_max + Water_Temp_June
-                PTEROSIPHONIA ~ L.SITKANA_scaled + ATemp_YearlyMn 
+sem3c_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + LOTTIIDAE_scaled
+                MYTILUS ~ mn_yr_discharge + Water_Temp_June + ATemp_Summ_max + PTERO_POLY_SUM + L.SITKANA_scaled
+                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTERO_POLY_SUM + L.SITKANA_scaled + LOTTIIDAE_scaled + ATemp_Summ_max
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + ATemp_yearMn + LOTTIIDAE_scaled
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_yearMn + ATemp_Summ_max + Water_Temp_June + MYTILUS
+                PTERO_POLY_SUM ~ L.SITKANA_scaled + ATemp_yearMn 
                 LOTTIIDAE_scaled ~ MYTILUS
                 '
 #    
-sem3c <- sem(sem3c_model, data=PerCov_FWT_NA, estimator="MLM")
+sem3c <- sem(sem3c_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem3c)
 fitMeasures(sem3c, "pvalue")
-summary(sem3c, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem3c) ; residuals(sem3c, type="cor")
-modificationIndices(sem3c, standardized=F)
+summary(sem3c, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem3c) ; residuals(sem3c, type = "cor")
+modificationIndices(sem3c, standardized = F)
 parameterEstimates(sem3c)
 inspect(sem3c, "sample") ; fitted(sem3c) 
 
@@ -509,22 +518,22 @@ semPaths(sem3c, "std")
 
 #
 
-sem3d_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + LOTTIIDAE_scaled
-                MYTILUS ~ mn_yr_discharge + Water_Temp_June  + PTEROSIPHONIA + L.SITKANA_scaled 
-                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTEROSIPHONIA + L.SITKANA_scaled + LOTTIIDAE_scaled
-                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + ATemp_YearlyMn + LOTTIIDAE_scaled
-                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn + Water_Temp_June
-                PTEROSIPHONIA ~ L.SITKANA_scaled + ATemp_YearlyMn 
+sem3d_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + LOTTIIDAE_scaled
+                MYTILUS ~ mn_yr_discharge + Water_Temp_June  + PTERO_POLY_SUM + L.SITKANA_scaled + BARNACLE_SPAT
+                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTERO_POLY_SUM + L.SITKANA_scaled + LOTTIIDAE_scaled
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + ATemp_yearMn + LOTTIIDAE_scaled
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_yearMn + Water_Temp_June
+                PTERO_POLY_SUM ~ L.SITKANA_scaled + ATemp_yearMn 
                 LOTTIIDAE_scaled ~ MYTILUS
                 '
 #     
-sem3d <- sem(sem3d_model, data=PerCov_FWT_NA, estimator="MLM")
+sem3d <- sem(sem3d_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem3d)
 fitMeasures(sem3d, "pvalue")
-summary(sem3d, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem3d) ; residuals(sem3d, type="cor")
-modificationIndices(sem3d, standardized=F)
+summary(sem3d, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem3d) ; residuals(sem3d, type = "cor")
+modificationIndices(sem3d, standardized = F)
 parameterEstimates(sem3d)
 inspect(sem3d, "sample") ; fitted(sem3d) 
 
@@ -532,22 +541,22 @@ semPaths(sem3d, "std")
 
 # 
  
-sem3e_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_YearlyMn + LOTTIIDAE_scaled
-                MYTILUS ~ mn_yr_discharge + Water_Temp_June  + PTEROSIPHONIA + L.SITKANA_scaled + LOTTIIDAE_scaled
-                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTEROSIPHONIA + L.SITKANA_scaled + LOTTIIDAE_scaled
-                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + ATemp_YearlyMn + LOTTIIDAE_scaled
-                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_YearlyMn + Water_Temp_June
-                PTEROSIPHONIA ~ L.SITKANA_scaled + ATemp_YearlyMn 
+sem3e_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + LOTTIIDAE_scaled
+                MYTILUS ~ mn_yr_discharge + Water_Temp_June  + PTERO_POLY_SUM + L.SITKANA_scaled + LOTTIIDAE_scaled + BARNACLE_SPAT
+                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + PTERO_POLY_SUM + L.SITKANA_scaled + LOTTIIDAE_scaled
+                FUCUS_SPORELINGS_PERCOV ~ BARNACLES + MYTILUS + ATemp_yearMn + LOTTIIDAE_scaled
+                BARNACLE_SPAT ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + ATemp_yearMn + Water_Temp_June
+                PTERO_POLY_SUM ~ L.SITKANA_scaled + ATemp_yearMn 
                
                 '
 #     LOTTIIDAE_scaled ~ MYTILUS
-sem3e <- sem(sem3e_model, data=PerCov_FWT_NA, estimator="MLM")
+sem3e <- sem(sem3e_model, data = PerCov_FWT_NA, estimator = "MLM")
 
 AIC(sem3e)
 fitMeasures(sem3e, "pvalue")
-summary(sem3e, rsquare=T, standardized=T, fit.measures=T)
-residuals(sem3e) ; residuals(sem3e, type="cor")
-modificationIndices(sem3e, standardized=F)
+summary(sem3e, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem3e) ; residuals(sem3e, type = "cor")
+modificationIndices(sem3e, standardized = F)
 parameterEstimates(sem3e)
 inspect(sem3e, "sample") ; fitted(sem3e) 
 
@@ -580,16 +589,61 @@ semPaths(sem3e, "std")
 # Yves. 
 
 
+######################################################################
+# new try Sept 8, 2023
 
+sem4_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + BARNACLES + MYTILUS + Water_Temp_June + L.SITKANA_scaled + LOTTIIDAE_scaled
+               MYTILUS ~ BARNACLES + mn_yr_discharge + ATemp_yearMn + Water_Temp_June + PTERO_POLY_SUM + LOTTIIDAE_scaled
+               BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + L.SITKANA_scaled + LOTTIIDAE_scaled + Water_Temp_June + ATemp_yearMn
+               PTERO_POLY_SUM ~ L.SITKANA_scaled + ATemp_yearMn + BARNACLES + MYTILUS
+               '
 
+sem4 <- sem(sem4_model, data = PerCov_FWT_NA, estimator = "MLM")
 
+AIC(sem4)
+fitMeasures(sem4, "pvalue")
+summary(sem4, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem4, type = "cor")
+modificationIndices(sem4, standardized = F)
+parameterEstimates(sem4)
+inspect(sem4, "sample")  
 
+semPaths(sem4, "std") 
 
+#
 
+sem5_model <- 'L.SITKANA_scaled ~ MYTILUS + BARNACLES + ATemp_yearMn + mn_yr_discharge + Water_Temp_June + PTERO_POLY_SUM + L.SCUTULATA_scaled
+               L.SCUTULATA_scaled ~  MYTILUS + FUCUS_PERCOV_TOTAL_scaled + Water_Temp_June + BARNACLES + mn_yr_discharge + ATemp_yearMn
+              '
 
+sem5 <- sem(sem5_model, data = PerCov_FWT_NA, estimator = "MLM")
 
+AIC(sem5)
+fitMeasures(sem5, "pvalue")
+summary(sem5, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem5, type = "cor")
+modificationIndices(sem5, standardized = F)
+parameterEstimates(sem5)
+inspect(sem5, "sample")  
 
+semPaths(sem5, "std") 
 
+#
+
+sem6_model <- '
+              '
+
+sem6 <- sem(sem6_model, data = PerCov_FWT_NA, estimator = "MLM")
+
+AIC(sem6)
+fitMeasures(sem6, "pvalue")
+summary(sem6, rsquare = T, standardized = T, fit.measures = T)
+residuals(sem6, type = "cor")
+modificationIndices(sem6, standardized = F)
+parameterEstimates(sem6)
+inspect(sem6, "sample")  
+
+semPaths(sem6, "std")
 
 
 
