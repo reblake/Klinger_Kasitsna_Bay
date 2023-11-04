@@ -8,7 +8,7 @@
 
 # load packages
 library(lavaan) ; library(tidyverse) ; library(car) ; library(ggm) ; library(semPlot)  
-library(semTools) ; library(psych) ; library(stats) ; library(here)
+library(semTools) ; library(psych) ; library(stats) ; library(here) ; library(lavaanPlot)
 
 
 ###################################################################################
@@ -100,10 +100,11 @@ PerCov_FWT_NA <- PerCov_FWT %>%
                  dplyr::select(-WTemp_Dec_Lag) %>%
                  # dplyr::mutate_at(c(5:20,22,24:50), funs(as.numeric)) %>% # converts select columns to numeric
                  dplyr::group_by() %>%
-                 dplyr::mutate(L.SITKANA_scaled = L.SITKANA/10,
+                 dplyr::mutate(L.SITKANA_scaled = L.SITKANA/10,  # scaling variables
                                L.SCUTULATA_scaled = L.SCUTULATA/10,
                                LOTTIIDAE_scaled = LOTTIIDAE/10,
-                               FUCUS_PERCOV_TOTAL_scaled = FUCUS_PERCOV_TOTAL/10) %>%
+                               FUCUS_PERCOV_TOTAL_scaled = FUCUS_PERCOV_TOTAL/10,
+                               mn_yr_discharge_scaled = mn_yr_discharge/1000) %>%
                  dplyr::ungroup()
                  
                  
@@ -592,11 +593,21 @@ semPaths(sem3e, "std")
 ######################################################################
 # new try Sept 8, 2023
 
-sem4_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + BARNACLES + MYTILUS + Water_Temp_June + L.SITKANA_scaled + LOTTIIDAE_scaled
-               MYTILUS ~ BARNACLES + mn_yr_discharge + ATemp_yearMn + Water_Temp_June + PTERO_POLY_SUM + LOTTIIDAE_scaled
-               BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + L.SITKANA_scaled + LOTTIIDAE_scaled + Water_Temp_June + ATemp_yearMn
-               PTERO_POLY_SUM ~ L.SITKANA_scaled + ATemp_yearMn + BARNACLES + MYTILUS
-               '
+# revised model 4 on 11/3/2023 to include predictors for the Littorines
+sem4_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + BARNACLES + Water_Temp_June
+               MYTILUS ~ BARNACLES + mn_yr_discharge_scaled + PTERO_POLY_SUM + Water_Temp_June
+               BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge_scaled + L.SITKANA_scaled + MYTILUS + ATemp_yearMn + L.SCUTULATA_scaled
+               PTERO_POLY_SUM ~ L.SITKANA_scaled + ATemp_yearMn + MYTILUS + Water_Temp_June + BARNACLES
+               L.SITKANA_scaled ~ MYTILUS + ATemp_yearMn + Water_Temp_June + mn_yr_discharge_scaled + BARNACLES + L.SCUTULATA_scaled
+               L.SCUTULATA_scaled ~  BARNACLES + mn_yr_discharge_scaled + Water_Temp_June + FUCUS_PERCOV_TOTAL_scaled + ATemp_yearMn + L.SITKANA_scaled
+              '
+#               'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + BARNACLES + Water_Temp_June + L.SCUTULATA_scaled
+#                MYTILUS ~ BARNACLES + mn_yr_discharge_scaled + ATemp_yearMn + Water_Temp_June + PTERO_POLY_SUM + L.SCUTULATA_scaled
+#                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge_scaled + L.SITKANA_scaled + Water_Temp_June + ATemp_yearMn
+#                PTERO_POLY_SUM ~ L.SITKANA_scaled + ATemp_yearMn + MYTILUS + Water_Temp_June + BARNACLES 
+#                L.SITKANA_scaled ~ MYTILUS + ATemp_yearMn + Water_Temp_June + PTERO_POLY_SUM + L.SCUTULATA_scaled
+#                L.SCUTULATA_scaled ~  BARNACLES + mn_yr_discharge_scaled + Water_Temp_June + FUCUS_PERCOV_TOTAL_scaled + L.SITKANA_scaled
+#               '
 
 sem4 <- sem(sem4_model, data = PerCov_FWT_NA, estimator = "MLM")
 
@@ -609,11 +620,13 @@ parameterEstimates(sem4)
 inspect(sem4, "sample")  
 
 semPaths(sem4, "std") 
+lavaanPlot(model = sem4, node_options = list(shape = "box", fontname = "Raleway"), 
+           coefs = TRUE, graph_options = list(rankdir = "BT"))
 
 #
 
-sem5_model <- 'L.SITKANA_scaled ~ MYTILUS + BARNACLES + ATemp_yearMn + mn_yr_discharge + Water_Temp_June + PTERO_POLY_SUM + L.SCUTULATA_scaled
-               L.SCUTULATA_scaled ~  MYTILUS + FUCUS_PERCOV_TOTAL_scaled + Water_Temp_June + BARNACLES + mn_yr_discharge + ATemp_yearMn
+sem5_model <- 'L.SITKANA_scaled ~ MYTILUS + BARNACLES + ATemp_yearMn + mn_yr_discharge_scaled + Water_Temp_June + PTERO_POLY_SUM + FUCUS_PERCOV_TOTAL_scaled + L.SCUTULATA_scaled
+               L.SCUTULATA_scaled ~  MYTILUS + BARNACLES + ATemp_yearMn + mn_yr_discharge_scaled + Water_Temp_June + FUCUS_PERCOV_TOTAL_scaled
               '
 
 sem5 <- sem(sem5_model, data = PerCov_FWT_NA, estimator = "MLM")
@@ -627,11 +640,16 @@ parameterEstimates(sem5)
 inspect(sem5, "sample")  
 
 semPaths(sem5, "std") 
+lavaanPlot(model = sem5, node_options = list(shape = "box", fontname = "Raleway"), 
+           coefs = TRUE, graph_options = list(rankdir = "BT"))
 
 #
 
-sem6_model <- '
-              '
+sem6_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + BARNACLES + MYTILUS + Water_Temp_June + L.SITKANA_scaled + L.SCUTULATA_scaled
+               MYTILUS ~ BARNACLES + mn_yr_discharge_scaled + ATemp_yearMn + Water_Temp_June + PTERO_POLY_SUM + L.SCUTULATA_scaled
+               BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge_scaled + L.SITKANA_scaled + L.SCUTULATA_scaled + Water_Temp_June + ATemp_yearMn
+               PTERO_POLY_SUM ~ L.SITKANA_scaled + ATemp_yearMn + BARNACLES + MYTILUS + Water_Temp_June
+               '
 
 sem6 <- sem(sem6_model, data = PerCov_FWT_NA, estimator = "MLM")
 
@@ -644,7 +662,8 @@ parameterEstimates(sem6)
 inspect(sem6, "sample")  
 
 semPaths(sem6, "std")
-
+lavaanPlot(model = sem6, node_options = list(shape = "box", fontname = "Raleway"), 
+           coefs = TRUE, graph_options = list(rankdir = "BT"))
 
 
 
