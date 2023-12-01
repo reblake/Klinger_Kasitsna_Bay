@@ -87,7 +87,7 @@ PerCov_FWT <- AllData_clean %>%
               dplyr::arrange(Year)
 
 # write.csv(PerCov_FWT, file = "K_Bay_All_Data_SEM.csv", row.names=FALSE)
- 
+  
 ###################################################################################
 ###### Start here if running the SEM but not re-building the input dataframe ######
 ###################################################################################

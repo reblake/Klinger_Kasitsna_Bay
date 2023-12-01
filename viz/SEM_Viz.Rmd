@@ -1,0 +1,222 @@
+---
+title: "SEM results and plots"
+author: "Rachael E. Blake"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# load packages
+library(lavaan) ; library(tidyverse) ; library(car) ; library(ggm) ; library(semPlot)  
+library(semTools) ; library(psych) ; library(stats) ; library(here) ; library(lavaanPlot) ; library(tidySEM)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+PerCov_FWT <- read_csv(here("./K_Bay_All_Data_SEM.csv"))
+
+# without any NAs
+PerCov_FWT_NA <- PerCov_FWT %>%
+                 dplyr::select(-WTemp_Dec_Lag) %>%
+                 # dplyr::mutate_at(c(5:20,22,24:50), funs(as.numeric)) %>% # converts select columns to numeric
+                 dplyr::group_by() %>%
+                 dplyr::mutate(L.SITKANA_scaled = L.SITKANA/10,  # scaling variables
+                               L.SCUTULATA_scaled = L.SCUTULATA/10,
+                               LOTTIIDAE_scaled = LOTTIIDAE/10,
+                               FUCUS_PERCOV_TOTAL_scaled = FUCUS_PERCOV_TOTAL/10,
+                               mn_yr_discharge_scaled = mn_yr_discharge/1000) %>%
+                 dplyr::ungroup()
+                 
+```
+
+
+```{r snail model, echo=FALSE, message=FALSE, warning=FALSE, eval = FALSE}
+# sem5_model <- 'L.SITKANA_scaled ~ MYTILUS + BARNACLES + ATemp_yearMn + mn_yr_discharge + Water_Temp_June + PTERO_POLY_SUM + FUCUS_PERCOV_TOTAL_scaled + L.SCUTULATA_scaled
+#                L.SCUTULATA_scaled ~  MYTILUS + BARNACLES + ATemp_yearMn + mn_yr_discharge + Water_Temp_June + FUCUS_PERCOV_TOTAL_scaled
+#               '
+# 
+# sem5 <- sem(sem5_model, data = PerCov_FWT_NA, estimator = "MLM")
+# 
+# AIC(sem5)
+# fitMeasures(sem5, "pvalue")
+# summary(sem5, rsquare = T, standardized = T, fit.measures = T)
+# # residuals(sem5, type = "cor")
+# # modificationIndices(sem5, standardized = F)
+# parameterEstimates(sem5)
+# # inspect(sem5, "sample")  
+```
+
+ 
+```{r snail plots, echo=FALSE, eval=FALSE, fig.dim = c(8.5, 9), eval = FALSE}
+# semPaths(sem5, "std") 
+# lavaanPlot(model = sem5, node_options = list(shape = "box", fontname = "Raleway"), coefs = TRUE, graph_options = list(rankdir = "BT"))
+
+# graph_sem(model = sem5)
+# get_layout(sem5)
+# get_nodes(sem5)
+# 
+# lays <- get_layout("", "L.SITKANA_scaled", "", "L.SCUTULATA_scaled", "",
+#                   "MYTILUS", "BARNACLES", "", "FUCUS_PERCOV_TOTAL_scaled", "PTERO_POLY_SUM", 
+#                   "Water_Temp_June", "", "mn_yr_discharge", "", "ATemp_yearMn", 
+#                   rows = 3
+#                   )
+# 
+# gs_labels <- c("Air Temp", "Barnacles", "Fucus", "L.scutulata", "L.sitkana", "Freshwater", "Mytilus",  "Ptero/Poly",  "Water Temp")
+# 
+# gs <- prepare_graph(model = sem5, layout = lays) %>%
+#       color_pos_edges("green") %>%
+#       color_neg_edges("red") %>%
+#       color_var("black") %>%
+#       alpha_var(.2) %>%
+#       edit_graph({label = gs_labels}, element = "nodes")
+
+# plot(gs)
+# figure out why the freshwater paths are black
+```
+
+```{r echo=FALSE, out.width="100%", eval=FALSE}
+# knitr::include_graphics(here("./viz/snail_semplot.png"))
+```
+
+
+```{r full model, echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
+
+# sem6_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + BARNACLES + MYTILUS + Water_Temp_June + L.SITKANA_scaled + L.SCUTULATA_scaled
+#                MYTILUS ~ BARNACLES + mn_yr_discharge + ATemp_yearMn + Water_Temp_June + PTERO_POLY_SUM + L.SCUTULATA_scaled
+#                BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge + L.SITKANA_scaled + L.SCUTULATA_scaled + Water_Temp_June + ATemp_yearMn
+#                PTERO_POLY_SUM ~ L.SITKANA_scaled + ATemp_yearMn + BARNACLES + MYTILUS + Water_Temp_June
+#                '
+# 
+# sem6 <- sem(sem6_model, data = PerCov_FWT_NA, estimator = "MLM")
+# 
+# AIC(sem6)
+# fitMeasures(sem6, "pvalue")
+# # extract_coefs(sem6, include = NULL, stand = TRUE)
+# summary(sem6, rsquare = T, standardized = T, fit.measures = T)
+# # residuals(sem6, type = "cor")
+# # modificationIndices(sem6, standardized = F)
+# parameterEstimates(sem6)
+# # inspect(sem6, "sample")  
+```
+
+```{r full lavaanPlot, echo=FALSE, eval = FALSE, fig.dim = c(8.5, 9), eval=FALSE}
+# labels <- c(Water_Temp_June = "mean june water temp", ATemp_yearMn = "annual mean air temp", mn_yr_discharge = "modeled freshwater discharge", 
+#             LSCUTULATA_scaled = "L. scutulata", LSITKANA_scaled = "L. sitkana", BARNACLES = "Barnacles", MYTILUS = "Mytilus", 
+#             PTERO_POLY_SUM = "sum biomass ptero- and polysiphonia", FUCUS_PERCOV_TOTAL_scaled = "Fucus percent cover")
+# 
+# #e_opts <- formatting(list(color = "orange"), list(color = "green"), type = "custom")
+# 
+# m6_plot <- lavaanPlot2(model = sem6, labels = labels, graph_options = list(rankdir = "BT"), include = "all", #stand = TRUE, 
+#                        node_options = list(fontname = "Raleway"), #edge_options = e_opts#,
+#                        coef_labels = TRUE, sig = .05, stars = c("regress")
+#                        )
+
+# m6_plot
+
+# save_png(m6_plot, "m6_plot.png")
+
+```
+
+```{r echo=FALSE, out.width="100%", eval=FALSE}
+# knitr::include_graphics(here("./viz/lavaanPlot.png"))
+```
+
+
+```{r full tidySEM, echo = FALSE, eval = FALSE, fig.dim = c(8.5, 7), eval=FALSE}
+# graph_sem(model = sem6)
+# get_layout(sem6)
+# get_nodes(sem6)
+# 
+# lay <- get_layout("", "MYTILUS", "BARNACLES", "", "L.SITKANA_scaled", "L.SCUTULATA_scaled", "",
+#                   "", "", "FUCUS_PERCOV_TOTAL_scaled", "", "PTERO_POLY_SUM", "", "",
+#                   "", "Water_Temp_June", "", "mn_yr_discharge", "", "ATemp_yearMn", "",
+#                   rows = 3
+#                   )
+# 
+# g_labels <- c("Air Temp", "Barnacles", "Fucus", "L.scutulata", "L.sitkana", "Freshwater", "Mytilus",  "Ptero/Poly",  "Water Temp")
+# 
+# g <- prepare_graph(model = sem6, layout = lay) %>%
+#      color_pos_edges("green") %>%
+#      color_neg_edges("red") %>%
+#      color_var("black") %>%
+#      alpha_var(.2) %>%
+#      edit_graph({label = g_labels}, element = "nodes")
+
+# plot(g)
+
+```
+
+```{r echo=FALSE, out.width="100%", eval=FALSE}
+# knitr::include_graphics(here("./viz/semplot.png"))
+```
+
+
+```{r full model4, echo=TRUE, message=FALSE, warning=FALSE}
+
+sem4_model <- 'FUCUS_PERCOV_TOTAL_scaled ~ ATemp_yearMn + BARNACLES + Water_Temp_June
+               MYTILUS ~ BARNACLES + mn_yr_discharge_scaled + PTERO_POLY_SUM + Water_Temp_June
+               BARNACLES ~ FUCUS_PERCOV_TOTAL_scaled + mn_yr_discharge_scaled + L.SITKANA_scaled + MYTILUS + ATemp_yearMn + L.SCUTULATA_scaled
+               PTERO_POLY_SUM ~ L.SITKANA_scaled + ATemp_yearMn + MYTILUS + Water_Temp_June + BARNACLES
+               L.SITKANA_scaled ~ MYTILUS + ATemp_yearMn + Water_Temp_June + mn_yr_discharge_scaled + BARNACLES + L.SCUTULATA_scaled
+               L.SCUTULATA_scaled ~  BARNACLES + mn_yr_discharge_scaled + Water_Temp_June + FUCUS_PERCOV_TOTAL_scaled + ATemp_yearMn + L.SITKANA_scaled
+              '
+
+sem4 <- sem(sem4_model, data = PerCov_FWT_NA, estimator = "MLM")
+
+AIC(sem4)
+fitMeasures(sem4, "pvalue")
+# extract_coefs(sem4, include = NULL, stand = TRUE)
+summary(sem4, rsquare = T, standardized = T, fit.measures = T)
+# residuals(sem4, type = "cor")
+# modificationIndices(sem4, standardized = F)
+parameterEstimates(sem4)
+# inspect(sem4, "sample")  
+```
+
+```{r full tidySEM4, echo = FALSE, fig.dim = c(8.5, 7)}
+# graph_sem(model = sem4)
+# get_layout(sem4)
+# get_nodes(sem4)
+# get_edges(sem4)
+
+lay <- get_layout("MYTILUS", "", "BARNACLES", "", "", "",
+                  "", "", "", "L.SITKANA_scaled", "","L.SCUTULATA_scaled", 
+                  "PTERO_POLY_SUM", "", "FUCUS_PERCOV_TOTAL_scaled", "", "", "",  
+                  "", "Water_Temp_June",  "","mn_yr_discharge_scaled", "", "ATemp_yearMn",
+                  rows = 4
+                  )
+
+g_labels <- c("Air Temp", "Barnacles", "Fucus", "L.scutulata", "L.sitkana", "Freshwater",
+              "Mytilus",  "Ptero/Poly",  "Water Temp")
+
+curve <- c(NA_integer_, -2, NA_integer_, NA_integer_, NA_integer_, 
+           3, NA_integer_, NA_integer_, NA_integer_, NA_integer_, 
+           3, NA_integer_, -3, NA_integer_, NA_integer_, 
+           NA_integer_, NA_integer_, NA_integer_, NA_integer_, -2, 
+           1, NA_integer_, -1, -3, NA_integer_, 
+           NA_integer_, NA_integer_, NA_integer_, NA_integer_, NA_integer_, 
+           NA_integer_, NA_integer_, NA_integer_, NA_integer_, NA_integer_, 
+           NA_integer_, NA_integer_, NA_integer_, NA_integer_, NA_integer_, 
+           NA_integer_, NA_integer_)  
+
+g <- prepare_graph(model = sem4, layout = lay) %>%
+     color_pos_edges("green") %>%
+     color_neg_edges("red") %>%
+     hide_var() %>%
+     alpha_var(.2) %>%
+     edit_graph({label = g_labels}, element = "nodes") %>% 
+     edit_graph({label_location = .3}) %>% 
+     edit_graph({label = est_sig_std}, element = "edges") %>% 
+     edit_graph({curvature = curve}, element = "edges") # add curvature to edges
+
+# plot(g)
+
+```
+
+```{r echo=FALSE, out.width="100%"}
+knitr::include_graphics(here("./viz/SEM_Viz_image.png"))
+```
+
