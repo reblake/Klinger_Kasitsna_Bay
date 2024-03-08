@@ -177,16 +177,20 @@ winter_a_temp <- a_temp %>%
                  dplyr::group_by(year, month) %>%
                  dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
                  dplyr::ungroup() %>%
+                 dplyr::group_by(year) %>%
+                 dplyr::mutate(ATemp_yearMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>% 
+                 dplyr::ungroup() %>%  
                  dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date, -report_type) %>%
                  dplyr::distinct() %>%
-                 dplyr::mutate(YrMnDy = paste(year, month, day, sep="-"),
+                 dplyr::mutate(YrMnDy = paste(year, month, day, sep = "-"),
                                day_Anom = ATemp_dayMn - Win_mn_all,
                                month_Anom = ATemp_monthMn - Win_mn_all,
                                day_Sign = ifelse(day_Anom>0, "A", "B"),
                                month_Sign = ifelse(month_Anom>0, "A", "B")) %>%
                  dplyr::group_by(year) %>%
-                 dplyr::mutate(Num_day_Less_neg10 = sum(ATemp_dayMn < -10, na.rm=TRUE)) %>%
-                 dplyr::ungroup()    
+                 dplyr::mutate(Num_day_Less_neg10 = sum(ATemp_dayMn < -10, na.rm = TRUE)) %>%
+                 dplyr::ungroup()  
+                    
 
 ann_a_temp <- a_temp %>%
               dplyr::select(-hourlydrybulbtemperatureF) %>% 
@@ -218,10 +222,35 @@ year_a_temp <- a_temp %>%
                dplyr::select(-Ann_mn_all)
 
 
+JanFeb_a_temp <- a_temp %>%
+                 dplyr::filter(month %in% c("01", "02")) %>%
+                 dplyr::select(-hourlydrybulbtemperatureF) %>% 
+                 dplyr::mutate(Win_mn_all = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
+                 dplyr::group_by(year, month, day) %>%
+                 dplyr::mutate(ATemp_dayMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
+                 dplyr::ungroup() %>%
+                 dplyr::group_by(year, month) %>%
+                 dplyr::mutate(ATemp_monthMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>%
+                 dplyr::ungroup() %>%
+                 dplyr::group_by(year) %>%
+                 dplyr::mutate(ATemp_yearMn = mean(hourlydrybulbtemperatureC, na.rm = TRUE)) %>% 
+                 dplyr::ungroup() %>%  
+                 dplyr::select(-hourlydrybulbtemperatureC, -time, -date, -cal_date, -report_type) %>%
+                 dplyr::distinct() %>%
+                 dplyr::mutate(YrMnDy = paste(year, month, day, sep = "-"),
+                               day_Anom = ATemp_dayMn - Win_mn_all,
+                               month_Anom = ATemp_monthMn - Win_mn_all,
+                               day_Sign = ifelse(day_Anom>0, "A", "B"),
+                               month_Sign = ifelse(month_Anom>0, "A", "B")) %>%
+                 dplyr::group_by(year) %>%
+                 dplyr::mutate(Num_day_Less_neg10 = sum(ATemp_dayMn < -10, na.rm = TRUE)) %>%
+                 dplyr::ungroup()  
+
 # write_csv(ann_a_temp, "./data_clean/air_temp_annual_clean.csv")
 # write_csv(spring_a_temp, "./data_clean/air_temp_spring_clean.csv")
 # write_csv(summer_a_temp, "./data_clean/air_temp_summer_clean.csv")
 # write_csv(fall_a_temp, "./data_clean/air_temp_fall_clean.csv")
 # write_csv(winter_a_temp, "./data_clean/air_temp_winter_clean.csv")
+# write_csv(JanFeb_a_temp, "./data_clean/air_temp_JanFeb_clean.csv")
 # write_csv(year_a_temp, "./data_clean/air_temp_year_clean.csv")
   

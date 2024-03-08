@@ -149,12 +149,24 @@ WTemp_Dec <- WTemp_all %>%
              dplyr::rename(Water_Temp_Dec = Water_Temp_Monthly) %>%
              dplyr::select(-Month) %>% 
              dplyr::mutate(WTemp_Dec_Lag = lag(Water_Temp_Dec))
+
+# WTemp_JanFeb <- WTemp_all %>%
+#                 dplyr::select(-Water_Temp_Yearly) %>%
+#                 dplyr::filter(Month %in% c("01", "02")) %>%
+#                 group_by(Year) %>% 
+#                 dplyr::mutate(Water_Temp_JanFeb = mean(Water_Temp_Monthly)) %>%
+#                 dplyr::select(Year, Water_Temp_JanFeb) %>% 
+#                 unique() %>% 
+#                 ungroup() %>% 
+#                 dplyr::mutate(LAG_WTemp_JanFeb = dplyr::lag(Water_Temp_JanFeb),
+#                               LEAD_WTemp_JanFeb = dplyr::lead(Water_Temp_JanFeb))  
+  
   
 # write_csv(WTemp_Anom, "./data_clean/WTemp_all_clean.csv") 
 # write_csv(WTemp_Yr, "./data_clean/WTemp_year_clean.csv") 
 # write_csv(WTemp_June, "./data_clean/WTemp_June_clean.csv")  
 # write_csv(WTemp_Dec, "./data_clean/WTemp_Dec_clean.csv") 
-
+# write_csv(WTemp_JanFeb, "./data_clean/WTemp_JanFeb_clean.csv") 
 
 
   

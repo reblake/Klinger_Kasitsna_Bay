@@ -27,6 +27,8 @@ cp_dat <- PerCov_FWT %>%
           dplyr::ungroup()
 
 
+##### Biological variables change point analysis
+
 # univariate changepoint analysis
 set.seed(5)
 cp_mod_1 <- bcp(cp_dat$L.SCUTULATA_scaled)
@@ -87,6 +89,117 @@ plot(year_prob_mv2, type = "l", xlab = "Year", ylab = "Posterior Probability",
 year_prob_mva2 <- as.data.frame(year_prob_mv2) %>% rename(year = V1, prob = V2) %>% 
                   arrange(desc(prob))
 head(year_prob_mva2)
+
+
+##### Physical variables change point analysis
+
+# select vars for multivariate model
+cp_mv_3 <- as.matrix(cp_dat %>% 
+                     dplyr::select(ATemp_yearMn, Water_Temp_June, mn_yr_discharge_scaled))
+# do the changepoint analysis
+set.seed(5)
+cp_mod_mv3 <- bcp(cp_mv_3)
+# plot the multivariate model
+plot(cp_mod_mv3, separated = TRUE, main = "Air & water temp, freshwater discharge")
+year_prob_mv3 <- cbind(cp_dat$Year, cp_mod_mv3$posterior.prob)
+plot(year_prob_mv3, type = "l", xlab = "Year", ylab = "Posterior Probability", 
+     main = "Air & water temp, freshwater discharge")
+# look at probabilities
+year_prob_mva3 <- as.data.frame(year_prob_mv3) %>% rename(year = V1, prob = V2) %>% 
+                  arrange(desc(prob))
+head(year_prob_mva3)
+
+
+# univariate changepoint analysis
+set.seed(5)
+cp_mod_u3 <- bcp(cp_dat$ATemp_yearMn)
+# plot the univariate model
+plot(cp_mod_u3, main = "Mean Annual Air Temp")
+year_prob_u3 <- cbind(cp_dat$Year, cp_mod_u3$posterior.prob)
+plot(year_prob_u3, type = "l", xlab = "Year", ylab = "Posterior Probability", main = "Mean Annual Air Temp")
+# look at probabilities
+year_prob_u3a <- as.data.frame(year_prob_u3) %>% rename(year = V1, prob = V2) %>% 
+                arrange(desc(prob))
+head(year_prob_u3a)
+
+
+# univariate changepoint analysis
+# load winter air temp dataset
+Winter_ATemp <- read_csv("./data_clean/air_temp_winter_clean.csv")
+                
+#
+watmp <- Winter_ATemp %>% select(year, ATemp_yearMn) %>% unique()
+
+set.seed(5)
+cp_mod_u4 <- bcp(watmp$ATemp_yearMn)
+# plot the univariate model
+plot(cp_mod_u4, main = "Winter Mean Annual Air Temp")
+year_prob_u4 <- cbind(cp_dat$Year, cp_mod_u4$posterior.prob)
+plot(year_prob_u4, type = "l", xlab = "Year", ylab = "Posterior Probability", main = "Winter Mean Annual Air Temp")
+# look at probabilities
+year_prob_u4a <- as.data.frame(year_prob_u4) %>% rename(year = V1, prob = V2) %>% 
+                arrange(desc(prob))
+head(year_prob_u4a)
+
+#
+JanFeb_Atemp <- read_csv("./data_clean/air_temp_JanFeb_clean.csv") %>% 
+                select(year, ATemp_yearMn) %>% unique()
+
+set.seed(5)
+cp_mod_u5 <- bcp(JanFeb_Atemp$ATemp_yearMn)
+# plot the univariate model
+plot(cp_mod_u5, main = "JanFeb Mean Annual Air Temp")
+year_prob_u5 <- cbind(cp_dat$Year, cp_mod_u5$posterior.prob)
+plot(year_prob_u5, type = "l", xlab = "Year", ylab = "Posterior Probability", main = "JanFeb Mean Annual Air Temp")
+# look at probabilities
+year_prob_u5a <- as.data.frame(year_prob_u5) %>% rename(year = V1, prob = V2) %>% 
+                arrange(desc(prob))
+head(year_prob_u5a)
+
+#
+water_temp_Dec <- read_csv("./data_clean/WTemp_Dec_clean.csv")
+
+set.seed(5)
+cp_mod_u6 <- bcp(water_temp_Dec$Water_Temp_Dec)
+# plot the univariate model
+plot(cp_mod_u6, main = "Dec Annual Water Temp")
+year_prob_u6 <- cbind(cp_dat$Year, cp_mod_u6$posterior.prob)
+plot(year_prob_u6, type = "l", xlab = "Year", ylab = "Posterior Probability", main = "Dec Annual Water Temp")
+# look at probabilities
+year_prob_u6a <- as.data.frame(year_prob_u6) %>% rename(year = V1, prob = V2) %>% 
+                arrange(desc(prob))
+head(year_prob_u6a)
+
+
+#
+wtemp_j <- cp_dat %>% dplyr::select(Water_Temp_June)
+
+set.seed(5)
+cp_mod_u8 <- bcp(wtemp_j$Water_Temp_June)
+# plot the univariate model
+plot(cp_mod_u8, main = "June Water Temp")
+year_prob_u8 <- cbind(cp_dat$Year, cp_mod_u8$posterior.prob)
+plot(year_prob_u8, type = "l", xlab = "Year", ylab = "Posterior Probability", main = "June Water Temp")
+# look at probabilities
+year_prob_u8a <- as.data.frame(year_prob_u8) %>% rename(year = V1, prob = V2) %>% 
+                arrange(desc(prob))
+head(year_prob_u8a)
+
+
+#####################################################################
+###########Freshwater Discharge##############
+cp_mv_4 <- cp_dat %>% dplyr::select(Year, mn_yr_discharge_scaled)
+                     
+set.seed(5)
+cp_mod_u9 <- bcp(cp_mv_4$mn_yr_discharge_scaled)
+# plot the univariate model
+plot(cp_mod_u9, main = "Freshwater Discharge")
+year_prob_u9 <- cbind(cp_dat$Year, cp_mod_u9$posterior.prob)
+plot(year_prob_u9, type = "l", xlab = "Year", ylab = "Posterior Probability", main = "Freshwater Discharge")
+# look at probabilities
+year_prob_u9a <- as.data.frame(year_prob_u9) %>% rename(year = V1, prob = V2) %>% 
+                arrange(desc(prob))
+head(year_prob_u9a)
 
 
 

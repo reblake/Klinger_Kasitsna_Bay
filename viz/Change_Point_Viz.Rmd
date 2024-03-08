@@ -100,5 +100,21 @@ year_prob_mva2 <- as.data.frame(year_prob_mv2) %>% rename(year = V1, prob = V2) 
 head(year_prob_mva2)
 ```
 
+```{r mv physical vars, echo=TRUE, message=FALSE, warning=FALSE}
+cp_mv_3 <- as.matrix(cp_dat %>% 
+                     dplyr::select(ATemp_yearMn, Water_Temp_June, mn_yr_discharge_scaled))
+# do the changepoint analysis
+set.seed(5)
+cp_mod_mv3 <- bcp(cp_mv_3)
+# plot the multivariate model
+plot(cp_mod_mv3, separated = TRUE, main = "Air & water temp, freshwater discharge")
+year_prob_mv3 <- cbind(cp_dat$Year, cp_mod_mv3$posterior.prob)
+plot(year_prob_mv3, type = "l", xlab = "Year", ylab = "Posterior Probability", 
+     main = "Air & water temp, freshwater discharge")
+# look at probabilities
+year_prob_mva3 <- as.data.frame(year_prob_mv3) %>% rename(year = V1, prob = V2) %>% 
+                  arrange(desc(prob))
+head(year_prob_mva3)
+```
 
 
